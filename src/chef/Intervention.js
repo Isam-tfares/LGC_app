@@ -15,43 +15,57 @@ export default function Intervention({ route, navigation }) {
     return (
         <View style={styles.container}>
             <View style={styles.card}>
-                <Text style={styles.title}>Client:</Text>
-                <Text style={styles.text}>{intervention.client}</Text>
-                <Text style={styles.title}>Projet:</Text>
-                <Text style={styles.text}>{intervention.projet}</Text>
-                <Text style={styles.title}>Adresse:</Text>
-                <Text style={styles.text}>{intervention.adresse}</Text>
-                <Text style={styles.title}>Type:</Text>
-                <Text style={styles.text}>{intervention.type}</Text>
+                <View style={styles.row}>
+                    <Text style={styles.title}>Client:</Text>
+                    <Text style={styles.text}>{intervention.client}</Text>
+                </View>
+                <View style={styles.row}>
+                    <Text style={styles.title}>Projet : </Text>
+                    <Text style={styles.text}>{intervention.projet}</Text>
+                </View>
+                <View style={styles.row}>
+                    <Text style={styles.title}>Objet : </Text>
+                    <Text style={styles.text}>{intervention.object}</Text>
+                </View>
+                <View style={styles.row}>
+                    <Text style={styles.title}>Prestation : </Text>
+                    <Text style={styles.text}>{intervention.Prestation ? intervention.Prestation : ""}</Text>
+                </View>
+                <View style={styles.row}>
+                    <Text style={styles.title}>Matériaux : </Text>
+                    <Text style={styles.text}>{intervention.Materiaux ? intervention.Materiaux : ""}</Text>
+                </View>
 
-                {intervention.status === 'Non faite' ? (
+                <View style={styles.row}>
+                    <Text style={styles.title}>Lieu de prélévement : </Text>
+                    <Text style={styles.text}>{intervention.adresse}</Text>
+                </View>
+                <View style={styles.row}>
+                    <Text style={styles.title}>Etat de récupération : </Text>
+                    <Text style={styles.text}>{intervention.recuperation ? intervention.recuperation : ""}</Text>
+                </View>
+                <View style={styles.row}>
+                    <Text style={styles.title}>Etat d'intervention : </Text>
+                    <Text style={[styles.text, intervention.status == "faite" ? styles.valide : (intervention.status == "annulée" ? styles.annule : styles.enCours)]}
+
+                    >{intervention.status}</Text>
+                </View>
+                <View style={styles.row}>
+                    <Text style={styles.title}>Observation : </Text>
+                    <Text>{intervention.obs ? intervention.obs : ""}</Text>
+                </View>
+
+                {(intervention.status == "faite") ?
                     <View style={styles.buttonContainer}>
-                        <TouchableOpacity style={[styles.button, styles.confirmButton]} onPress={() => { Alert.alert('Confirmer intervention ' + intervention.id) }}>
-                            <Text style={styles.buttonText}>Confirmer</Text>
+                        <TouchableOpacity style={[styles.button, styles.confirmButton]} onPress={() => { Alert.alert('Confirmer reception ' + intervention.id) }}>
+                            <Text style={styles.buttonText}>Confirmer récéption</Text>
                         </TouchableOpacity>
-                        <TouchableOpacity style={[styles.button, styles.cancelButton]} onPress={() => { setModalVisible(true) }}>
-                            <Text style={styles.buttonText}>Annuler</Text>
-                        </TouchableOpacity>
-                    </View>) : (
-                    intervention.status === 'faite' ?
-                        (<>
-                            <View style={{ marginTop: 10 }}>
-                                <Button title='Intervention faite' color="green" />
-                            </View>
-                        </>) :
-                        (<>
-                            <Text style={styles.title}>Observation:</Text>
-                            <Text style={styles.text}>{intervention.obs}</Text>
-                            <View style={{ marginTop: 10 }}>
-                                <Button title='Intervention annulée' color="red" />
-                            </View>
-                        </>)
-                )
+                    </View>
+                    : ""
                 }
 
             </View>
 
-            {/* Modal for annuler intervention */}
             <Modal
                 animationType="slide"
                 transparent={true}
@@ -99,14 +113,20 @@ const styles = StyleSheet.create({
         elevation: 5,
         width: '100%',
     },
+    row: {
+        flexDirection: 'row',
+        alignItems: "center",
+        marginBottom: 20,
+        paddingEnd: 5,
+        justifyContent: "space-between"
+    },
     title: {
         fontSize: 16,
-        fontWeight: 'bold',
-        marginBottom: 5,
+        paddingEnd: 10,
     },
     text: {
         fontSize: 16,
-        marginBottom: 10,
+        fontWeight: 'bold',
     },
     buttonContainer: {
         flexDirection: 'row',
@@ -173,5 +193,17 @@ const styles = StyleSheet.create({
         color: '#fff',
         fontWeight: 'bold',
         fontSize: 16,
+    },
+    valide: {
+        color: "green",
+        fontSize: 17,
+    },
+    annule: {
+        color: "red",
+        fontSize: 17,
+    },
+    enCours: {
+        color: "#4bacc0",
+        fontSize: 17,
     },
 });

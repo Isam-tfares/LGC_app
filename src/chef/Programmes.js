@@ -1,37 +1,25 @@
 import React, { useState } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, FlatList, Alert } from 'react-native';
-import moment from 'moment';
 import { TextInput } from 'react-native-gesture-handler';
 import { EvilIcons } from '@expo/vector-icons';
 import { createStackNavigator } from '@react-navigation/stack';
-import { AntDesign } from '@expo/vector-icons';
+import { Picker } from '@react-native-picker/picker';
 import Intervention from './Intervention';
-import AddIntervention from './AddIntervention';
-
-
-const generateDays = () => {
-    const daysArray = [];
-    for (let i = 0; i < 7; i++) {
-        daysArray.push(moment().add(i, 'days'));
-    }
-    return daysArray;
-};
 
 function Interventions({ navigation }) {
     const [search, setSearch] = useState("");
-    const days = generateDays();
-    const [currentDay, setCurrentDay] = useState(days[0]);
     const [clicked, setClicked] = useState(0);
-    const [modalVisible, setModalVisible] = useState(false);
-
     const navbar = ["Tous", "Faites", "Non Faites", "Annulées"];
+    const [selectedTechnician, setSelectedTechnician] = useState('');
+
+    const techniciens = ["Technicien 1", "Technicien 2", "Technicien 3", "Technicien 4", "Technicien 5"];
     const interventions = [
-        { id: 1, client: 'Client 1', projet: 'Projet 1', object: "Objet 1", adresse: 'Adresse 1', technicien: "Techinicien 1", date: "7/11/2024", type: 'Type 1', status: "faite" },
-        { id: 2, client: 'Client 2', projet: 'Projet 2', object: "Objet 2", adresse: 'Adresse 2', technicien: "Techinicien 2", date: "7/11/2024", type: 'Type 2', status: "faite" },
-        { id: 3, client: 'Client 3', projet: 'Projet 3', object: "Objet 3", adresse: 'Adresse 3', technicien: "Techinicien 3", date: "7/11/2024", type: 'Type 3', status: "annulée" },
-        { id: 4, client: 'Client 4', projet: 'Projet 4', object: "Objet 4", adresse: 'Adresse 4', technicien: "Techinicien 4", date: "7/11/2024", type: 'Type 4', status: "faite" },
-        { id: 5, client: 'Client 5', projet: 'Projet 5', object: "Objet 5", adresse: 'Adresse 5', technicien: "Techinicien 5", date: "7/11/2024", type: 'Type 5', status: "Non faite" },
-        { id: 6, client: 'Client 6', projet: 'Projet 6', object: "Objet 6", adresse: 'Adresse 6', technicien: "Techinicien 6", date: "7/11/2024", type: 'Type 6', status: "Non faite" },
+        { id: 1, client: 'Client 1', projet: 'Projet 1', object: "Objet 1", adresse: 'Adresse 1', technicien: "Technicien 1", date: "7/11/2024", type: 'Type 1', status: "faite" },
+        { id: 2, client: 'Client 2', projet: 'Projet 2', object: "Objet 2", adresse: 'Adresse 2', technicien: "Technicien 2", date: "7/11/2024", type: 'Type 2', status: "faite" },
+        { id: 3, client: 'Client 3', projet: 'Projet 3', object: "Objet 3", adresse: 'Adresse 3', technicien: "Technicien 3", date: "7/11/2024", type: 'Type 3', status: "annulée" },
+        { id: 4, client: 'Client 4', projet: 'Projet 4', object: "Objet 4", adresse: 'Adresse 4', technicien: "Technicien 4", date: "7/11/2024", type: 'Type 4', status: "faite" },
+        { id: 5, client: 'Client 5', projet: 'Projet 5', object: "Objet 5", adresse: 'Adresse 5', technicien: "Technicien 5", date: "7/11/2024", type: 'Type 5', status: "Non faite" },
+        { id: 6, client: 'Client 6', projet: 'Projet 6', object: "Objet 6", adresse: 'Adresse 6', technicien: "Technicien 3", date: "7/11/2024", type: 'Type 6', status: "Non faite" },
     ];
 
     const filterInterventions = () => {
@@ -42,6 +30,11 @@ function Interventions({ navigation }) {
                 intervention.projet.toLowerCase().includes(search.toLowerCase()) ||
                 intervention.client.toLowerCase().includes(search.toLowerCase()) ||
                 intervention.technicien.toLowerCase().includes(search.toLowerCase())
+            );
+        }
+        if (selectedTechnician) {
+            filteredInterventions = filteredInterventions.filter(intervention =>
+                intervention.technicien.toLowerCase().includes(selectedTechnician.toLowerCase())
             );
         }
 
@@ -62,16 +55,11 @@ function Interventions({ navigation }) {
         navigation.navigate('Détails Intervention', { intervention });
     };
 
+
+
+
     return (
         <View style={{ flex: 1, backgroundColor: "white", position: "relative" }}>
-
-            {/* add intervention */}
-            <TouchableOpacity onPress={() => { setModalVisible(true) }} style={styles.plus} >
-                <AntDesign name="pluscircle" size={40} color="#4bacc0" />
-            </TouchableOpacity>
-            <AddIntervention modalVisible={modalVisible}
-                setModalVisible={setModalVisible} />
-
 
             <View style={styles.searchView}>
                 <TextInput placeholder='rechercher' value={search} onChangeText={setSearch}
@@ -81,7 +69,18 @@ function Interventions({ navigation }) {
                     style={styles.searchIcon}
                 />
             </View>
-
+            <View>
+                <Picker
+                    selectedValue={selectedTechnician}
+                    onValueChange={(itemValue, itemIndex) => setSelectedTechnician(itemValue)}
+                    style={styles.picker}
+                >
+                    <Picker.Item label="Séléctionner Technicien" value="" />
+                    {techniciens.map((technician, index) => (
+                        <Picker.Item key={index} label={technician} value={technician} />
+                    ))}
+                </Picker>
+            </View>
             <View style={styles.navBar}>
                 {navbar.map((value, index) => {
                     return (
@@ -97,6 +96,7 @@ function Interventions({ navigation }) {
                     );
                 })}
             </View>
+
             <FlatList
                 data={filterInterventions()}
                 keyExtractor={(item) => item.id.toString()}
@@ -128,7 +128,7 @@ function Interventions({ navigation }) {
 
 const Stack = createStackNavigator();
 
-export default function InterventionsStack() {
+export default function Programmes() {
     return (
         <Stack.Navigator initialRouteName="Listes Interventions">
             <Stack.Screen

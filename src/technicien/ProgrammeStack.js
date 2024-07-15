@@ -4,10 +4,9 @@ import moment from 'moment';
 import { createStackNavigator } from '@react-navigation/stack';
 import Intervention from "./Intervention"
 
-
 const generateDays = () => {
     const daysArray = [];
-    for (let i = 0; i < 7; i++) {
+    for (let i = -3; i < 4; i++) {
         daysArray.push(moment().add(i, 'days'));
     }
     return daysArray;
@@ -18,13 +17,20 @@ function Programme({ navigation }) {
     const [currentDay, setCurrentDay] = useState(days[0]);
 
     const interventions = [
-        { id: 1, client: 'client1', projet: 'projet1', adresse: 'adresse1', type: 'type1' },
-        { id: 2, client: 'client2', projet: 'projet2', adresse: 'adresse2', type: 'type2' },
-        { id: 3, client: 'client3', projet: 'projet3', adresse: 'adresse3', type: 'type3' },
-        { id: 4, client: 'client4', projet: 'projet4', adresse: 'adresse4', type: 'type4' },
-        { id: 5, client: 'client5', projet: 'projet5', adresse: 'adresse5', type: 'type5' },
-        { id: 6, client: 'client6', projet: 'projet6', adresse: 'adresse6', type: 'type6' },
+        { id: 1, client: 'Client 1', projet: 'Projet 1', object: "Objet 1", adresse: 'Adresse 1', technicien: "Techinicien 1", date: "7/14/2024", type: 'Type 1', status: "faite" },
+        { id: 2, client: 'Client 2', projet: 'Projet 2', object: "Objet 2", adresse: 'Adresse 2', technicien: "Techinicien 2", date: "7/14/2024", type: 'Type 2', status: "faite" },
+        { id: 3, client: 'Client 3', projet: 'Projet 3', object: "Objet 3", adresse: 'Adresse 3', technicien: "Techinicien 3", date: "7/14/2024", type: 'Type 3', status: "annulée", obs: "observation about annulation" },
+        { id: 4, client: 'Client 4', projet: 'Projet 4', object: "Objet 4", adresse: 'Adresse 4', technicien: "Techinicien 4", date: "7/15/2024", type: 'Type 4', status: "faite" },
+        { id: 5, client: 'Client 5', projet: 'Projet 5', object: "Objet 5", adresse: 'Adresse 5', technicien: "Techinicien 5", date: "7/15/2024", type: 'Type 5', status: "Non faite" },
+        { id: 6, client: 'Client 6', projet: 'Projet 6', object: "Objet 6", adresse: 'Adresse 6', technicien: "Techinicien 6", date: "7/15/2024", type: 'Type 6', status: "Non faite" },
     ];
+
+    const filterInterventionsbyDay = () => {
+        const filteredInterventions = interventions.filter(item => {
+            return moment(item.date, 'MM/DD/YYYY').isSame(currentDay, 'day');
+        });
+        return filteredInterventions;
+    };
 
     const interventionClick = (intervention) => {
         navigation.navigate('Intervention', { intervention });
@@ -40,10 +46,6 @@ function Programme({ navigation }) {
                 <View style={styles.titleView}>
                     <Text style={styles.title}>PROGRAMME DU JOUR</Text>
                 </View>
-                {/* <View style={styles.monthView}>
-                    <Text style={styles.month}>{currentMonth.format('MMMM')}</Text>
-                </View> */}
-
                 <FlatList
                     horizontal
                     data={days}
@@ -64,17 +66,24 @@ function Programme({ navigation }) {
             </View>
 
             <FlatList
-                data={interventions}
+                data={filterInterventionsbyDay()}
                 keyExtractor={(item) => item.id.toString()}
                 renderItem={({ item }) => (
                     <TouchableOpacity
                         style={styles.intervention}
                         onPress={() => interventionClick(item)}
                     >
-                        <Text style={styles.interventionText}>Client: {item.client}</Text>
-                        <Text style={styles.interventionText}>Projet: {item.projet}</Text>
-                        <Text style={styles.interventionText}>Adresse: {item.adresse}</Text>
-                        <Text style={styles.interventionText}>Type: {item.type}</Text>
+                        <Text style={styles.Project}>{item.projet}</Text>
+                        <Text style={styles.client}>Objet : {item.object}</Text>
+                        <Text style={styles.client}>client : {item.client}</Text>
+                        <Text style={styles.technicien}>Technicien: {item.technicien}</Text>
+                        <View style={{ flexDirection: "row", alignItems: "center", marginTop: 10 }}>
+                            <Text style={styles.status}>Etat : </Text>
+                            <Text style={item.status == "faite" ? styles.valide : (item.status == "annulée" ? styles.annule : styles.enCours)}>{item.status}</Text>
+                        </View>
+                        <View style={styles.dateView}>
+                            <Text style={styles.dateText}>{item.date}</Text>
+                        </View>
                     </TouchableOpacity>
                 )}
                 ItemSeparatorComponent={() => <View style={styles.itemSeparator} />}
@@ -84,6 +93,7 @@ function Programme({ navigation }) {
         </View>
     );
 }
+
 const Stack = createStackNavigator();
 
 export default function ProgrammeStack() {
@@ -117,16 +127,6 @@ const styles = StyleSheet.create({
     title: {
         color: "#fff",
         fontSize: 20,
-    },
-    monthView: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        marginTop: 15,
-    },
-    month: {
-        fontSize: 20,
-        fontWeight: 'bold',
-        color: "#fff",
     },
     daysList: {
         marginTop: 10,
@@ -165,18 +165,53 @@ const styles = StyleSheet.create({
     intervention: {
         backgroundColor: '#fff',
         padding: 15,
-        borderRadius: 10,
-        borderWidth: 1,
-        borderColor: '#ccc',
-        elevation: 2,
-        marginBottom: 10,
+        marginRight: 5,
+        borderBottomWidth: 1,
+        borderBottomColor: '#ccc',
     },
-    interventionText: {
+    Project: {
+        fontWeight: "bold",
+        fontSize: 22,
+    },
+    client: {
+        color: "#8d8d8d",
         fontSize: 16,
-        marginBottom: 5,
-        color: '#333',
+        fontWeight: "bold",
+        paddingLeft: 5,
+        marginTop: 5
+    },
+    technicien: {
+        color: "#8d8d8d",
+        fontSize: 16,
+        fontWeight: "bold",
+        paddingLeft: 5,
+        marginTop: 5
     },
     itemSeparator: {
         height: 10,
+    },
+    status: {
+        color: "#555",
+        fontSize: 17
+    },
+    valide: {
+        color: "green",
+        fontSize: 17,
+    },
+    annule: {
+        color: "red",
+        fontSize: 17,
+    },
+    enCours: {
+        color: "#4bacc0",
+        fontSize: 17,
+    },
+    dateView: {
+        position: "absolute",
+        bottom: 15,
+        right: 15,
+    },
+    dateText: {
+        color: "#777"
     },
 });
