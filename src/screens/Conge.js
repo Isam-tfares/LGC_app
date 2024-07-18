@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, TextInput } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, TextInput, Button } from 'react-native';
+import DateTimePickerModal from "react-native-modal-datetime-picker";
 
 export default function Conge({ navigation }) {
     // Dummy data for available and taken days (replace with actual data)
@@ -9,6 +10,30 @@ export default function Conge({ navigation }) {
     // State variables for input values
     const [fromDate, setFromDate] = useState('');
     const [toDate, setToDate] = useState('');
+    const [isDatePickerVisible, setDatePickerVisibility] = useState(false);
+    const [dateType, setDateType] = useState('');
+
+    // Show date picker
+    const showDatePicker = (type) => {
+        setDateType(type);
+        setDatePickerVisibility(true);
+    };
+
+    // Hide date picker
+    const hideDatePicker = () => {
+        setDatePickerVisibility(false);
+    };
+
+    // Handle date selection
+    const handleConfirm = (date) => {
+        const formattedDate = `${date.getDate()}/${date.getMonth() + 1}/${date.getFullYear()}`;
+        if (dateType === 'from') {
+            setFromDate(formattedDate);
+        } else {
+            setToDate(formattedDate);
+        }
+        hideDatePicker();
+    };
 
     // Handler for submitting the leave request
     const handleRequest = () => {
@@ -29,30 +54,36 @@ export default function Conge({ navigation }) {
                         <Text style={styles.labelText}>Jours pris</Text>
                         <Text style={styles.daysText}>{takenDays}</Text>
                     </View>
-
-
                 </View>
             </View>
             <Text style={styles.title}>Demander Congé</Text>
             <View style={styles.formContainer}>
-                <TextInput
-                    style={styles.input}
-                    placeholder="From date (DD/MM/YYYY)"
-                    keyboardType="numeric"
-                    value={fromDate}
-                    onChangeText={text => setFromDate(text)}
-                />
-                <TextInput
-                    style={styles.input}
-                    placeholder="To date (DD/MM/YYYY)"
-                    keyboardType="numeric"
-                    value={toDate}
-                    onChangeText={text => setToDate(text)}
-                />
+                <TouchableOpacity onPress={() => showDatePicker('from')}>
+                    <TextInput
+                        style={styles.input}
+                        placeholder="From date (DD/MM/YYYY)"
+                        value={fromDate}
+                        editable={false}
+                    />
+                </TouchableOpacity>
+                <TouchableOpacity onPress={() => showDatePicker('to')}>
+                    <TextInput
+                        style={styles.input}
+                        placeholder="To date (DD/MM/YYYY)"
+                        value={toDate}
+                        editable={false}
+                    />
+                </TouchableOpacity>
                 <TouchableOpacity style={styles.button} onPress={handleRequest}>
                     <Text style={styles.buttonText}>Demander</Text>
                 </TouchableOpacity>
             </View>
+            <DateTimePickerModal
+                isVisible={isDatePickerVisible}
+                mode="date"
+                onConfirm={handleConfirm}
+                onCancel={hideDatePicker}
+            />
         </View>
     );
 }
@@ -102,6 +133,7 @@ const styles = StyleSheet.create({
         borderRadius: 5,
         paddingLeft: 10,
         marginBottom: 10,
+        backgroundColor: '#f2f2f2', // make the input field look non-editable
     },
     button: {
         backgroundColor: '#4b6aff',

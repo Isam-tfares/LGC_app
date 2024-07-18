@@ -1,7 +1,9 @@
 import React, { useState } from 'react';
-import { View, Modal, Text, TextInput, TouchableOpacity, StyleSheet, Alert } from "react-native";
+import { View, Modal, Text, TouchableOpacity, StyleSheet, Alert } from "react-native";
 import { Picker } from '@react-native-picker/picker';
 import { Ionicons } from '@expo/vector-icons';
+import DateTimePickerModal from 'react-native-modal-datetime-picker';
+import moment from 'moment';
 
 export default function AddIntervention({ modalVisible, setModalVisible }) {
     const clients = ["client 1", "client 2", "client 3", "client 4", "client 5"];
@@ -15,9 +17,25 @@ export default function AddIntervention({ modalVisible, setModalVisible }) {
     const [selectedObject, setSelectedObject] = useState('');
     const [selectedTechnician, setSelectedTechnician] = useState('');
     const [selectedPrestation, setSelectedPrestation] = useState('');
+    const [selectedDate, setSelectedDate] = useState(null);
+    const [isDatePickerVisible, setDatePickerVisibility] = useState(false);
 
-    const handleAnnuler = () => {
-        Alert.alert('Submitted', `Client: ${selectedClient}\nProject: ${selectedProject}\nObject: ${selectedObject}\nTechnician: ${selectedTechnician}\nPrestation: ${selectedPrestation}`);
+    const showDatePicker = () => {
+        setDatePickerVisibility(true);
+    };
+
+    const hideDatePicker = () => {
+        setDatePickerVisibility(false);
+    };
+
+    const handleConfirm = (date) => {
+        setSelectedDate(date);
+        hideDatePicker();
+    };
+
+    const handleAddIntervention = () => {
+        Alert.alert('Submitted',
+            `Client: ${selectedClient}\nProject: ${selectedProject}\nObject: ${selectedObject}\nTechnician: ${selectedTechnician}\nPrestation: ${selectedPrestation}\nDate: ${selectedDate ? moment(selectedDate).format('MM/DD/YYYY') : 'No date selected'}`);
         setModalVisible(false);
     };
 
@@ -99,7 +117,20 @@ export default function AddIntervention({ modalVisible, setModalVisible }) {
                         ))}
                     </Picker>
 
-                    <TouchableOpacity style={styles.modalButton} onPress={handleAnnuler}>
+                    <Text style={styles.label}>Date</Text>
+                    <TouchableOpacity style={styles.dateButton} onPress={showDatePicker}>
+                        <Text style={styles.dateButtonText}>
+                            {selectedDate ? moment(selectedDate).format('MM/DD/YYYY') : 'Séléctionner Date'}
+                        </Text>
+                    </TouchableOpacity>
+                    <DateTimePickerModal
+                        isVisible={isDatePickerVisible}
+                        mode="date"
+                        onConfirm={handleConfirm}
+                        onCancel={hideDatePicker}
+                    />
+
+                    <TouchableOpacity style={styles.modalButton} onPress={handleAddIntervention}>
                         <Text style={styles.modalButtonText}>Ajouter</Text>
                     </TouchableOpacity>
                 </View>
@@ -114,7 +145,6 @@ const styles = StyleSheet.create({
         justifyContent: 'center',
         alignItems: 'center',
         backgroundColor: 'rgba(0, 0, 0, 0.5)',
-
     },
     close: {
         position: "absolute",
@@ -149,6 +179,19 @@ const styles = StyleSheet.create({
         width: '100%',
         height: 50,
         marginBottom: 20,
+    },
+    dateButton: {
+        width: '100%',
+        height: 50,
+        justifyContent: 'center',
+        alignItems: 'center',
+        backgroundColor: '#f0f0f0',
+        borderRadius: 5,
+        marginBottom: 20,
+    },
+    dateButtonText: {
+        fontSize: 16,
+        color: '#333',
     },
     modalButton: {
         backgroundColor: '#4bacc0',

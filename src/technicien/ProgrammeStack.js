@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, FlatList } from 'react-native';
 import moment from 'moment';
 import { createStackNavigator } from '@react-navigation/stack';
+// import DateTimePickerModal from 'react-native-modal-datetime-picker';
 import Intervention from "./Intervention"
 
 const generateDays = () => {
@@ -14,7 +15,9 @@ const generateDays = () => {
 
 function Programme({ navigation }) {
     const days = generateDays();
-    const [currentDay, setCurrentDay] = useState(days[0]);
+    const [currentDay, setCurrentDay] = useState(days[3]);
+    // const [isDatePickerVisible, setDatePickerVisibility] = useState(false);
+    // const [selectedDate, setSelectedDate] = useState(null);
 
     const interventions = [
         { id: 1, client: 'Client 1', projet: 'Projet 1', object: "Objet 1", adresse: 'Adresse 1', technicien: "Techinicien 1", date: "7/14/2024", type: 'Type 1', status: "faite" },
@@ -25,9 +28,23 @@ function Programme({ navigation }) {
         { id: 6, client: 'Client 6', projet: 'Projet 6', object: "Objet 6", adresse: 'Adresse 6', technicien: "Techinicien 6", date: "7/15/2024", type: 'Type 6', status: "Non faite" },
     ];
 
+    // const showDatePicker = () => {
+    //     setDatePickerVisibility(true);
+    // };
+
+    // const hideDatePicker = () => {
+    //     setDatePickerVisibility(false);
+    // };
+
+    // const handleConfirm = (date) => {
+    //     setSelectedDate(date);
+    //     setCurrentDay(moment(date));
+    //     hideDatePicker();
+    // };
+
     const filterInterventionsbyDay = () => {
         const filteredInterventions = interventions.filter(item => {
-            return moment(item.date, 'MM/DD/YYYY').isSame(currentDay, 'day');
+            return moment(item.date, 'M/D/YYYY').isSame(currentDay, 'day');
         });
         return filteredInterventions;
     };
@@ -62,9 +79,16 @@ function Programme({ navigation }) {
                         </TouchableOpacity>
                     )}
                 />
-
+                {/* <TouchableOpacity style={styles.datePickerButton} onPress={showDatePicker}>
+                    <Text style={styles.datePickerButtonText}>Select Date</Text>
+                </TouchableOpacity> */}
+                {/*<DateTimePickerModal
+                    isVisible={isDatePickerVisible}
+                    mode="date"
+                    onConfirm={handleConfirm}
+                    onCancel={hideDatePicker}
+                />*/}
             </View>
-
             <FlatList
                 data={filterInterventionsbyDay()}
                 keyExtractor={(item) => item.id.toString()}
@@ -75,10 +99,10 @@ function Programme({ navigation }) {
                     >
                         <Text style={styles.Project}>{item.projet}</Text>
                         <Text style={styles.client}>Objet : {item.object}</Text>
-                        <Text style={styles.client}>client : {item.client}</Text>
+                        <Text style={styles.client}>Client : {item.client}</Text>
                         <Text style={styles.technicien}>Technicien: {item.technicien}</Text>
                         <View style={{ flexDirection: "row", alignItems: "center", marginTop: 10 }}>
-                            <Text style={styles.status}>Etat : </Text>
+                            <Text style={styles.status}>État : </Text>
                             <Text style={item.status == "faite" ? styles.valide : (item.status == "annulée" ? styles.annule : styles.enCours)}>{item.status}</Text>
                         </View>
                         <View style={styles.dateView}>
@@ -89,7 +113,6 @@ function Programme({ navigation }) {
                 ItemSeparatorComponent={() => <View style={styles.itemSeparator} />}
                 contentContainerStyle={styles.pgm}
             />
-
         </View>
     );
 }
@@ -213,5 +236,17 @@ const styles = StyleSheet.create({
     },
     dateText: {
         color: "#777"
+    },
+    datePickerButton: {
+        backgroundColor: "#f2f2f2",
+        padding: 10,
+        marginBottom: 10,
+        margin: 10,
+        borderRadius: 25,
+        alignItems: 'center',
+    },
+    datePickerButtonText: {
+        color: "#333",
+        fontSize: 16,
     },
 });

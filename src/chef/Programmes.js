@@ -5,21 +5,25 @@ import { EvilIcons } from '@expo/vector-icons';
 import { createStackNavigator } from '@react-navigation/stack';
 import { Picker } from '@react-native-picker/picker';
 import Intervention from './Intervention';
+import DateTimePickerModal from 'react-native-modal-datetime-picker';
+import moment from 'moment';
 
 function Interventions({ navigation }) {
     const [search, setSearch] = useState("");
     const [clicked, setClicked] = useState(0);
     const navbar = ["Tous", "Faites", "Non Faites", "Annulées"];
     const [selectedTechnician, setSelectedTechnician] = useState('');
+    const [isDatePickerVisible, setDatePickerVisibility] = useState(false);
+    const [selectedDate, setSelectedDate] = useState('');
 
     const techniciens = ["Technicien 1", "Technicien 2", "Technicien 3", "Technicien 4", "Technicien 5"];
     const interventions = [
-        { id: 1, client: 'Client 1', projet: 'Projet 1', object: "Objet 1", adresse: 'Adresse 1', technicien: "Technicien 1", date: "7/11/2024", type: 'Type 1', status: "faite" },
-        { id: 2, client: 'Client 2', projet: 'Projet 2', object: "Objet 2", adresse: 'Adresse 2', technicien: "Technicien 2", date: "7/11/2024", type: 'Type 2', status: "faite" },
-        { id: 3, client: 'Client 3', projet: 'Projet 3', object: "Objet 3", adresse: 'Adresse 3', technicien: "Technicien 3", date: "7/11/2024", type: 'Type 3', status: "annulée" },
-        { id: 4, client: 'Client 4', projet: 'Projet 4', object: "Objet 4", adresse: 'Adresse 4', technicien: "Technicien 4", date: "7/11/2024", type: 'Type 4', status: "faite" },
-        { id: 5, client: 'Client 5', projet: 'Projet 5', object: "Objet 5", adresse: 'Adresse 5', technicien: "Technicien 5", date: "7/11/2024", type: 'Type 5', status: "Non faite" },
-        { id: 6, client: 'Client 6', projet: 'Projet 6', object: "Objet 6", adresse: 'Adresse 6', technicien: "Technicien 3", date: "7/11/2024", type: 'Type 6', status: "Non faite" },
+        { id: 1, client: 'Client 1', projet: 'Projet 1', object: "Objet 1", adresse: 'Adresse 1', technicien: "Technicien 1", date: "11/7/2024", type: 'Type 1', status: "faite" },
+        { id: 2, client: 'Client 2', projet: 'Projet 2', object: "Objet 2", adresse: 'Adresse 2', technicien: "Technicien 2", date: "11/7/2024", type: 'Type 2', status: "faite" },
+        { id: 3, client: 'Client 3', projet: 'Projet 3', object: "Objet 3", adresse: 'Adresse 3', technicien: "Technicien 3", date: "11/7/2024", type: 'Type 3', status: "annulée" },
+        { id: 4, client: 'Client 4', projet: 'Projet 4', object: "Objet 4", adresse: 'Adresse 4', technicien: "Technicien 4", date: "11/7/2024", type: 'Type 4', status: "faite" },
+        { id: 5, client: 'Client 5', projet: 'Projet 5', object: "Objet 5", adresse: 'Adresse 5', technicien: "Technicien 5", date: "11/7/2024", type: 'Type 5', status: "Non faite" },
+        { id: 6, client: 'Client 6', projet: 'Projet 6', object: "Objet 6", adresse: 'Adresse 6', technicien: "Technicien 3", date: "11/7/2024", type: 'Type 6', status: "Non faite" },
     ];
 
     const filterInterventions = () => {
@@ -35,6 +39,11 @@ function Interventions({ navigation }) {
         if (selectedTechnician) {
             filteredInterventions = filteredInterventions.filter(intervention =>
                 intervention.technicien.toLowerCase().includes(selectedTechnician.toLowerCase())
+            );
+        }
+        if (selectedDate) {
+            filteredInterventions = filteredInterventions.filter(intervention =>
+                intervention.date === selectedDate
             );
         }
 
@@ -55,8 +64,18 @@ function Interventions({ navigation }) {
         navigation.navigate('Détails Intervention', { intervention });
     };
 
+    const showDatePicker = () => {
+        setDatePickerVisibility(true);
+    };
 
+    const hideDatePicker = () => {
+        setDatePickerVisibility(false);
+    };
 
+    const handleConfirm = (date) => {
+        setSelectedDate(moment(date).format('D/M/YYYY'));
+        hideDatePicker();
+    };
 
     return (
         <View style={{ flex: 1, backgroundColor: "white", position: "relative" }}>
@@ -81,6 +100,11 @@ function Interventions({ navigation }) {
                     ))}
                 </Picker>
             </View>
+
+            <TouchableOpacity style={styles.datePickerButton} onPress={showDatePicker}>
+                <Text style={styles.datePickerButtonText}>{selectedDate ? selectedDate : 'Select Date'}</Text>
+            </TouchableOpacity>
+
             <View style={styles.navBar}>
                 {navbar.map((value, index) => {
                     return (
@@ -120,6 +144,13 @@ function Interventions({ navigation }) {
                 )}
                 ItemSeparatorComponent={() => <View style={styles.itemSeparator} />}
                 contentContainerStyle={styles.pgm}
+            />
+
+            <DateTimePickerModal
+                isVisible={isDatePickerVisible}
+                mode="date"
+                onConfirm={handleConfirm}
+                onCancel={hideDatePicker}
             />
 
         </View>
@@ -240,11 +271,8 @@ const styles = StyleSheet.create({
         backgroundColor: '#fff',
         padding: 15,
         marginRight: 5,
-        // borderRadius: 10,
         borderBottomWidth: 1,
         borderBottomColor: '#ccc',
-        // elevation: 2,
-        // marginBottom: 10,
     },
     Project: {
         fontWeight: "bold",
@@ -306,5 +334,17 @@ const styles = StyleSheet.create({
         bottom: 70,
         right: 25,
         zIndex: 20,
-    }
+    },
+    datePickerButton: {
+        backgroundColor: "#f2f2f2",
+        padding: 10,
+        marginBottom: 10,
+        margin: 10,
+        borderRadius: 25,
+        alignItems: "center",
+    },
+    datePickerButtonText: {
+        fontSize: 16,
+        color: "#333",
+    },
 });

@@ -1,13 +1,12 @@
 import React, { useState } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, FlatList, Alert } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, FlatList, TextInput } from 'react-native';
 import moment from 'moment';
-import { TextInput } from 'react-native-gesture-handler';
 import { EvilIcons } from '@expo/vector-icons';
 import { createStackNavigator } from '@react-navigation/stack';
 import { AntDesign } from '@expo/vector-icons';
+import DateTimePickerModal from 'react-native-modal-datetime-picker';
 import Intervention from './Intervention';
 import AddIntervention from './AddIntervention';
-
 
 const generateDays = () => {
     const daysArray = [];
@@ -23,16 +22,31 @@ function Interventions({ navigation }) {
     const [currentDay, setCurrentDay] = useState(days[0]);
     const [clicked, setClicked] = useState(0);
     const [modalVisible, setModalVisible] = useState(false);
+    const [isDatePickerVisible, setDatePickerVisibility] = useState(false);
+    const [selectedDate, setSelectedDate] = useState(null);
 
     const navbar = ["Tous", "Faites", "Non Faites", "Annulées"];
     const interventions = [
-        { id: 1, client: 'Client 1', projet: 'Projet 1', object: "Objet 1", adresse: 'Adresse 1', technicien: "Techinicien 1", date: "7/11/2024", type: 'Type 1', status: "faite" },
-        { id: 2, client: 'Client 2', projet: 'Projet 2', object: "Objet 2", adresse: 'Adresse 2', technicien: "Techinicien 2", date: "7/11/2024", type: 'Type 2', status: "faite" },
-        { id: 3, client: 'Client 3', projet: 'Projet 3', object: "Objet 3", adresse: 'Adresse 3', technicien: "Techinicien 3", date: "7/11/2024", type: 'Type 3', status: "annulée" },
-        { id: 4, client: 'Client 4', projet: 'Projet 4', object: "Objet 4", adresse: 'Adresse 4', technicien: "Techinicien 4", date: "7/11/2024", type: 'Type 4', status: "faite" },
-        { id: 5, client: 'Client 5', projet: 'Projet 5', object: "Objet 5", adresse: 'Adresse 5', technicien: "Techinicien 5", date: "7/11/2024", type: 'Type 5', status: "Non faite" },
-        { id: 6, client: 'Client 6', projet: 'Projet 6', object: "Objet 6", adresse: 'Adresse 6', technicien: "Techinicien 6", date: "7/11/2024", type: 'Type 6', status: "Non faite" },
+        { id: 1, client: 'Client 1', projet: 'Projet 1', object: "Objet 1", adresse: 'Adresse 1', technicien: "Techinicien 1", date: "15/7/2024", type: 'Type 1', status: "faite" },
+        { id: 2, client: 'Client 2', projet: 'Projet 2', object: "Objet 2", adresse: 'Adresse 2', technicien: "Techinicien 2", date: "15/7/2024", type: 'Type 2', status: "faite" },
+        { id: 3, client: 'Client 3', projet: 'Projet 3', object: "Objet 3", adresse: 'Adresse 3', technicien: "Techinicien 3", date: "15/7/2024", type: 'Type 3', status: "annulée" },
+        { id: 4, client: 'Client 4', projet: 'Projet 4', object: "Objet 4", adresse: 'Adresse 4', technicien: "Techinicien 4", date: "16/7/2024", type: 'Type 4', status: "faite" },
+        { id: 5, client: 'Client 5', projet: 'Projet 5', object: "Objet 5", adresse: 'Adresse 5', technicien: "Techinicien 5", date: "16/7/2024", type: 'Type 5', status: "Non faite" },
+        { id: 6, client: 'Client 6', projet: 'Projet 6', object: "Objet 6", adresse: 'Adresse 6', technicien: "Techinicien 6", date: "16/7/2024", type: 'Type 6', status: "Non faite" },
     ];
+
+    const showDatePicker = () => {
+        setDatePickerVisibility(true);
+    };
+
+    const hideDatePicker = () => {
+        setDatePickerVisibility(false);
+    };
+
+    const handleConfirm = (date) => {
+        setSelectedDate(date);
+        hideDatePicker();
+    };
 
     const filterInterventions = () => {
         let filteredInterventions = interventions;
@@ -42,6 +56,13 @@ function Interventions({ navigation }) {
                 intervention.projet.toLowerCase().includes(search.toLowerCase()) ||
                 intervention.client.toLowerCase().includes(search.toLowerCase()) ||
                 intervention.technicien.toLowerCase().includes(search.toLowerCase())
+            );
+        }
+
+        if (selectedDate) {
+            const formattedDate = moment(selectedDate).format('D/M/YYYY');
+            filteredInterventions = filteredInterventions.filter(intervention =>
+                intervention.date === formattedDate
             );
         }
 
@@ -72,7 +93,6 @@ function Interventions({ navigation }) {
             <AddIntervention modalVisible={modalVisible}
                 setModalVisible={setModalVisible} />
 
-
             <View style={styles.searchView}>
                 <TextInput placeholder='rechercher' value={search} onChangeText={setSearch}
                     style={styles.searchInput}
@@ -81,6 +101,19 @@ function Interventions({ navigation }) {
                     style={styles.searchIcon}
                 />
             </View>
+
+            <TouchableOpacity style={styles.datePickerButton} onPress={showDatePicker}>
+                <Text style={styles.datePickerButtonText}>
+                    {selectedDate ? moment(selectedDate).format('DD/MM/YYYY') : 'Select Date'}
+                </Text>
+            </TouchableOpacity>
+
+            <DateTimePickerModal
+                isVisible={isDatePickerVisible}
+                mode="date"
+                onConfirm={handleConfirm}
+                onCancel={hideDatePicker}
+            />
 
             <View style={styles.navBar}>
                 {navbar.map((value, index) => {
@@ -107,7 +140,7 @@ function Interventions({ navigation }) {
                     >
                         <Text style={styles.Project}>{item.projet}</Text>
                         <Text style={styles.client}>Objet : {item.object}</Text>
-                        <Text style={styles.client}>client : {item.client}</Text>
+                        <Text style={styles.client}>Client : {item.client}</Text>
                         <Text style={styles.technicien}>Technicien: {item.technicien}</Text>
                         <View style={{ flexDirection: "row", alignItems: "center", marginTop: 10 }}>
                             <Text style={styles.status}>Etat : </Text>
@@ -240,11 +273,8 @@ const styles = StyleSheet.create({
         backgroundColor: '#fff',
         padding: 15,
         marginRight: 5,
-        // borderRadius: 10,
         borderBottomWidth: 1,
         borderBottomColor: '#ccc',
-        // elevation: 2,
-        // marginBottom: 10,
     },
     Project: {
         fontWeight: "bold",
@@ -306,5 +336,17 @@ const styles = StyleSheet.create({
         bottom: 70,
         right: 25,
         zIndex: 20,
-    }
+    },
+    datePickerButton: {
+        backgroundColor: "#f2f2f2",
+        padding: 10,
+        marginBottom: 10,
+        margin: 10,
+        borderRadius: 25,
+        alignItems: 'center',
+    },
+    datePickerButtonText: {
+        color: "#333",
+        fontSize: 16,
+    },
 });
