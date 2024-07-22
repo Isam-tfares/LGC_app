@@ -13,6 +13,8 @@ import InterventionsStack from './src/chef/Interventions';
 import Programmes from './src/chef/Programmes';
 import Deconnexion from './src/components/Deconnexion';
 import InterventionsStackRec from './src/reception/InterventionsRec';
+import Receptions from './src/reception/Receptions';
+import PVReceptions from './src/reception/PVReceptions';
 
 const Drawer = createDrawerNavigator();
 
@@ -66,8 +68,8 @@ export default function App() {
       <NavigationContainer>
         <Drawer.Navigator initialRouteName="Interventions">
           <Drawer.Screen name="Interventions" component={InterventionsStackRec} />
-          {/* <Drawer.Screen name="Programmes && techniciens" component={Programmes} /> */}
-          <Drawer.Screen name="PVs" component={PV} />
+          <Drawer.Screen name="Réceptions" component={Receptions} />
+          <Drawer.Screen name="PVs" component={PVReceptions} />
           <Drawer.Screen name="Notes de frais" component={NoteFrais} />
           <Drawer.Screen name="Demande du Congé" component={Conge} />
           <Drawer.Screen name="Déconnexion">
