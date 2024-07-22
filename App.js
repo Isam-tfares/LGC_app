@@ -12,6 +12,7 @@ import ProgrammeStack from './src/technicien/ProgrammeStack';
 import InterventionsStack from './src/chef/Interventions';
 import Programmes from './src/chef/Programmes';
 import Deconnexion from './src/components/Deconnexion';
+import InterventionsStackRec from './src/reception/InterventionsRec';
 
 const Drawer = createDrawerNavigator();
 
@@ -60,7 +61,32 @@ export default function App() {
         </Drawer.Navigator>
       </NavigationContainer>
     );
-  } else {
+  } else if (isLogined === 3) { // reception
+    return (
+      <NavigationContainer>
+        <Drawer.Navigator initialRouteName="Interventions">
+          <Drawer.Screen name="Interventions" component={InterventionsStackRec} />
+          {/* <Drawer.Screen name="Programmes && techniciens" component={Programmes} /> */}
+          <Drawer.Screen name="PVs" component={PV} />
+          <Drawer.Screen name="Notes de frais" component={NoteFrais} />
+          <Drawer.Screen name="Demande du Congé" component={Conge} />
+          <Drawer.Screen name="Déconnexion">
+            {() => {
+              return (
+                <Deconnexion setLogined={setLogined} />
+              );
+            }}
+          </Drawer.Screen>
+        </Drawer.Navigator>
+      </NavigationContainer>
+    )
+  } else if (isLogined === 4) { // labo
+    return (
+      <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+        <Text>Labo</Text>
+      </View>);
+  }
+  else {
     return (
       <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
         <Text>None</Text>

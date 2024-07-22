@@ -11,15 +11,20 @@ const Login = ({ isLogined, setLogined }) => {
     const [errorPassword, setErrorPassword] = useState('');
 
     const handleLogin = async () => {
-        // Alert.alert("Login" + Username + password);
-        if (Username == "chef") {
+
+        if (Username == "labo") {
+            setLogined(4);
+
+        } else if (Username == "reception") {
+            setLogined(3);
+
+        } else if (Username == "chef") {
             setLogined(2);
         }
         else if (Username == "tec") {
             setLogined(1);
         }
         else {
-            // setLogined(true);
             Alert.alert("Nom d'utilisateur ou passsword incorrecte");
         }
         return;
