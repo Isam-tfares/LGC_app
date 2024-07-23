@@ -27,12 +27,12 @@ function Interventions({ navigation }) {
 
     const navbar = ["Tous", "Faites", "Non Faites", "Annulées"];
     const interventions = [
-        { id: 1, client: 'Client 1', projet: 'Projet 1', object: "Objet 1", adresse: 'Adresse 1', technicien: "Techinicien 1", date: "15/7/2024", type: 'Type 1', status: "faite" },
-        { id: 2, client: 'Client 2', projet: 'Projet 2', object: "Objet 2", adresse: 'Adresse 2', technicien: "Techinicien 2", date: "15/7/2024", type: 'Type 2', status: "faite" },
-        { id: 3, client: 'Client 3', projet: 'Projet 3', object: "Objet 3", adresse: 'Adresse 3', technicien: "Techinicien 3", date: "15/7/2024", type: 'Type 3', status: "annulée" },
-        { id: 4, client: 'Client 4', projet: 'Projet 4', object: "Objet 4", adresse: 'Adresse 4', technicien: "Techinicien 4", date: "16/7/2024", type: 'Type 4', status: "faite" },
-        { id: 5, client: 'Client 5', projet: 'Projet 5', object: "Objet 5", adresse: 'Adresse 5', technicien: "Techinicien 5", date: "16/7/2024", type: 'Type 5', status: "Non faite" },
-        { id: 6, client: 'Client 6', projet: 'Projet 6', object: "Objet 6", adresse: 'Adresse 6', technicien: "Techinicien 6", date: "16/7/2024", type: 'Type 6', status: "Non faite" },
+        { id: 1, client: 'Client 1', projet: 'Projet 1', object: "Objet 1", adresse: 'Adresse 1', technicien: "Techinicien 1", date: "23/7/2024", type: 'Type 1', status: "faite" },
+        { id: 2, client: 'Client 2', projet: 'Projet 2', object: "Objet 2", adresse: 'Adresse 2', technicien: "Techinicien 2", date: "23/7/2024", type: 'Type 2', status: "faite" },
+        { id: 3, client: 'Client 3', projet: 'Projet 3', object: "Objet 3", adresse: 'Adresse 3', technicien: "Techinicien 3", date: "23/7/2024", type: 'Type 3', status: "annulée" },
+        { id: 4, client: 'Client 4', projet: 'Projet 4', object: "Objet 4", adresse: 'Adresse 4', technicien: "Techinicien 4", date: "24/7/2024", type: 'Type 4', status: "faite" },
+        { id: 5, client: 'Client 5', projet: 'Projet 5', object: "Objet 5", adresse: 'Adresse 5', technicien: "Techinicien 5", date: "24/7/2024", type: 'Type 5', status: "Non faite" },
+        { id: 6, client: 'Client 6', projet: 'Projet 6', object: "Objet 6", adresse: 'Adresse 6', technicien: "Techinicien 6", date: "24/7/2024", type: 'Type 6', status: "Non faite" },
     ];
 
     const showDatePicker = () => {

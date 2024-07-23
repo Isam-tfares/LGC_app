@@ -3,35 +3,23 @@ import { View, Text, StyleSheet, TouchableOpacity, FlatList, TextInput } from 'r
 import moment from 'moment';
 import { EvilIcons } from '@expo/vector-icons';
 import { createStackNavigator } from '@react-navigation/stack';
-import { AntDesign } from '@expo/vector-icons';
 import DateTimePickerModal from 'react-native-modal-datetime-picker';
 import InterventionRec from './InterventionRec';
 
-const generateDays = () => {
-    const daysArray = [];
-    for (let i = 0; i < 7; i++) {
-        daysArray.push(moment().add(i, 'days'));
-    }
-    return daysArray;
-};
-
 function InterventionsRec({ navigation }) {
     const [search, setSearch] = useState("");
-    const days = generateDays();
-    const [currentDay, setCurrentDay] = useState(days[0]);
     const [clicked, setClicked] = useState(0);
-    const [modalVisible, setModalVisible] = useState(false);
     const [isDatePickerVisible, setDatePickerVisibility] = useState(false);
     const [selectedDate, setSelectedDate] = useState(null);
 
     const navbar = ["Tous", "Faites", "Non Faites", "Annulées"];
     const interventions = [
-        { id: 1, client: 'Client 1', projet: 'Projet 1', object: "Objet 1", adresse: 'Adresse 1', technicien: "Techinicien 1", date: "15/7/2024", type: 'Type 1', status: "faite" },
-        { id: 2, client: 'Client 2', projet: 'Projet 2', object: "Objet 2", adresse: 'Adresse 2', technicien: "Techinicien 2", date: "15/7/2024", type: 'Type 2', status: "faite" },
-        { id: 3, client: 'Client 3', projet: 'Projet 3', object: "Objet 3", adresse: 'Adresse 3', technicien: "Techinicien 3", date: "15/7/2024", type: 'Type 3', status: "annulée" },
-        { id: 4, client: 'Client 4', projet: 'Projet 4', object: "Objet 4", adresse: 'Adresse 4', technicien: "Techinicien 4", date: "16/7/2024", type: 'Type 4', status: "faite" },
-        { id: 5, client: 'Client 5', projet: 'Projet 5', object: "Objet 5", adresse: 'Adresse 5', technicien: "Techinicien 5", date: "16/7/2024", type: 'Type 5', status: "Non faite" },
-        { id: 6, client: 'Client 6', projet: 'Projet 6', object: "Objet 6", adresse: 'Adresse 6', technicien: "Techinicien 6", date: "16/7/2024", type: 'Type 6', status: "Non faite" },
+        { id: 1, client: 'Client 1', projet: 'Projet 1', object: "Objet 1", adresse: 'Adresse 1', technicien: "Techinicien 1", date: "23/7/2024", type: 'Type 1', status: "faite", reception: "faite" },
+        { id: 2, client: 'Client 2', projet: 'Projet 2', object: "Objet 2", adresse: 'Adresse 2', technicien: "Techinicien 2", date: "23/7/2024", type: 'Type 2', status: "faite", reception: "Non faite" },
+        { id: 3, client: 'Client 3', projet: 'Projet 3', object: "Objet 3", adresse: 'Adresse 3', technicien: "Techinicien 3", date: "23/7/2024", type: 'Type 3', status: "annulée" },
+        { id: 4, client: 'Client 4', projet: 'Projet 4', object: "Objet 4", adresse: 'Adresse 4', technicien: "Techinicien 4", date: "24/7/2024", type: 'Type 4', status: "faite", reception: "faite" },
+        { id: 5, client: 'Client 5', projet: 'Projet 5', object: "Objet 5", adresse: 'Adresse 5', technicien: "Techinicien 5", date: "24/7/2024", type: 'Type 5', status: "Non faite" },
+        { id: 6, client: 'Client 6', projet: 'Projet 6', object: "Objet 6", adresse: 'Adresse 6', technicien: "Techinicien 6", date: "24/7/2024", type: 'Type 6', status: "Non faite" },
     ];
 
     const showDatePicker = () => {
@@ -133,10 +121,16 @@ function InterventionsRec({ navigation }) {
                         <Text style={styles.client}>Objet : {item.object}</Text>
                         <Text style={styles.client}>Client : {item.client}</Text>
                         <Text style={styles.technicien}>Technicien: {item.technicien}</Text>
-                        <View style={{ flexDirection: "row", alignItems: "center", marginTop: 10 }}>
-                            <Text style={styles.status}>Etat : </Text>
+                        <Text style={styles.client}>Etat Intervention : <Text style={item.status == "faite" ? styles.valide : (item.status == "annulée" ? styles.annule : styles.enCours)}>{item.status}</Text></Text>
+                        {/* <View style={{ flexDirection: "row", alignItems: "center", marginTop: 10 }}>
+                            <Text style={styles.status}>Etat Intervention : </Text>
                             <Text style={item.status == "faite" ? styles.valide : (item.status == "annulée" ? styles.annule : styles.enCours)}>{item.status}</Text>
-                        </View>
+                        </View> */}
+                        {item.status == "faite" ? (
+                            <View style={{ flexDirection: "row", alignItems: "center", marginTop: 10 }}>
+                                <Text style={styles.status}>Etat Réception : </Text>
+                                <Text style={item.reception == "faite" ? styles.valide : styles.enCours}>{item.reception}</Text>
+                            </View>) : (<></>)}
                         <View style={styles.dateView}>
                             <Text style={styles.dateText}>{item.date}</Text>
                         </View>
@@ -300,19 +294,23 @@ const styles = StyleSheet.create({
     },
     status: {
         color: "#555",
-        fontSize: 17
+        fontSize: 17,
+        fontWeight: "bold"
     },
     valide: {
         color: "green",
         fontSize: 17,
+        fontWeight: "bold"
     },
     annule: {
         color: "red",
         fontSize: 17,
+        fontWeight: "bold"
     },
     enCours: {
         color: "#4bacc0",
         fontSize: 17,
+        fontWeight: "bold"
     },
     dateView: {
         position: "absolute",

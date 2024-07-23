@@ -44,20 +44,28 @@ export default function InterventionRec({ route, navigation }) {
 
                     >{intervention.status}</Text>
                 </View>
-                <View style={styles.row}>
-                    <Text style={styles.title}>Observation : </Text>
-                    <Text>{intervention.obs ? intervention.obs : ""}</Text>
-                </View>
 
-                {(intervention.status == "faite") ?
-                    <View style={styles.buttonContainer}>
-                        <TouchableOpacity style={[styles.button, styles.confirmButton]} onPress={() => { setAddModalVisible(true) }}>
-                            <Text style={styles.buttonText}>Confirmer récéption</Text>
-                        </TouchableOpacity>
-                    </View>
-                    : ""
-                }
+                {intervention.status == "faite" && (
+                    intervention.reception == "faite" ? (
+                        <View style={styles.row}>
+                            <Text style={styles.title}>Etat réception : </Text>
+                            <Text style={[styles.text, intervention.reception == "faite" ? styles.valide : styles.enCours]}
+
+                            >{intervention.reception}</Text>
+                        </View>
+                    ) : (
+                        <View style={styles.buttonContainer}>
+                            <TouchableOpacity
+                                style={[styles.button, styles.confirmButton]}
+                                onPress={() => setAddModalVisible(true)}
+                            >
+                                <Text style={styles.buttonText}>Confirmer récéption</Text>
+                            </TouchableOpacity>
+                        </View>
+                    )
+                )}
             </View>
+
             <AddReception modalVisible={AddModalVisible} setModalVisible={setAddModalVisible} />
         </View>
     );

@@ -60,8 +60,9 @@ export default function AddReception({ modalVisible, setModalVisible }) {
         }
     }
     const addNbrJr = () => {
-        if (!nbr_jrs.includes(jrs)) {
+        if (!nbr_jrs.includes(jrs) && jrs !== "") {
             setNbr_jrs([...nbr_jrs, jrs]);
+            setJrs("");
         }
     }
     const showDatePicker = () => {
@@ -78,8 +79,7 @@ export default function AddReception({ modalVisible, setModalVisible }) {
     };
 
     const handleAddIntervention = () => {
-        Alert.alert('Submitted',
-            `Client: ${selectedClient}\nProject: ${selectedProject}\nObject: \nTechnician: ${selectedTechnician}\nPrestation: ${selectedPrestation}\nDate: ${selectedDate ? moment(selectedDate).format('MM/DD/YYYY') : 'No date selected'}`);
+        Alert.alert('Réception ajoutée avec succès');
         setModalVisible(false);
     };
 
@@ -188,9 +188,9 @@ export default function AddReception({ modalVisible, setModalVisible }) {
                                 ))}
                             </Picker>
                             <Text style={styles.label}>Lieu Prélevement</Text>
-                            <TextInput value={lieu_prelevement} onValueChange={setLieu_prelevement} style={styles.textInput2} />
+                            <TextInput value={lieu_prelevement} onChangeText={setLieu_prelevement} style={styles.textInput2} />
                             <Text style={styles.label}>Observation</Text>
-                            <TextInput value={obs} onValueChange={setObs} style={styles.textInput2} />
+                            <TextInput value={obs} onChangeText={setObs} style={styles.textInput2} />
                         </View>
 
                         <View style={styles.section_ttl}>
