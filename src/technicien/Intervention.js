@@ -8,7 +8,11 @@ export default function Intervention({ route, navigation }) {
 
     const handleAnnuler = () => {
         // Logic to handle the comment submission or cancellation
-        Alert.alert('Comment: ' + comment);
+        if (comment === '') {
+            Alert.alert('Veuillez ajouter un commentaire');
+            return;
+        }
+        Alert.alert("Intervention annulée avec succès");
         setModalVisible(false);
     };
 
@@ -26,7 +30,7 @@ export default function Intervention({ route, navigation }) {
 
                 {intervention.status === 'Non faite' ? (
                     <View style={styles.buttonContainer}>
-                        <TouchableOpacity style={[styles.button, styles.confirmButton]} onPress={() => { Alert.alert('Confirmer intervention ' + intervention.id) }}>
+                        <TouchableOpacity style={[styles.button, styles.confirmButton]} onPress={() => { Alert.alert('Pour Confirmer intervention ' + intervention.id + '\nVeuillez charger le PV') }}>
                             <Text style={styles.buttonText}>Confirmer</Text>
                         </TouchableOpacity>
                         <TouchableOpacity style={[styles.button, styles.cancelButton]} onPress={() => { setModalVisible(true) }}>

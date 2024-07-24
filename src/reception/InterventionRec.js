@@ -34,10 +34,7 @@ export default function InterventionRec({ route, navigation }) {
                     <Text style={styles.title}>Lieu de prélévement : </Text>
                     <Text style={styles.text}>{intervention.adresse}</Text>
                 </View>
-                <View style={styles.row}>
-                    <Text style={styles.title}>Etat de récupération : </Text>
-                    <Text style={styles.text}>{intervention.recuperation ? intervention.recuperation : ""}</Text>
-                </View>
+
                 <View style={styles.row}>
                     <Text style={styles.title}>Etat d'intervention : </Text>
                     <Text style={[styles.text, intervention.status == "faite" ? styles.valide : (intervention.status == "annulée" ? styles.annule : styles.enCours)]}
@@ -66,7 +63,7 @@ export default function InterventionRec({ route, navigation }) {
                 )}
             </View>
 
-            <AddReception modalVisible={AddModalVisible} setModalVisible={setAddModalVisible} />
+            <AddReception modalVisible={AddModalVisible} setModalVisible={setAddModalVisible} intervention={intervention} />
         </View>
     );
 }

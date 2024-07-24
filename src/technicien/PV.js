@@ -1,9 +1,10 @@
 import React, { useState } from 'react';
-import { View, Text, TouchableOpacity, StyleSheet, Image, Modal, TextInput, Alert } from 'react-native';
+import { View, Text, TouchableOpacity, StyleSheet, Image, Alert } from 'react-native';
 import { Picker } from '@react-native-picker/picker';
 import DateTimePickerModal from 'react-native-modal-datetime-picker';
 import moment from 'moment';
 import * as ImagePicker from 'expo-image-picker';
+import { Ionicons } from '@expo/vector-icons';
 
 export default function PV({ navigation }) {
     const [selectedIntervention, setSelectedIntervention] = useState('');
@@ -20,12 +21,16 @@ export default function PV({ navigation }) {
                 quality: 1,
             });
 
-            if (!result.cancelled) {
+            if (!result.canceled) {
                 setImage(result.assets[0].uri);
             }
         } catch (error) {
             Alert.alert('Erreur', 'Impossible de sélectionner une image.');
         }
+    };
+
+    const removeImage = () => {
+        setImage(null);
     };
 
     const showDatePicker = () => {
@@ -74,10 +79,21 @@ export default function PV({ navigation }) {
                     ))}
                 </Picker>
 
-                <TouchableOpacity style={styles.button} onPress={pickImage}>
-                    <Text style={styles.buttonText}>Sélectionner Image</Text>
+                <TouchableOpacity style={styles.uploadArea} onPress={pickImage}>
+                    {image ? (
+                        <>
+                            <Image source={{ uri: image }} style={styles.image} />
+                            <TouchableOpacity style={styles.removeButton} onPress={removeImage}>
+                                <Ionicons name="close-circle" size={24} color="red" />
+                            </TouchableOpacity>
+                        </>
+                    ) : (
+                        <>
+                            <Ionicons name="cloud-upload" size={50} color="black" />
+                            <Text style={styles.text}>Charger PV</Text>
+                        </>
+                    )}
                 </TouchableOpacity>
-                {image && <Image source={{ uri: image }} style={styles.image} />}
 
                 <TouchableOpacity style={styles.button} onPress={showDatePicker}>
                     <Text style={styles.buttonText}>
@@ -123,12 +139,28 @@ const styles = StyleSheet.create({
         fontSize: 24,
         textAlign: "center",
         fontWeight: 'bold',
-        marginBottom: 10,
+        marginBottom: 20,
     },
     picker: {
         width: '100%',
         height: 50,
         marginBottom: 20,
+    },
+    uploadArea: {
+        borderRadius: 10,
+        borderStyle: 'dashed',
+        borderWidth: 1,
+        width: '100%',
+        height: 200,
+        justifyContent: 'center',
+        alignItems: 'center',
+        marginBottom: 20,
+        position: 'relative',
+    },
+    text: {
+        textAlign: "center",
+        fontSize: 18,
+        color: "#333"
     },
     button: {
         backgroundColor: '#4bacc0',
@@ -144,10 +176,14 @@ const styles = StyleSheet.create({
         fontSize: 16,
     },
     image: {
-        width: 200,
-        height: 200,
-        marginTop: 20,
-        marginBottom: 20,
+        width: '100%',
+        height: '100%',
+        borderRadius: 10,
+    },
+    removeButton: {
+        position: 'absolute',
+        top: 0,
+        right: 0,
     },
     modalOverlay: {
         flex: 1,

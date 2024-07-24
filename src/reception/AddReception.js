@@ -8,9 +8,9 @@ import moment from 'moment';
 import Checkbox from 'expo-checkbox';
 
 
-export default function AddReception({ modalVisible, setModalVisible }) {
-    const clients = ["client 1", "client 2", "client 3", "client 4", "client 5"];
-    const projects = ["project 10", "project 11", "project 12", "project 13", "project 14", "project 15"];
+export default function AddReception({ modalVisible, setModalVisible, intervention }) {
+    const clients = ["Client 1", "Client 2", "Client 3", "Client 4", "Client 5"];
+    const projects = ["Projet 6", "Projet 1", "Projet 2", "Projet 3", "Projet 4", "Projet 5"];
     const prestations = ["prestation 1", "prestation 2", "prestation 3", "prestation 4", "prestation 5", "prestation 6", "prestation 7", "prestation 8", "prestation 9", "prestation 10"];
     const materiaux = ["matiere 1", "matiere 2", "matiere 3", "matiere 4", "matiere 5"];
     const techniciens = ["technicien 1", "technicien 2", "technicien 3", "technicien 4", "technicien 5"];
@@ -24,13 +24,13 @@ export default function AddReception({ modalVisible, setModalVisible }) {
     const nature_echantillons = ["Béton", "Mortier", "Granulat", "Ciment", "Eau", "Adjuvant", "Fibre", "Autre"];
 
     const [showenSections, setShowenSections] = useState([]);
-
-    const [selectedClient, setSelectedClient] = useState('');
-    const [selectedProject, setSelectedProject] = useState('');
-    const [selectedTechnician, setSelectedTechnician] = useState('');
+    const [selectedClient, setSelectedClient] = useState(intervention.client);
+    const [selectedProject, setSelectedProject] = useState(intervention.projet);
+    const [selectedTechnician, setSelectedTechnician] = useState(intervention.technicien);
     const [selectedPrestation, setSelectedPrestation] = useState('');
     const [selectedMatiere, setSelectedMatiere] = useState('');
     const [selectedDate, setSelectedDate] = useState(null);
+    const [selectedDate2, setSelectedDate2] = useState(null);
     const [nbr_echatillon, setNbr_echatillon] = useState(2);
     const [etat_recuperation, setEtat_recuperation] = useState('Réccupéré');
     const [preleve, setPreleve] = useState('LGC');
@@ -77,11 +77,42 @@ export default function AddReception({ modalVisible, setModalVisible }) {
         setSelectedDate(date);
         hideDatePicker();
     };
+    const handleConfirm2 = (date) => {
+        setSelectedDate2(date);
+        hideDatePicker();
+    };
 
     const handleAddIntervention = () => {
+        // Check for empty fields
+        if (!selectedClient || !selectedProject || !selectedPrestation || !selectedMatiere || !nbr_echatillon || !selectedDate || !selectedTechnician || !etat_recuperation || !preleve || !Essaie || !betonSelected || !slump || !centralSelected || !BL || nbr_jrs.length === 0) {
+            Alert.alert('Veuillez remplir tous les champs obligatoires');
+            return;
+        }
+
+        // All fields are filled, proceed with adding the intervention
+        console.log('New Reception Data:', {
+            selectedClient,
+            selectedProject,
+            selectedPrestation,
+            selectedMatiere,
+            nbr_echatillon,
+            selectedDate,
+            selectedTechnician,
+            etat_recuperation,
+            preleve,
+            Essaie,
+            betonSelected,
+            slump,
+            centralSelected,
+            BL,
+            nbr_jrs,
+        });
+
+        // Replace this with actual data saving logic (e.g., API call, database operation)
         Alert.alert('Réception ajoutée avec succès');
         setModalVisible(false);
     };
+
 
     return (
         <Modal
@@ -221,13 +252,13 @@ export default function AddReception({ modalVisible, setModalVisible }) {
                                     <Text style={styles.label}>Date confection béton</Text>
                                     <TouchableOpacity style={styles.dateButton} onPress={showDatePicker}>
                                         <Text style={styles.dateButtonText}>
-                                            {selectedDate ? moment(selectedDate).format('MM/DD/YYYY') : 'Séléctionner Date'}
+                                            {selectedDate2 ? moment(selectedDate2).format('MM/DD/YYYY') : 'Séléctionner Date'}
                                         </Text>
                                     </TouchableOpacity>
                                     <DateTimePickerModal
                                         isVisible={isDatePickerVisible}
                                         mode="date"
-                                        onConfirm={handleConfirm}
+                                        onConfirm={handleConfirm2}
                                         onCancel={hideDatePicker}
                                     />
                                 </View>
