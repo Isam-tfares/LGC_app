@@ -166,7 +166,7 @@ function Receptions({ navigation }) {
 
             <TouchableOpacity style={styles.datePickerButton} onPress={showDatePicker}>
                 <Text style={styles.datePickerButtonText}>
-                    {selectedDate ? moment(selectedDate).format('DD/MM/YYYY') : 'Select Date'}
+                    {selectedDate ? moment(selectedDate).format('DD/MM/YYYY') : 'Sélectionner Date'}
                 </Text>
             </TouchableOpacity>
 

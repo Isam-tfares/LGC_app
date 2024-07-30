@@ -13,7 +13,6 @@ import InterventionsStack from './src/chef/Interventions';
 import Programmes from './src/chef/Programmes';
 import Deconnexion from './src/components/Deconnexion';
 import InterventionsStackRec from './src/reception/InterventionsRec';
-import Receptions from './src/reception/Receptions';
 import PVReceptions from './src/reception/PVReceptions';
 import ReceptionsStack from './src/reception/Receptions';
 
@@ -35,7 +34,7 @@ export default function App() {
           <Drawer.Screen name="Programme" component={ProgrammeStack} />
           <Drawer.Screen name="PVs" component={PV} />
           <Drawer.Screen name="Notes de frais" component={NoteFrais} />
-          <Drawer.Screen name="Demande du Congé" component={Conge} />
+          <Drawer.Screen name="Congés" component={Conge} />
           <Drawer.Screen name="Déconnexion">
             {() => {
               return (
@@ -52,8 +51,9 @@ export default function App() {
         <Drawer.Navigator initialRouteName="Interventions">
           <Drawer.Screen name="Interventions" component={InterventionsStack} />
           <Drawer.Screen name="Programmes && techniciens" component={Programmes} />
+          <Drawer.Screen name="Réceptions" component={ReceptionsStack} />
           <Drawer.Screen name="Notes de frais" component={NoteFrais} />
-          <Drawer.Screen name="Demande du Congé" component={Conge} />
+          <Drawer.Screen name="Congés" component={Conge} />
           <Drawer.Screen name="Déconnexion">
             {() => {
               return (
@@ -72,7 +72,7 @@ export default function App() {
           <Drawer.Screen name="Réceptions" component={ReceptionsStack} />
           <Drawer.Screen name="PVs" component={PVReceptions} />
           <Drawer.Screen name="Notes de frais" component={NoteFrais} />
-          <Drawer.Screen name="Demande du Congé" component={Conge} />
+          <Drawer.Screen name="Congés" component={Conge} />
           <Drawer.Screen name="Déconnexion">
             {() => {
               return (
@@ -97,3 +97,10 @@ export default function App() {
     );
   }
 }
+
+// defaultProps Error
+const error = console.error;
+console.error = (...args: any) => {
+  if (/defaultProps/.test(args[0])) return;
+  error(...args);
+};

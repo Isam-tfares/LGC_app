@@ -8,13 +8,13 @@ import moment from 'moment';
 export default function AddIntervention({ modalVisible, setModalVisible }) {
     const clients = ["client 1", "client 2", "client 3", "client 4", "client 5"];
     const projects = ["project 10", "project 11", "project 12", "project 13", "project 14", "project 15"];
-    const objects = ["object 1", "object 2", "object 3", "object 4", "object 5", "object 6", "object 7", "object 8", "object 9", "object 10"];
+    // const objects = ["object 1", "object 2", "object 3", "object 4", "object 5", "object 6", "object 7", "object 8", "object 9", "object 10"];
     const prestations = ["prestation 1", "prestation 2", "prestation 3", "prestation 4", "prestation 5", "prestation 6", "prestation 7", "prestation 8", "prestation 9", "prestation 10"];
     const techniciens = ["technicien 1", "technicien 2", "technicien 3", "technicien 4", "technicien 5"];
 
     const [selectedClient, setSelectedClient] = useState('');
     const [selectedProject, setSelectedProject] = useState('');
-    const [selectedObject, setSelectedObject] = useState('');
+    // const [selectedObject, setSelectedObject] = useState('');
     const [selectedTechnician, setSelectedTechnician] = useState('');
     const [selectedPrestation, setSelectedPrestation] = useState('');
     const [selectedDate, setSelectedDate] = useState(null);
@@ -34,8 +34,8 @@ export default function AddIntervention({ modalVisible, setModalVisible }) {
     };
 
     const handleAddIntervention = () => {
-        Alert.alert('Submitted',
-            `Client: ${selectedClient}\nProject: ${selectedProject}\nObject: ${selectedObject}\nTechnician: ${selectedTechnician}\nPrestation: ${selectedPrestation}\nDate: ${selectedDate ? moment(selectedDate).format('MM/DD/YYYY') : 'No date selected'}`);
+        Alert.alert('Intervention ajoutée',
+            `Client: ${selectedClient}\nProject: ${selectedProject}\nTechnician: ${selectedTechnician}\nPrestation: ${selectedPrestation}\nDate: ${selectedDate ? moment(selectedDate).format('MM/DD/YYYY') : 'No date selected'}`);
         setModalVisible(false);
     };
 
@@ -81,7 +81,7 @@ export default function AddIntervention({ modalVisible, setModalVisible }) {
                         ))}
                     </Picker>
 
-                    <Text style={styles.label}>Objet</Text>
+                    {/* <Text style={styles.label}>Objet</Text>
                     <Picker
                         selectedValue={selectedObject}
                         onValueChange={(itemValue, itemIndex) => setSelectedObject(itemValue)}
@@ -91,7 +91,7 @@ export default function AddIntervention({ modalVisible, setModalVisible }) {
                         {objects.map((object, index) => (
                             <Picker.Item key={index} label={object} value={object} />
                         ))}
-                    </Picker>
+                    </Picker> */}
 
                     <Text style={styles.label}>Technicien</Text>
                     <Picker

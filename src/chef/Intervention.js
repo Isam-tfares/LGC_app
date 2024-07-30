@@ -57,8 +57,8 @@ export default function Intervention({ route, navigation }) {
 
                 {(intervention.status == "faite") ?
                     <View style={styles.buttonContainer}>
-                        <TouchableOpacity style={[styles.button, styles.confirmButton]} onPress={() => { Alert.alert('Confirmer reception ' + intervention.id) }}>
-                            <Text style={styles.buttonText}>Confirmer récéption</Text>
+                        <TouchableOpacity style={[styles.button, styles.confirmButton]} onPress={() => { Alert.alert('Intervention ' + intervention.id + " est validée") }}>
+                            <Text style={styles.buttonText}>Valider Intervention</Text>
                         </TouchableOpacity>
                     </View>
                     : ""

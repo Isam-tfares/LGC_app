@@ -1,31 +1,23 @@
 import React, { useState } from 'react';
 import { View, TextInput, Button, Alert, StyleSheet, TouchableOpacity, Text, Image, KeyboardAvoidingView, ScrollView, Platform, SafeAreaView } from 'react-native';
-// import { useDispatch } from 'react-redux';
-// import { setToken, setUserData } from '../actions/userActions';
 
 const Login = ({ isLogined, setLogined }) => {
-    // const dispatch = useDispatch();
     const [Username, setUsername] = useState('');
     const [password, setPassword] = useState('');
     const [errorUsername, setErrorUsername] = useState('');
     const [errorPassword, setErrorPassword] = useState('');
 
     const handleLogin = async () => {
-
-        if (Username == "labo") {
+        if (Username === "labo") {
             setLogined(4);
-
-        } else if (Username == "reception") {
+        } else if (Username === "reception") {
             setLogined(3);
-
-        } else if (Username == "chef") {
+        } else if (Username === "chef") {
             setLogined(2);
-        }
-        else if (Username == "tec") {
+        } else if (Username === "tec") {
             setLogined(1);
-        }
-        else {
-            Alert.alert("Nom d'utilisateur ou passsword incorrecte");
+        } else {
+            Alert.alert("Nom d'utilisateur ou mot de passe incorrect");
         }
         return;
         if (validateUsername()) {
@@ -50,10 +42,11 @@ const Login = ({ isLogined, setLogined }) => {
                     .then((response) => {
                         if (response.message === 'Connected') {
                             const { token } = response;
-                            dispatch(setToken(token));
-                            const userData = response.user;
-                            userData.password = password;
-                            dispatch(setUserData(userData));
+                            // Assuming dispatch is available
+                            // dispatch(setToken(token));
+                            // const userData = response.user;
+                            // userData.password = password;
+                            // dispatch(setUserData(userData));
                             setLogined(true);
                         } else {
                             Alert.alert(response.message);
@@ -75,67 +68,72 @@ const Login = ({ isLogined, setLogined }) => {
         return reg.test(Username);
     };
 
+    const keyboardVerticalOffset = Platform.OS === 'ios' ? 80 : 0; // Adjust as needed
+
     return (
-        <KeyboardAvoidingView
-            style={styles.body}
-            behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-        >
-
-            <ScrollView contentContainerStyle={styles.scrollView}>
-                <View style={styles.imgC}>
-                    <Image style={styles.img} source={require('../../assets/login.jpg')} />
+        <SafeAreaView style={styles.safeArea}>
+            <KeyboardAvoidingView
+                behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+                keyboardVerticalOffset={keyboardVerticalOffset}
+                style={styles.container}
+            >
+                <ScrollView contentContainerStyle={styles.scrollView}>
+                    <View style={styles.imgC}>
+                        <Image style={styles.img} source={require('../../assets/login.jpg')} />
+                    </View>
+                    <View style={{ marginBottom: 30, marginTop: 10 }}>
+                        <Text style={{ color: 'white', fontSize: 24 }}>Login</Text>
+                    </View>
+                    <TextInput
+                        placeholder="Nom d'utilisateur"
+                        value={Username}
+                        onChangeText={setUsername}
+                        keyboardType="email-address"
+                        autoCapitalize="none"
+                        style={styles.input}
+                        placeholderTextColor="#edede9"
+                    />
+                    <View style={styles.errorC}>
+                        <Text style={styles.error}>{errorUsername}</Text>
+                    </View>
+                    <TextInput
+                        placeholder="Mot de passe"
+                        value={password}
+                        onChangeText={setPassword}
+                        secureTextEntry
+                        style={styles.input}
+                        placeholderTextColor="#edede9"
+                    />
+                    <View style={styles.errorC}>
+                        <Text style={styles.error}>{errorPassword}</Text>
+                    </View>
+                    <TouchableOpacity>
+                        <Text style={styles.password}>Mot de passe oubliée ?</Text>
+                    </TouchableOpacity>
+                    <TouchableOpacity onPress={handleLogin} style={styles.button}>
+                        <Text style={styles.btnText}>Se connecter</Text>
+                    </TouchableOpacity>
+                </ScrollView>
+                <View style={styles.footer}>
+                    <Image style={styles.img2} source={require('../../assets/logo.png')} />
                 </View>
-                <View style={{ marginBottom: 30, marginTop: 10 }}>
-                    <Text style={{ color: 'white', fontSize: 24 }}>Login</Text>
-                </View>
-                <TextInput
-                    placeholder="Nom d'utilisateur"
-                    value={Username}
-                    onChangeText={setUsername}
-                    keyboardType="email-address"
-                    autoCapitalize="none"
-                    style={styles.input}
-                    placeholderTextColor="#edede9"
-                />
-                <View style={styles.errorC}>
-                    <Text style={styles.error}>{errorUsername}</Text>
-                </View>
-                <TextInput
-                    placeholder="Mot de passe"
-                    value={password}
-                    onChangeText={setPassword}
-                    secureTextEntry
-                    style={styles.input}
-                    placeholderTextColor="#edede9"
-                />
-                <View style={styles.errorC}>
-                    <Text style={styles.error}>{errorPassword}</Text>
-                </View>
-                <TouchableOpacity>
-                    <Text style={styles.password}>Mot de passe oubliée ?</Text>
-                </TouchableOpacity>
-                <TouchableOpacity onPress={handleLogin} style={{ marginVertical: 10, width: 300, backgroundColor: 'white', padding: 10 }}>
-                    <Text style={styles.btnText}>Se connecter</Text>
-                </TouchableOpacity>
-            </ScrollView>
-            <View style={styles.footer}>
-                <Image style={styles.img2} source={require('../../assets/logo.png')} />
-            </View>
-
-        </KeyboardAvoidingView>
-
+            </KeyboardAvoidingView>
+        </SafeAreaView>
     );
 };
 
 const styles = StyleSheet.create({
-    body: {
+    safeArea: {
         flex: 1,
         backgroundColor: '#1c488c',
     },
+    container: {
+        flex: 1,
+    },
     scrollView: {
-        alignItems: 'center',
-        justifyContent: 'center',
         flexGrow: 1,
+        justifyContent: 'center',
+        alignItems: 'center',
     },
     input: {
         width: 300,
@@ -183,6 +181,8 @@ const styles = StyleSheet.create({
         width: '100%',
         alignItems: 'center',
         justifyContent: 'center',
+        position: "absolute",
+        bottom: 0,
     },
     errorC: {
         textAlign: 'left',
@@ -196,6 +196,12 @@ const styles = StyleSheet.create({
         color: '#f94144',
         left: -50,
     },
+    button: {
+        marginVertical: 10,
+        width: 300,
+        backgroundColor: 'white',
+        padding: 10,
+    }
 });
 
 export default Login;

@@ -107,8 +107,8 @@ export default function PV({ navigation }) {
                     onCancel={hideDatePicker}
                 />
 
-                <TouchableOpacity style={styles.button} onPress={handlePrepareData}>
-                    <Text style={styles.buttonText}>Ajouter</Text>
+                <TouchableOpacity style={styles.button2} onPress={handlePrepareData}>
+                    <Text style={styles.buttonText2}>Ajouter</Text>
                 </TouchableOpacity>
             </View>
 
@@ -163,7 +163,17 @@ const styles = StyleSheet.create({
         color: "#333"
     },
     button: {
+        // backgroundColor: '#4bacc0',
+        backgroundColor: '#f0f0f0',
+        borderRadius: 5,
+        padding: 10,
+        alignItems: 'center',
+        width: '100%',
+        marginBottom: 20,
+    },
+    button2: {
         backgroundColor: '#4bacc0',
+        // backgroundColor: '#f0f0f0',
         borderRadius: 5,
         padding: 10,
         alignItems: 'center',
@@ -171,6 +181,11 @@ const styles = StyleSheet.create({
         marginBottom: 20,
     },
     buttonText: {
+        color: '#444',
+        fontWeight: 'bold',
+        fontSize: 16,
+    },
+    buttonText2: {
         color: '#fff',
         fontWeight: 'bold',
         fontSize: 16,

@@ -102,7 +102,7 @@ function Interventions({ navigation }) {
             </View>
 
             <TouchableOpacity style={styles.datePickerButton} onPress={showDatePicker}>
-                <Text style={styles.datePickerButtonText}>{selectedDate ? selectedDate : 'Select Date'}</Text>
+                <Text style={styles.datePickerButtonText}>{selectedDate ? selectedDate : 'Sélectionner Date'}</Text>
             </TouchableOpacity>
 
             <View style={styles.navBar}>
