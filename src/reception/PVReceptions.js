@@ -3,6 +3,7 @@ import { View, Text, StyleSheet, FlatList, Image, TouchableOpacity, Modal, TextI
 import DateTimePickerModal from "react-native-modal-datetime-picker";
 import moment from 'moment';
 import { EvilIcons } from '@expo/vector-icons';
+import { Ionicons } from '@expo/vector-icons';
 
 export default function PVReceptions({ navigation }) {
     const [selectedImage, setSelectedImage] = useState(null);
@@ -96,8 +97,7 @@ export default function PVReceptions({ navigation }) {
         if (search) {
             filteredInterventions = filteredInterventions.filter(intervention =>
                 intervention.technicien.toLowerCase().includes(search.toLowerCase()) ||
-                intervention.intervention_id.toLowerCase().includes(search.toLowerCase()) ||
-                intervention.date.toLowerCase().includes(search.toLowerCase())
+                intervention.id.toLowerCase().includes(search.toLowerCase())
             );
         }
 
@@ -143,7 +143,7 @@ export default function PVReceptions({ navigation }) {
                     <TouchableOpacity style={styles.pvCard} onPress={() => handlePVClick(item.imageUrl)}>
                         <Image source={{ uri: item.imageUrl }} style={styles.pvImage} />
                         <View style={styles.pvDetails}>
-                            <Text style={styles.pvText}>Intervention ID: {item.intervention_id}</Text>
+                            <Text style={styles.pvText}>N° Intervention: {item.id}</Text>
                             <Text style={styles.pvText}>Technician: {item.technicien}</Text>
                             <Text style={styles.pvText}>Date: {moment(item.date).format('DD/MM/YYYY')}</Text>
                         </View>
@@ -154,11 +154,19 @@ export default function PVReceptions({ navigation }) {
             {selectedImage && (
                 <Modal visible={true} transparent={true} onRequestClose={closeImageModal}>
                     <View style={styles.modalContainer}>
-                        <Image source={{ uri: selectedImage }} style={styles.fullScreenImage} />
-                        <TouchableOpacity style={styles.closeButton} onPress={closeImageModal}>
-                            <Text style={styles.closeButtonText}>Close</Text>
-                        </TouchableOpacity>
+                        <View style={styles.relativeView}>
+                            <Image source={{ uri: selectedImage }} style={styles.fullScreenImage} />
+                            <TouchableOpacity style={styles.close}
+                                onPress={closeImageModal}
+                            >
+                                <Ionicons name="close-circle-sharp" size={40} color="red" />
+                            </TouchableOpacity>
+                            {/* <TouchableOpacity style={styles.closeButton} onPress={closeImageModal}>
+                                <Text style={styles.closeButtonText}>X</Text>
+                            </TouchableOpacity> */}
+                        </View>
                     </View>
+
                 </Modal>
             )}
         </View>
@@ -226,10 +234,14 @@ const styles = StyleSheet.create({
         color: '#333',
     },
     modalContainer: {
-        flex: 1,
         backgroundColor: 'rgba(0, 0, 0, 0.8)',
+        flex: 1,
+    },
+    relativeView: {
+        flex: 1,
         justifyContent: 'center',
         alignItems: 'center',
+        position: "relative",
     },
     fullScreenImage: {
         width: '90%',
@@ -238,14 +250,21 @@ const styles = StyleSheet.create({
     },
     closeButton: {
         position: 'absolute',
-        top: 40,
-        right: 20,
-        backgroundColor: '#fff',
-        padding: 10,
-        borderRadius: 5,
+        top: "14%",
+        right: '4%',
+        backgroundColor: 'red',
+        padding: 15,
+        borderRadius: 10
     },
     closeButtonText: {
-        color: '#000',
+        color: '#fff',
         fontWeight: 'bold',
+    },
+    close: {
+        position: "absolute",
+        top: "13%",
+        right: '1%',
+        backgroundColor: "#fff",
+        borderRadius: 100
     },
 });

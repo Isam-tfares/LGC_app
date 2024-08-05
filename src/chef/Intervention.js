@@ -45,24 +45,25 @@ export default function Intervention({ route, navigation }) {
                     <Text style={styles.text}>{intervention.recuperation ? intervention.recuperation : ""}</Text>
                 </View>
                 <View style={styles.row}>
+                    <Text style={styles.title}>Observation : </Text>
+                    <Text>{intervention.obs ? intervention.obs : ""}</Text>
+                </View>
+                <View style={styles.row}>
                     <Text style={styles.title}>Etat d'intervention : </Text>
                     <Text style={[styles.text, intervention.status == "faite" ? styles.valide : (intervention.status == "annulée" ? styles.annule : styles.enCours)]}
 
                     >{intervention.status}</Text>
                 </View>
-                <View style={styles.row}>
-                    <Text style={styles.title}>Observation : </Text>
-                    <Text>{intervention.obs ? intervention.obs : ""}</Text>
-                </View>
-
                 {(intervention.status == "faite") ?
-                    <View style={styles.buttonContainer}>
-                        <TouchableOpacity style={[styles.button, styles.confirmButton]} onPress={() => { Alert.alert('Intervention ' + intervention.id + " est validée") }}>
-                            <Text style={styles.buttonText}>Valider Intervention</Text>
-                        </TouchableOpacity>
+                    <View style={styles.row}>
+                        <Text style={styles.title}>Etat de réception : </Text>
+                        <Text style={[styles.text, intervention.reception == "faite" ? styles.valide : (intervention.status == "annulée" ? styles.annule : styles.enCours)]}
+
+                        >{intervention.reception}</Text>
                     </View>
                     : ""
                 }
+
 
             </View>
 

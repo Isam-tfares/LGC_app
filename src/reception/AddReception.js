@@ -27,8 +27,8 @@ export default function AddReception({ modalVisible, setModalVisible, interventi
     const [selectedClient, setSelectedClient] = useState(intervention.client);
     const [selectedProject, setSelectedProject] = useState(intervention.projet);
     const [selectedTechnician, setSelectedTechnician] = useState(intervention.technicien);
-    const [selectedPrestation, setSelectedPrestation] = useState('');
-    const [selectedMatiere, setSelectedMatiere] = useState('');
+    const [selectedPrestation, setSelectedPrestation] = useState(intervention.Prestation);
+    const [selectedMatiere, setSelectedMatiere] = useState(intervention.Materiaux);
     const [selectedDate, setSelectedDate] = useState(null);
     const [selectedDate2, setSelectedDate2] = useState(null);
     const [nbr_echatillon, setNbr_echatillon] = useState(2);
@@ -47,7 +47,7 @@ export default function AddReception({ modalVisible, setModalVisible, interventi
     const [BL, setBL] = useState("");
     const [nbr_jrs, setNbr_jrs] = useState([]);
     const [jrs, setJrs] = useState("");
-    const [lieu_prelevement, setLieu_prelevement] = useState("");
+    const [lieu_prelevement, setLieu_prelevement] = useState(intervention.adresse);
     const [nature_echantillon, setNature_echantillon] = useState("");
     const [obs, setObs] = useState("");
     const [isDatePickerVisible, setDatePickerVisibility] = useState(false);

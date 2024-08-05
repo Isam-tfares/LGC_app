@@ -15,15 +15,12 @@ import Deconnexion from './src/components/Deconnexion';
 import InterventionsStackRec from './src/reception/InterventionsRec';
 import PVReceptions from './src/reception/PVReceptions';
 import ReceptionsStack from './src/reception/Receptions';
+import NewReception from './src/technicien/NewReception';
 
 const Drawer = createDrawerNavigator();
 
 export default function App() {
   const [isLogined, setLogined] = useState(false);
-
-  const handleLogout = () => {
-    setLogined(false);
-  };
 
   if (!isLogined) {
     return <Login isLogined={isLogined} setLogined={setLogined} />;
@@ -32,6 +29,7 @@ export default function App() {
       <NavigationContainer>
         <Drawer.Navigator initialRouteName="Programme">
           <Drawer.Screen name="Programme" component={ProgrammeStack} />
+          <Drawer.Screen name="Nouvelle réception" component={NewReception} />
           <Drawer.Screen name="PVs" component={PV} />
           <Drawer.Screen name="Notes de frais" component={NoteFrais} />
           <Drawer.Screen name="Congés" component={Conge} />

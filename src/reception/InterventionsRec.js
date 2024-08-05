@@ -117,6 +117,8 @@ function InterventionsRec({ navigation }) {
                         style={styles.intervention}
                         onPress={() => interventionClick(item)}
                     >
+                        <View style={styles.idView}><Text style={styles.id}>N° Intervention : {item.id}</Text></View>
+
                         <Text style={styles.Project}>{item.projet}</Text>
                         <Text style={styles.client}>Objet : {item.object}</Text>
                         <Text style={styles.client}>Client : {item.client}</Text>
@@ -338,4 +340,14 @@ const styles = StyleSheet.create({
         color: "#333",
         fontSize: 16,
     },
+    idView: {
+        position: "absolute",
+        top: 10,
+        right: 10
+    },
+    id: {
+        fontSize: 16,
+        fontWeight: "bold",
+
+    }
 });

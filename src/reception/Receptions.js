@@ -112,7 +112,7 @@ function Receptions({ navigation }) {
     ];
 
     const handleReceptionPress = (reception) => {
-        navigation.navigate('ReceptionDetails', { reception });
+        navigation.navigate('Détails Réception', { reception });
     };
 
     const showDatePicker = () => {
@@ -209,7 +209,7 @@ export default function ReceptionsStack() {
                 options={{ headerShown: false }}
             />
             <Stack.Screen
-                name="ReceptionDetails"
+                name="Détails Réception"
                 component={ReceptionDetails}
             />
         </Stack.Navigator>

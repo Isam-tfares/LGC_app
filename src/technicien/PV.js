@@ -12,7 +12,7 @@ export default function PV({ navigation }) {
     const [selectedDate, setSelectedDate] = useState(new Date());
     const [isDatePickerVisible, setDatePickerVisibility] = useState(false);
 
-    const interventions = ["Intervention A", "Intervention B", "Intervention C", "Intervention D", "Intervention E"];
+    const interventions = ["1", "2", "3", "4", "5"];
 
     const pickImage = async () => {
         try {
@@ -51,12 +51,17 @@ export default function PV({ navigation }) {
             Alert.alert('Erreur', 'Veuillez sélectionner une intervention.');
             return;
         }
+        if (!image) {
+            Alert.alert('Erreur', 'Veuillez charger une image.');
+            return;
+        }
 
         console.log({
             selectedIntervention,
             image,
             selectedDate: moment(selectedDate).format('MM/DD/YYYY'),
         });
+        Alert.alert('Succès', 'PV ajouté avec succès.');
 
         setSelectedIntervention('');
         setImage(null);
@@ -67,13 +72,13 @@ export default function PV({ navigation }) {
         <View style={styles.container}>
             <Text style={styles.title}>Ajouter PV</Text>
             <View style={styles.card}>
-
+                <Text style={styles.label}>Intervention</Text>
                 <Picker
                     selectedValue={selectedIntervention}
                     onValueChange={(itemValue, itemIndex) => setSelectedIntervention(itemValue)}
                     style={styles.picker}
                 >
-                    <Picker.Item label="Sélectionner Intervention" value="" />
+                    <Picker.Item label="N° Intervention " value="" />
                     {interventions.map((intervention, index) => (
                         <Picker.Item key={index} label={intervention} value={intervention} />
                     ))}
@@ -94,18 +99,6 @@ export default function PV({ navigation }) {
                         </>
                     )}
                 </TouchableOpacity>
-
-                <TouchableOpacity style={styles.button} onPress={showDatePicker}>
-                    <Text style={styles.buttonText}>
-                        {moment(selectedDate).format('MM/DD/YYYY')}
-                    </Text>
-                </TouchableOpacity>
-                <DateTimePickerModal
-                    isVisible={isDatePickerVisible}
-                    mode="date"
-                    onConfirm={handleConfirm}
-                    onCancel={hideDatePicker}
-                />
 
                 <TouchableOpacity style={styles.button2} onPress={handlePrepareData}>
                     <Text style={styles.buttonText2}>Ajouter</Text>
@@ -243,4 +236,12 @@ const styles = StyleSheet.create({
         fontWeight: 'bold',
         fontSize: 16,
     },
+    label: {
+        fontSize: 16,
+        fontWeight: 'bold',
+        marginBottom: 10,
+        fontSize: 16,
+        fontWeight: 'bold',
+        marginBottom: 10,
+    }
 });

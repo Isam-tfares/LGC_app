@@ -12,7 +12,7 @@ export default function Conge({ navigation }) {
 
     // State variables for input values
     const [showenSection, setShowenSection] = useState(false);
-    const [availableDays, setAvailableDays] = useState(0);
+    const [availableDays, setAvailableDays] = useState(15);
     const [years, setYears] = useState([2022, 2023, 2024]);
     const [year, setYear] = useState(2024);
     const [fromDate, setFromDate] = useState('');
@@ -23,7 +23,7 @@ export default function Conge({ navigation }) {
     const conges = [
         { "id": 1, "start_date": "2024-01-01", "end_date": "2024-01-02", "nbr_jrs": 2 },
         { "id": 2, "start_date": "2024-04-03", "end_date": "2024-04-10", "nbr_jrs": 8 },
-        { "id": 3, "start_date": "2024-07-01", "end_date": "2024-07-10", "nbr_jrs": 10 },
+        { "id": 3, "start_date": "2024-07-01", "end_date": "2024-07-05", "nbr_jrs": 5 },
     ]
 
     // Show date picker

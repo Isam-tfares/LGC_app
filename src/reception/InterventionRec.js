@@ -10,6 +10,10 @@ export default function InterventionRec({ route, navigation }) {
         <View style={styles.container}>
             <View style={styles.card}>
                 <View style={styles.row}>
+                    <Text style={styles.title}>N° Intervention :</Text>
+                    <Text style={styles.text}>{intervention.id}</Text>
+                </View>
+                <View style={styles.row}>
                     <Text style={styles.title}>Client:</Text>
                     <Text style={styles.text}>{intervention.client}</Text>
                 </View>
