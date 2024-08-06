@@ -20,10 +20,12 @@ import NewReception from './src/technicien/NewReception';
 const Drawer = createDrawerNavigator();
 
 export default function App() {
-  const [isLogined, setLogined] = useState(false);
+  const [isLogined, setLogined] = useState(1);
+  const [token, setToken] = useState('');
+  console.log('token:', token);
 
   if (!isLogined) {
-    return <Login isLogined={isLogined} setLogined={setLogined} />;
+    return <Login isLogined={isLogined} setLogined={setLogined} setToken={setToken} />;
   } else if (isLogined === 1) { // technicien
     return (
       <NavigationContainer>
@@ -36,7 +38,7 @@ export default function App() {
           <Drawer.Screen name="Déconnexion">
             {() => {
               return (
-                <Deconnexion setLogined={setLogined} />
+                <Deconnexion setLogined={setLogined} setToken={setToken} />
               );
             }}
           </Drawer.Screen>
@@ -55,7 +57,7 @@ export default function App() {
           <Drawer.Screen name="Déconnexion">
             {() => {
               return (
-                <Deconnexion setLogined={setLogined} />
+                <Deconnexion setLogined={setLogined} setToken={setToken} />
               );
             }}
           </Drawer.Screen>
@@ -74,7 +76,7 @@ export default function App() {
           <Drawer.Screen name="Déconnexion">
             {() => {
               return (
-                <Deconnexion setLogined={setLogined} />
+                <Deconnexion setLogined={setLogined} setToken={setToken} />
               );
             }}
           </Drawer.Screen>
