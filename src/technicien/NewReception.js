@@ -7,22 +7,24 @@ import moment from 'moment';
 import Checkbox from 'expo-checkbox';
 
 
-export default function NewReception() {
-    const interventions = [
-        { id: 1, client: 'Client 1', projet: 'Projet 1', object: "Objet 1", adresse: 'Adresse 1', technicien: "Techinicien 1", date: "8/04/2024", prestation: 'Prestation 1', status: "faite", reception: "faite" },
-        { id: 2, client: 'Client 2', projet: 'Projet 2', object: "Objet 2", adresse: 'Adresse 2', technicien: "Techinicien 2", date: "8/04/2024", prestation: 'Prestation 2', status: "faite", reception: "Non faite" },
-        { id: 3, client: 'Client 3', projet: 'Projet 3', object: "Objet 3", adresse: 'Adresse 3', technicien: "Techinicien 3", date: "8/04/2024", prestation: 'Prestation 3', status: "annulée", obs: "commentaire sur annulation d\'intervention" },
-        { id: 4, client: 'Client 4', projet: 'Projet 4', object: "Objet 4", adresse: 'Adresse 4', technicien: "Techinicien 4", date: "8/05/2024", prestation: 'Prestation 4', status: "faite", reception: "faite" },
-        { id: 5, client: 'Client 5', projet: 'Projet 5', object: "Objet 5", adresse: 'Adresse 5', technicien: "Techinicien 5", date: "8/05/2024", prestation: 'Prestation 5', status: "Non faite" },
-        { id: 6, client: 'Client 6', projet: 'Projet 6', object: "Objet 6", adresse: 'Adresse 6', technicien: "Techinicien 6", date: "8/05/2024", prestation: 'Prestation 6', status: "Non faite" },
-    ];
-    const [selectedIntervention, setSelectedIntervention] = useState("");
+export default function NewReception({ route, navigation }) {
+    let intervention_id = route.params ? Number.parseInt(route.params.id) : "";
+    console.log('Intervention ID:', intervention_id);
+    const [interventions, setInterventions] = useState([
+        { id: 1, client: 'Client 1', projet: 'Projet 1', object: "Objet 1", adresse: 'Adresse 1', technicien: "Techinicien 1", date: "04/08/2024", materiaux: "béton", prestation: 'Prestation 1', status: "faite", reception: "faite" },
+        { id: 2, client: 'Client 2', projet: 'Projet 2', object: "Objet 2", adresse: 'Adresse 2', technicien: "Techinicien 1", date: "04/08/2024", materiaux: "béton", prestation: 'Prestation 2', status: "faite", reception: "Non faite" },
+        { id: 3, client: 'Client 3', projet: 'Projet 3', object: "Objet 3", adresse: 'Adresse 3', technicien: "Techinicien 1", date: "04/08/2024", materiaux: "béton", prestation: 'Prestation 3', status: "annulée", obs: "commentaire sur annulation d\'intervention" },
+        { id: 4, client: 'Client 4', projet: 'Projet 4', object: "Objet 4", adresse: 'Adresse 4', technicien: "Techinicien 1", date: "05/08/2024", materiaux: "béton", prestation: 'Prestation 4', status: "faite", reception: "faite" },
+        { id: 5, client: 'Client 5', projet: 'Projet 5', object: "Objet 5", adresse: 'Adresse 5', technicien: "Techinicien 1", date: "05/08/2024", materiaux: "béton", prestation: 'Prestation 5', status: "En cours" },
+        { id: 6, client: 'Client 6', projet: 'Projet 6', object: "Objet 6", adresse: 'Adresse 6', technicien: "Techinicien 1", date: "05/08/2024", materiaux: "béton", prestation: 'Prestation 6', status: "En cours" },
+    ]);
+    const [selectedIntervention, setSelectedIntervention] = useState(intervention_id);
     const [intervention, setInterevntion] = useState(selectedIntervention ? interventions.find(item => item.id === selectedIntervention) : null);
-    const interventions_ids = [1, 2, 3, 4, 5];
-    const clients = ["Client 1", "Client 2", "Client 3", "Client 4", "Client 5"];
-    const projects = ["Projet 6", "Projet 1", "Projet 2", "Projet 3", "Projet 4", "Projet 5"];
-    const prestations = ["prestation 1", "prestation 2", "prestation 3", "prestation 4", "prestation 5", "prestation 6", "prestation 7", "prestation 8", "prestation 9", "prestation 10"];
-    const materiaux = ["matiere 1", "matiere 2", "matiere 3", "matiere 4", "matiere 5"];
+    const interventions_ids = [1, 2, 3, 4, 5, 6];
+    const clients = ["Client 1", "Client 2", "Client 3", "Client 4", "Client 5", "Client 6"];
+    const projects = ["Projet 6", "Projet 1", "Projet 2", "Projet 3", "Projet 4", "Projet 5", "Projet 6"];
+    const prestations = ["Prestation 1", "Prestation 2", "Prestation 3", "Prestation 4", "Prestation 5", "Prestation 6", "Prestation 7", "Prestation 8", "Prestation 9", "Prestation 10"];
+    const materiaux = ["matiere 1", "matiere 2", "matiere 3", "matiere 4", "béton"];
     const techniciens = ["technicien 1", "technicien 2", "technicien 3", "technicien 4", "technicien 5"];
     const etats_recuperation = ["Réccupéré", "Non réccupéré"];
     const preleves = ["LGC", "Client"];
@@ -37,8 +39,8 @@ export default function NewReception() {
     const [selectedClient, setSelectedClient] = useState(intervention ? intervention.client : "");
     const [selectedProject, setSelectedProject] = useState(intervention ? intervention.projet : "");
     const [selectedTechnician, setSelectedTechnician] = useState(intervention ? intervention.technicien : "");
-    const [selectedPrestation, setSelectedPrestation] = useState(intervention ? intervention.Prestation : "");
-    const [selectedMatiere, setSelectedMatiere] = useState(intervention ? intervention.Materiaux : "");
+    const [selectedPrestation, setSelectedPrestation] = useState(intervention ? intervention.prestation : "");
+    const [selectedMatiere, setSelectedMatiere] = useState(intervention ? intervention.materiaux : "");
     const [selectedDate, setSelectedDate] = useState(null);
     const [selectedDate2, setSelectedDate2] = useState(null);
     const [nbr_echatillon, setNbr_echatillon] = useState(2);
@@ -69,11 +71,16 @@ export default function NewReception() {
             setSelectedClient(selected.client);
             setSelectedProject(selected.projet);
             setSelectedTechnician(selected.technicien);
-            setSelectedPrestation(selected.Prestation);
+            setSelectedPrestation(selected.prestation);
             setLieu_prelevement(selected.adresse);
-            setSelectedMatiere(selected.Materiaux);
+            setSelectedMatiere(selected.materiaux);
         }
     }, [selectedIntervention]);
+    useEffect(() => {
+        if (Number.isInteger(intervention_id)) {
+            setSelectedIntervention(intervention_id);
+        }
+    }, [intervention_id]);
     const showClick = (section) => {
         if (showenSections.includes(section)) {
             setShowenSections(showenSections.filter((item) => item !== section));
@@ -106,10 +113,10 @@ export default function NewReception() {
 
     const handleAddIntervention = () => {
         // Check for empty fields
-        if (!selectedClient || !selectedProject || !selectedPrestation || !selectedMatiere || !nbr_echatillon || !selectedDate || !selectedTechnician || !etat_recuperation || !preleve || !Essaie || !betonSelected || !slump || !centralSelected || !BL || nbr_jrs.length === 0) {
-            Alert.alert('Veuillez remplir tous les champs obligatoires');
-            return;
-        }
+        // if (!selectedClient || !selectedProject || !selectedPrestation || !selectedMatiere || !nbr_echatillon || !selectedDate || !selectedTechnician || !etat_recuperation || !preleve || !Essaie || !betonSelected || !slump || !centralSelected || !BL || nbr_jrs.length === 0) {
+        //     Alert.alert('Veuillez remplir tous les champs obligatoires');
+        //     return;
+        // }
 
         // All fields are filled, proceed with adding the intervention
         console.log('New Reception Data:', {
@@ -129,8 +136,34 @@ export default function NewReception() {
             BL,
             nbr_jrs,
         });
-
+        intervention_id = selectedIntervention;
+        setSelectedClient("");
+        setSelectedProject("");
+        setSelectedPrestation("");
+        setSelectedMatiere("");
+        setNbr_echatillon(2);
+        setSelectedDate(null);
+        setSelectedTechnician("");
+        setEtat_recuperation("Réccupéré");
+        setPreleve("LGC");
+        setEssaie("Labo");
+        setBetonSelected("");
+        setSlump("");
+        setCompression(false);
+        setPendage(false);
+        setFlexion(false);
+        setConfectionSelected("mode 1");
+        setFabricationSelected("mode 1");
+        setCentralSelected("");
+        setBL("");
+        setNbr_jrs([]);
+        setJrs("");
+        setLieu_prelevement("");
+        setNature_echantillon("");
+        setObs("");
+        setSelectedIntervention('');
         Alert.alert('Réception ajoutée avec succès \nVeuillez charger le PV');
+        navigation.navigate('PVs', { "id": intervention_id });
     };
 
     return (

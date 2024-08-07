@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { View, Text, TouchableOpacity, StyleSheet, Image, Alert } from 'react-native';
 import { Picker } from '@react-native-picker/picker';
 import DateTimePickerModal from 'react-native-modal-datetime-picker';
@@ -6,14 +6,20 @@ import moment from 'moment';
 import * as ImagePicker from 'expo-image-picker';
 import { Ionicons } from '@expo/vector-icons';
 
-export default function PV({ navigation }) {
-    const [selectedIntervention, setSelectedIntervention] = useState('');
+export default function PV({ navigation, route }) {
+    let intervention_id = route.params ? Number.parseInt(route.params.id) : "";
+    console.log(intervention_id);
+    const [selectedIntervention, setSelectedIntervention] = useState(intervention_id);
     const [image, setImage] = useState(null);
     const [selectedDate, setSelectedDate] = useState(new Date());
     const [isDatePickerVisible, setDatePickerVisibility] = useState(false);
 
-    const interventions = ["1", "2", "3", "4", "5"];
-
+    const interventions = [1, 2, 3, 4, 5, 6];
+    useEffect(() => {
+        if (Number.isInteger(intervention_id)) {
+            setSelectedIntervention(intervention_id);
+        }
+    }, [intervention_id]);
     const pickImage = async () => {
         try {
             let result = await ImagePicker.launchImageLibraryAsync({

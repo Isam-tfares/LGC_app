@@ -1,58 +1,60 @@
-import React, { useState } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, FlatList } from 'react-native';
+import React, { useState, useRef, useEffect } from 'react';
+import { View, Text, StyleSheet, TouchableOpacity, FlatList, ActivityIndicator } from 'react-native';
 import moment from 'moment';
 import 'moment/locale/fr'; // Import French locale
 import AntDesign from '@expo/vector-icons/AntDesign';
 import { createStackNavigator } from '@react-navigation/stack';
 import Intervention from './Intervention';
+import AddIntervention from './AddIntervention';
 
-const generateDays = () => {
+const generateDaysOfMonth = (month, year) => {
+    const startOfMonth = moment(`${month} ${year}`, 'MMMM YYYY').startOf('month');
+    const endOfMonth = moment(startOfMonth).endOf('month');
     const daysArray = [];
-    for (let i = -3; i < 4; i++) {
-        daysArray.push(moment().add(i, 'days'));
+
+    for (let date = startOfMonth; date.isBefore(endOfMonth); date.add(1, 'day')) {
+        daysArray.push(date.clone());
     }
+
     return daysArray;
 };
-const generateMonths = () => {
-    moment.locale('fr'); // Set locale to French
-    const monthsArray = [];
-    for (let i = 0; i < 12; i++) {
-        monthsArray.push(moment().month(i).startOf('month'));
-    }
-    return monthsArray;
-};
-console.log(generateMonths());
 
 function Programme({ navigation }) {
-    moment.locale('fr'); // Set locale to French
-    const days = generateDays();
-    const [currentDay, setCurrentDay] = useState(days[3]);
+    moment.locale('fr');
+    const technicien = 10;
+    const [currentDay, setCurrentDay] = useState(moment());
+    const [modalVisible, setModalVisible] = useState(false);
+    const [loading, setLoading] = useState(false);
     const [monthSelected, setMonthSelected] = useState(moment().format('MMMM'));
     const [yearSelected, setYearSelected] = useState(moment().format('YYYY'));
+    const [interventions, setInterventions] = useState([
+        { id: 1, client: 'Client 1', projet: 'Projet 1', object: "Objet 1", adresse: 'Adresse 1', technicien: "Techinicien 1", date: "04/08/2024", materiaux: "béton", prestation: 'Prestation 1', status: "faite", reception: "faite" },
+        { id: 2, client: 'Client 2', projet: 'Projet 2', object: "Objet 2", adresse: 'Adresse 2', technicien: "Techinicien 1", date: "04/08/2024", materiaux: "béton", prestation: 'Prestation 2', status: "faite", reception: "En cours" },
+        { id: 3, client: 'Client 3', projet: 'Projet 3', object: "Objet 3", adresse: 'Adresse 3', technicien: "Techinicien 1", date: "04/08/2024", materiaux: "béton", prestation: 'Prestation 3', status: "annulée", obs: "commentaire sur annulation d\'intervention" },
+        { id: 4, client: 'Client 4', projet: 'Projet 4', object: "Objet 4", adresse: 'Adresse 4', technicien: "Techinicien 1", date: "05/08/2024", materiaux: "béton", prestation: 'Prestation 4', status: "faite", reception: "faite" },
+        { id: 5, client: 'Client 5', projet: 'Projet 5', object: "Objet 5", adresse: 'Adresse 5', technicien: "Techinicien 1", date: "05/08/2024", materiaux: "béton", prestation: 'Prestation 5', status: "En cours" },
+        { id: 6, client: 'Client 6', projet: 'Projet 6', object: "Objet 6", adresse: 'Adresse 6', technicien: "Techinicien 1", date: "05/08/2024", materiaux: "béton", prestation: 'Prestation 6', status: "En cours" },
+        { id: 7, client: 'Client 4', projet: 'Projet 4', object: "Objet 4", adresse: 'Adresse 4', technicien: "Techinicien 1", date: "05/08/2024", materiaux: "béton", prestation: 'Prestation 4', status: "faite", reception: "faite" }
+    ]);
+    const daysOfMonth = generateDaysOfMonth(monthSelected, yearSelected);
 
-    const interventions = [
-        { id: 1, client: 'Client 1', projet: 'Projet 1', object: "Objet 1", adresse: 'Adresse 1', technicien: "Techinicien 1", date: "04/08/2024", prestation: 'Prestation 1', status: "faite", reception: "faite" },
-        { id: 2, client: 'Client 2', projet: 'Projet 2', object: "Objet 2", adresse: 'Adresse 2', technicien: "Techinicien 2", date: "04/08/2024", prestation: 'Prestation 2', status: "faite", reception: "Non faite" },
-        { id: 3, client: 'Client 3', projet: 'Projet 3', object: "Objet 3", adresse: 'Adresse 3', technicien: "Techinicien 3", date: "04/08/2024", prestation: 'Prestation 3', status: "annulée", obs: "commentaire sur annulation d\'intervention" },
-        { id: 4, client: 'Client 4', projet: 'Projet 4', object: "Objet 4", adresse: 'Adresse 4', technicien: "Techinicien 4", date: "05/08/2024", prestation: 'Prestation 4', status: "faite", reception: "faite" },
-        { id: 5, client: 'Client 5', projet: 'Projet 5', object: "Objet 5", adresse: 'Adresse 5', technicien: "Techinicien 5", date: "05/08/2024", prestation: 'Prestation 5', status: "Non faite" },
-        { id: 6, client: 'Client 6', projet: 'Projet 6', object: "Objet 6", adresse: 'Adresse 6', technicien: "Techinicien 6", date: "05/08/2024", prestation: 'Prestation 6', status: "Non faite" },
-    ];
+    useEffect(() => {
+        setLoading(true);
+        console.log(currentDay.format('D'), monthSelected, yearSelected);
+        console.log("here fetch interentions from server");
+        setLoading(false);
+    }, [currentDay]);
 
     const filterInterventionsbyDay = () => {
-        const filteredInterventions = interventions.filter(item => {
+        return interventions.filter(item => {
             return moment(item.date, 'D/M/YYYY').isSame(currentDay, 'day');
         });
-        return filteredInterventions;
     };
 
     const interventionClick = (intervention) => {
         navigation.navigate('Intervention', { intervention });
     };
 
-    const changeDay = (day) => {
-        setCurrentDay(day);
-    };
     const nextMonth = () => {
         const currentMonth = moment(`${monthSelected} ${yearSelected}`, 'MMMM YYYY');
         const nextMonth = currentMonth.add(1, 'month');
@@ -66,8 +68,6 @@ function Programme({ navigation }) {
         setMonthSelected(previousMonth.format('MMMM'));
         setYearSelected(previousMonth.format('YYYY'));
     };
-
-
     return (
         <View style={{ flex: 1, backgroundColor: "white" }}>
             <View style={styles.header}>
@@ -80,16 +80,17 @@ function Programme({ navigation }) {
                         <AntDesign name="right" size={24} color="black" />
                     </TouchableOpacity>
                 </View>
+
                 <FlatList
                     horizontal
-                    data={days}
+                    data={daysOfMonth}
                     showsHorizontalScrollIndicator={false}
                     contentContainerStyle={styles.daysList}
                     keyExtractor={(item, index) => index.toString()}
                     renderItem={({ item }) => (
                         <TouchableOpacity
                             style={item.isSame(currentDay, 'day') ? styles.currentDay : styles.dayContainer}
-                            onPress={() => changeDay(item)}
+                            onPress={() => setCurrentDay(item)}
                         >
                             <Text style={item.isSame(currentDay, 'day') ? styles.day2 : styles.day}>{item.format('D')}</Text>
                             <Text style={item.isSame(currentDay, 'day') ? styles.dayName2 : styles.dayName}>{item.format('ddd')}</Text>
@@ -98,31 +99,44 @@ function Programme({ navigation }) {
                 />
             </View>
             <View style={styles.main}>
-                <FlatList
-                    data={filterInterventionsbyDay()}
-                    keyExtractor={(item) => item.id.toString()}
-                    renderItem={({ item }) => (
-                        <TouchableOpacity
-                            style={styles.intervention}
-                            onPress={() => interventionClick(item)}
-                        >
-                            <View style={styles.idView}><Text style={styles.id}>N° Intervention : {item.id}</Text></View>
-                            <Text style={styles.Project}>{item.projet}</Text>
-                            <Text style={styles.client}>Objet : {item.object}</Text>
-                            <Text style={styles.client}>Client : {item.client}</Text>
-                            <Text style={styles.technicien}>Technicien: {item.technicien}</Text>
-                            <View style={{ flexDirection: "row", alignItems: "center", marginTop: 10 }}>
-                                <Text style={styles.status}>État : </Text>
-                                <Text style={item.status == "faite" ? styles.valide : (item.status == "annulée" ? styles.annule : styles.enCours)}>{item.status}</Text>
-                            </View>
-                            <View style={styles.dateView}>
-                                <Text style={styles.dateText}>{item.date}</Text>
-                            </View>
-                        </TouchableOpacity>
-                    )}
-                    ItemSeparatorComponent={() => <View style={styles.itemSeparator} />}
-                    contentContainerStyle={styles.pgm}
-                />
+
+                {/* add intervention */}
+                <TouchableOpacity onPress={() => { setModalVisible(true) }} style={styles.plus} >
+                    <AntDesign name="pluscircle" size={40} color="#0853a1" />
+                </TouchableOpacity>
+                <AddIntervention modalVisible={modalVisible}
+                    setModalVisible={setModalVisible} technicien={technicien} />
+                {/* end add intervention */}
+
+                {
+                    loading ?
+                        (<ActivityIndicator color={"#0853a1"} />)
+                        :
+                        (<FlatList
+                            data={filterInterventionsbyDay()}
+                            keyExtractor={(item) => item.id.toString()}
+                            renderItem={({ item }) => (
+                                <TouchableOpacity
+                                    style={styles.intervention}
+                                    onPress={() => interventionClick(item)}
+                                >
+                                    <View style={styles.idView}><Text style={styles.id}>N° Intervention : {item.id}</Text></View>
+                                    <Text style={styles.Project}>{item.projet}</Text>
+                                    <Text style={styles.client}>Objet : {item.object}</Text>
+                                    <Text style={styles.client}>Client : {item.client}</Text>
+                                    <Text style={styles.technicien}>Technicien: {item.technicien}</Text>
+                                    <View style={{ flexDirection: "row", alignItems: "center", marginTop: 10 }}>
+                                        <Text style={styles.status}>État : </Text>
+                                        <Text style={item.status == "faite" ? styles.valide : (item.status == "annulée" ? styles.annule : styles.enCours)}>{item.status}</Text>
+                                    </View>
+                                    <View style={styles.dateView}>
+                                        <Text style={styles.dateText}>{item.date}</Text>
+                                    </View>
+                                </TouchableOpacity>
+                            )}
+                            ItemSeparatorComponent={() => <View style={styles.itemSeparator} />}
+                            contentContainerStyle={styles.pgm}
+                        />)}
             </View>
         </View>
     );
@@ -275,11 +289,17 @@ const styles = StyleSheet.create({
         flexDirection: "row",
         alignItems: "center",
         justifyContent: "space-between",
-        padding: 10,
+        paddingBottom: 5,
         width: "100%",
     },
     monthText: {
         fontSize: 20,
         fontWeight: "bold",
+    },
+    plus: {
+        position: "absolute",
+        bottom: "25%",
+        right: "5%",
+        zIndex: 20,
     },
 });

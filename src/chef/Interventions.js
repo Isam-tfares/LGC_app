@@ -19,7 +19,6 @@ const generateDays = () => {
 function Interventions({ navigation }) {
     const [search, setSearch] = useState("");
     const days = generateDays();
-    const [currentDay, setCurrentDay] = useState(days[0]);
     const [clicked, setClicked] = useState(0);
     const [modalVisible, setModalVisible] = useState(false);
     const [isDatePickerVisible, setDatePickerVisibility] = useState(false);

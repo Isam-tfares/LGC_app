@@ -1,0 +1,4 @@
+the initial scroll index flatList days in Programme technicien
+add intervention for technicien ( add technicien id from user data )
+add interface pour tecnicien for showing interventions added by him
+Preréception values that should by default ( from DB )

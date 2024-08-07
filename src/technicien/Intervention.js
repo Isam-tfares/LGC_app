@@ -1,12 +1,13 @@
 import React, { useState } from 'react';
-import { Button, View, Text, StyleSheet, Alert, TouchableOpacity, Modal, TextInput } from 'react-native';
+import { View, Text, StyleSheet, Alert, TouchableOpacity, Modal, TextInput } from 'react-native';
+import { Ionicons } from '@expo/vector-icons';
 
 export default function Intervention({ route, navigation }) {
     const { intervention } = route.params;
     const [modalVisible, setModalVisible] = useState(false);
     const [comment, setComment] = useState('');
 
-    const handleAnnuler = () => {
+    const annulerIntervention = () => {
         // Logic to handle the comment submission or cancellation
         if (comment === '') {
             Alert.alert('Veuillez ajouter un commentaire');
@@ -14,6 +15,9 @@ export default function Intervention({ route, navigation }) {
         }
         Alert.alert("Intervention annulée avec succès");
         setModalVisible(false);
+    };
+    const validateIntervention = (intervention_id) => {
+        navigation.navigate('Nouvelle réception', { "id": intervention_id });
     };
 
     return (
@@ -37,11 +41,11 @@ export default function Intervention({ route, navigation }) {
                 </View>
                 <View style={styles.row}>
                     <Text style={styles.title}>Prestation : </Text>
-                    <Text style={styles.text}>{intervention.Prestation ? intervention.Prestation : ""}</Text>
+                    <Text style={styles.text}>{intervention.prestation}</Text>
                 </View>
                 <View style={styles.row}>
                     <Text style={styles.title}>Matériaux : </Text>
-                    <Text style={styles.text}>{intervention.Materiaux ? intervention.Materiaux : ""}</Text>
+                    <Text style={styles.text}>{intervention.materiaux}</Text>
                 </View>
 
                 <View style={styles.row}>
@@ -70,9 +74,9 @@ export default function Intervention({ route, navigation }) {
                     </View>
                     : ""
                 }
-                {intervention.status === 'Non faite' ? (
+                {intervention.status === 'En cours' ? (
                     <View style={styles.buttonContainer}>
-                        <TouchableOpacity style={[styles.button, styles.confirmButton]} onPress={() => { Alert.alert('Pour Valider l\'intervention ' + intervention.id + '\nVeuillez entrer la réception') }}>
+                        <TouchableOpacity style={[styles.button, styles.confirmButton]} onPress={() => { validateIntervention(intervention.id) }}>
                             <Text style={styles.buttonText}>Valider</Text>
                         </TouchableOpacity>
                         <TouchableOpacity style={[styles.button, styles.cancelButton]} onPress={() => { setModalVisible(true) }}>
@@ -96,6 +100,11 @@ export default function Intervention({ route, navigation }) {
             >
                 <View style={styles.modalOverlay}>
                     <View style={styles.modalView}>
+                        <TouchableOpacity style={styles.close}
+                            onPress={() => setModalVisible(false)}
+                        >
+                            <Ionicons name="close-circle-sharp" size={40} color="red" />
+                        </TouchableOpacity>
                         <Text style={styles.modalTitle}>Ajouter un commentaire</Text>
                         <TextInput
                             style={styles.input}
@@ -104,7 +113,7 @@ export default function Intervention({ route, navigation }) {
                             onChangeText={setComment}
                             placeholderTextColor="#ccc"
                         />
-                        <TouchableOpacity style={styles.modalButton} onPress={handleAnnuler}>
+                        <TouchableOpacity style={styles.modalButton} onPress={() => { annulerIntervention() }}>
                             <Text style={styles.modalButtonText}>Valider</Text>
                         </TouchableOpacity>
                     </View>
@@ -194,6 +203,11 @@ const styles = StyleSheet.create({
         shadowOpacity: 0.25,
         shadowRadius: 4,
         elevation: 5,
+    },
+    close: {
+        position: "absolute",
+        top: -15,
+        right: -15,
     },
     modalTitle: {
         fontSize: 18,
