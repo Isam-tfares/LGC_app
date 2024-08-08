@@ -15,12 +15,13 @@ import Deconnexion from './src/components/Deconnexion';
 import InterventionsStackRec from './src/reception/InterventionsRec';
 import PVReceptions from './src/reception/PVReceptions';
 import ReceptionsStack from './src/reception/Receptions';
+import PreReceptionsStack from './src/reception/PreReceptions';
 import NewReception from './src/technicien/NewReception';
 
 const Drawer = createDrawerNavigator();
 
 export default function App() {
-  const [isLogined, setLogined] = useState(1);
+  const [isLogined, setLogined] = useState(2);
   const [token, setToken] = useState('');
   console.log('token:', token);
 
@@ -51,6 +52,7 @@ export default function App() {
         <Drawer.Navigator initialRouteName="Interventions">
           <Drawer.Screen name="Interventions" component={InterventionsStack} />
           <Drawer.Screen name="Programmes && techniciens" component={Programmes} />
+          <Drawer.Screen name="PreRéceptions" component={PreReceptionsStack} />
           <Drawer.Screen name="Réceptions" component={ReceptionsStack} />
           <Drawer.Screen name="Notes de frais" component={NoteFrais} />
           <Drawer.Screen name="Congés" component={Conge} />

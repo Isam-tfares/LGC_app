@@ -11,10 +11,21 @@ export default function Intervention({ route, navigation }) {
         Alert.alert('Comment: ' + comment);
         setModalVisible(false);
     };
+    const validateIntervention = (intervention_id, status) => {
+        if (status == "pre") {
+            navigation.navigate('PreRéceptions', { "id": intervention_id });
+        } else {
+            navigation.navigate('Réceptions', { "id": intervention_id });
+        }
+    };
 
     return (
         <View style={styles.container}>
             <View style={styles.card}>
+                <View style={styles.row}>
+                    <Text style={styles.title}>N° Intervention :</Text>
+                    <Text style={styles.text}>{intervention.id}</Text>
+                </View>
                 <View style={styles.row}>
                     <Text style={styles.title}>Client:</Text>
                     <Text style={styles.text}>{intervention.client}</Text>
@@ -29,21 +40,18 @@ export default function Intervention({ route, navigation }) {
                 </View>
                 <View style={styles.row}>
                     <Text style={styles.title}>Prestation : </Text>
-                    <Text style={styles.text}>{intervention.Prestation ? intervention.Prestation : ""}</Text>
+                    <Text style={styles.text}>{intervention.prestation ? intervention.prestation : ""}</Text>
                 </View>
                 <View style={styles.row}>
                     <Text style={styles.title}>Matériaux : </Text>
-                    <Text style={styles.text}>{intervention.Materiaux ? intervention.Materiaux : ""}</Text>
+                    <Text style={styles.text}>{intervention.materiaux ? intervention.materiaux : ""}</Text>
                 </View>
 
                 <View style={styles.row}>
                     <Text style={styles.title}>Lieu de prélévement : </Text>
                     <Text style={styles.text}>{intervention.adresse}</Text>
                 </View>
-                <View style={styles.row}>
-                    <Text style={styles.title}>Etat de récupération : </Text>
-                    <Text style={styles.text}>{intervention.recuperation ? intervention.recuperation : ""}</Text>
-                </View>
+
                 <View style={styles.row}>
                     <Text style={styles.title}>Observation : </Text>
                     <Text>{intervention.obs ? intervention.obs : ""}</Text>
@@ -55,15 +63,41 @@ export default function Intervention({ route, navigation }) {
                     >{intervention.status}</Text>
                 </View>
                 {(intervention.status == "faite") ?
-                    <View style={styles.row}>
-                        <Text style={styles.title}>Etat de réception : </Text>
-                        <Text style={[styles.text, intervention.reception == "faite" ? styles.valide : (intervention.status == "annulée" ? styles.annule : styles.enCours)]}
+                    intervention.reception == "faite" ?
+                        (<><View style={styles.row}>
+                            <Text style={styles.title}>Etat de réception : </Text>
+                            <Text style={[styles.text, intervention.reception == "faite" ? styles.valide : (intervention.status == "annulée" ? styles.annule : styles.enCours)]}
 
-                        >{intervention.reception}</Text>
-                    </View>
-                    : ""
+                            >{intervention.reception}</Text>
+
+                        </View>
+                            <View style={styles.buttonView}>
+                                <TouchableOpacity style={[styles.button, styles.confirmButton]} onPress={() => { validateIntervention(intervention.id, "re") }}>
+                                    <Text style={styles.buttonText}>Voir réception</Text>
+                                </TouchableOpacity>
+                            </View>
+                        </>)
+                        :
+                        (<>
+                            <View style={styles.row}>
+                                <Text style={styles.title}>Etat de réception : </Text>
+                                <Text style={[styles.text, intervention.reception == "faite" ? styles.valide : (intervention.status == "annulée" ? styles.annule : styles.enCours)]}
+
+                                >{intervention.reception}</Text>
+                            </View>
+                            <View style={styles.buttonContainer}>
+                                <TouchableOpacity style={[styles.button, styles.confirmButton]} onPress={() => { validateIntervention(intervention.id, "pre") }}>
+                                    <Text style={styles.buttonText}>Voir preréception</Text>
+                                </TouchableOpacity>
+                                {/* <TouchableOpacity style={[styles.button, styles.cancelButton]} onPress={() => { setModalVisible(true) }}>
+                                <Text style={styles.buttonText}>Annuler</Text>
+                            </TouchableOpacity> */}
+                            </View>
+                        </>
+                        )
+                    :
+                    ("")
                 }
-
 
             </View>
 
@@ -128,6 +162,11 @@ const styles = StyleSheet.create({
     text: {
         fontSize: 16,
         fontWeight: 'bold',
+    },
+    buttonView: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        width: '100%',
     },
     buttonContainer: {
         flexDirection: 'row',

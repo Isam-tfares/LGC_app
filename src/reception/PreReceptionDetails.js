@@ -1,12 +1,12 @@
 import React from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, Alert } from 'react-native';
+import { View, Text, StyleSheet, Alert } from 'react-native';
 import { Button } from 'react-native-elements';
 import { ScrollView } from 'react-native-gesture-handler';
 
-export default function ReceptionDetails({ route, navigation }) {
+export default function PreReceptionDetails({ route, navigation }) {
     let { reception } = route.params;
     if (route.params.id) {
-        console.log("fetch reception of intervention_id", route.params.id);
+        console.log("fetch Prereception of intervention_id", route.params.id);
         reception = {
             n_reception: '4848',
             n_intervention: 1,
@@ -97,7 +97,7 @@ export default function ReceptionDetails({ route, navigation }) {
                         <Text style={styles.text}>{reception.nbr_jrs}</Text>
                     </View>
                     <View>
-                        <Button title="Voir PV" color="blue" onPress={() => { Alert.alert('Voir PV') }} />
+                        <Button color="blue" onPress={() => Alert.alert('Valider Prereception')} title="Valider Prereception" />
                     </View>
                 </View>
             </View>

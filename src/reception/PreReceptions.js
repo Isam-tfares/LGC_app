@@ -3,12 +3,12 @@ import { View, Text, StyleSheet, FlatList, TextInput, TouchableOpacity } from 'r
 import DateTimePickerModal from "react-native-modal-datetime-picker";
 import { EvilIcons } from '@expo/vector-icons';
 import moment from 'moment';
-import ReceptionDetails from './ReceptionDetails';
+import PreReceptionDetails from './PreReceptionDetails';
 import { createStackNavigator } from '@react-navigation/stack';
 
 const Stack = createStackNavigator();
 
-function Receptions({ route, navigation }) {
+function PreReceptions({ route, navigation }) {
     const [search, setSearch] = useState("");
     const [selectedDate, setSelectedDate] = useState(null);
     const [isDatePickerVisible, setDatePickerVisibility] = useState(false);
@@ -117,7 +117,7 @@ function Receptions({ route, navigation }) {
     ];
 
     const handleReceptionPress = (reception) => {
-        navigation.navigate('Détails Réception', { reception });
+        navigation.navigate('Détails PreRéception', { reception });
     };
 
     const showDatePicker = () => {
@@ -204,26 +204,29 @@ function Receptions({ route, navigation }) {
         </View>
     );
 }
+
 export default function PreReceptionsStack({ route, navigation }) {
-    console.log("route params ", route.params);
     const { id: intervention_id } = route.params || {}; // Destructure and set default empty object
 
     useEffect(() => {
         if (intervention_id) {
-            navigation.navigate('Détails Réception', { id: intervention_id });
+            navigation.navigate('Détails PreRéception', { id: intervention_id });
+        }
+        else {
+            console.log("No intervention_id");
         }
     }, [intervention_id, navigation]);
 
     return (
         <Stack.Navigator initialRouteName="Listes PreReceptions">
             <Stack.Screen
-                name="Listes Receptions"
-                component={Receptions}
+                name="Listes PreReceptions"
+                component={PreReceptions}
                 options={{ headerShown: false }}
             />
             <Stack.Screen
-                name="Détails Réception"
-                component={ReceptionDetails}
+                name="Détails PreRéception"
+                component={PreReceptionDetails}
             />
         </Stack.Navigator>
     );

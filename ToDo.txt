@@ -1,4 +1,8 @@
-the initial scroll index flatList days in Programme technicien
-add intervention for technicien ( add technicien id from user data )
-add interface pour tecnicien for showing interventions added by him
-Preréception values that should by default ( from DB )
+>>the initial scroll index flatList days in Programme technicien
+>>add intervention for technicien ( add technicien id from user data )
+>>add interface pour tecnicien for showing interventions added by him
+>>Preréception values that should by default ( from DB )
+>>chef interface interventions ( design select techniciens)
+>>Intervention Details (champs to display)
+>>in route intervention => prereception or reception details
+  the navigation is done if intervention_id is changed
