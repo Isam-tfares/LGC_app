@@ -204,7 +204,7 @@ function Receptions({ route, navigation }) {
         </View>
     );
 }
-export default function PreReceptionsStack({ route, navigation }) {
+export default function ReceptionsStack({ route, navigation }) {
     console.log("route params ", route.params);
     let { id: intervention_id } = route.params || {}; // Destructure and set default empty object
     console.log("intervention_id ", intervention_id);

@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, FlatList, TextInput, Alert } from 'react-native';
 import moment from 'moment';
+import { Picker } from '@react-native-picker/picker';
 import { EvilIcons } from '@expo/vector-icons';
 import { createStackNavigator } from '@react-navigation/stack';
 import { AntDesign } from '@expo/vector-icons';
@@ -13,12 +14,14 @@ function Interventions({ navigation }) {
     const [search, setSearch] = useState("");
     const [dateType, setDateType] = useState('');
     const [clicked, setClicked] = useState(0);
+    const [selectedTechnician, setSelectedTechnician] = useState('');
     const [fromDate, setFromDate] = useState(null);
     const [toDate, setToDate] = useState(null);
     const [modalVisible, setModalVisible] = useState(false);
     const [isDatePickerVisible, setDatePickerVisibility] = useState(false);
 
     const navbar = ["Tous", "Faites", "En cours", "Annulées"];
+    const techniciens = ["Technicien 1", "Technicien 2", "Technicien 3", "Technicien 4", "Technicien 5"];
     const interventions = [
         { id: 1, client: 'Client 1', projet: 'Projet 1', object: "Objet 1", adresse: 'Adresse 1', technicien: "Techinicien 1", date: "07/08/2024", type: 'Type 1', status: "faite", reception: "faite" },
         { id: 2, client: 'Client 2', projet: 'Projet 2', object: "Objet 2", adresse: 'Adresse 2', technicien: "Techinicien 2", date: "07/08/2024", type: 'Type 2', status: "faite", reception: "En cours" },
@@ -87,6 +90,11 @@ function Interventions({ navigation }) {
 
             return searchMatch && dateMatch;
         });
+        if (selectedTechnician && selectedTechnician !== "0") {
+            filteredInterventions = filteredInterventions.filter(intervention =>
+                intervention.technicien.toLowerCase().includes(selectedTechnician.toLowerCase())
+            );
+        }
 
         // Filter by status
         switch (navbar[clicked]) {
@@ -154,6 +162,20 @@ function Interventions({ navigation }) {
                 onConfirm={handleConfirm}
                 onCancel={hideDatePicker}
             />
+            {/* <View style={{ justifyContent: "center", flexDirection: "row" }}>
+                <View style={styles.picker}>
+                    <Picker
+                        selectedValue={selectedTechnician}
+                        onValueChange={(itemValue, itemIndex) => setSelectedTechnician(itemValue)}
+                    // style={styles.picker}
+                    >
+                        <Picker.Item label="Séléctionner Technicien" value="0" />
+                        {techniciens.map((technician, index) => (
+                            <Picker.Item key={index} label={technician} value={technician} />
+                        ))}
+                    </Picker>
+                </View>
+            </View> */}
 
             <View style={styles.navBar}>
                 {navbar.map((value, index) => {
@@ -260,7 +282,7 @@ const styles = StyleSheet.create({
     navBar: {
         backgroundColor: "#eee",
         marginBottom: 10,
-        margin: 10,
+        marginHorizontal: 10,
         borderRadius: 25,
         flexDirection: "row",
         justifyContent: "space-between",
@@ -409,6 +431,12 @@ const styles = StyleSheet.create({
         bottom: 70,
         right: 25,
         zIndex: 20,
+    },
+    picker: {
+        width: '94%',
+        paddingHorizontal: 10,
+        backgroundColor: "#f2f2f2",
+        borderRadius: 25,
     },
     datePickerButton: {
         backgroundColor: "#f2f2f2",

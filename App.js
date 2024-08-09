@@ -15,10 +15,11 @@ import Deconnexion from './src/components/Deconnexion';
 import InterventionsStackRec from './src/reception/InterventionsRec';
 import PVReceptions from './src/reception/PVReceptions';
 import ReceptionsStack from './src/reception/Receptions';
-import PreReceptionsStack from './src/reception/PreReceptions';
+import PrereceptionsStack from './src/reception/PreReceptions';
 import NewReception from './src/technicien/NewReception';
 import Conges from './src/chef/Conges';
 import CongesStack from './src/chef/Conges';
+import DemandesInterventions from './src/chef/demandesIntreventions';
 
 const Drawer = createDrawerNavigator();
 
@@ -53,8 +54,9 @@ export default function App() {
       <NavigationContainer>
         <Drawer.Navigator initialRouteName="Interventions">
           <Drawer.Screen name="Interventions" component={InterventionsStack} />
-          <Drawer.Screen name="Programmes && techniciens" component={Programmes} />
-          <Drawer.Screen name="PreRéceptions" component={PreReceptionsStack} />
+          {/* <Drawer.Screen name="Programmes && techniciens" component={Programmes} /> */}
+          <Drawer.Screen name="Demandes des interventions" component={DemandesInterventions} />
+          <Drawer.Screen name="Pré-réceptions" component={PrereceptionsStack} />
           <Drawer.Screen name="Réceptions" component={ReceptionsStack} />
           <Drawer.Screen name="Notes de frais" component={NoteFrais} />
           <Drawer.Screen name="Demandes de congés" component={CongesStack} />

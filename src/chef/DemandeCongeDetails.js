@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, Image, Alert, TouchableOpacity } from 'react-native';
+import { View, Text, StyleSheet, Image, Alert, TouchableOpacity, Modal, TextInput } from 'react-native';
 import Ionicons from '@expo/vector-icons/Ionicons';
 import moment from 'moment';
 import 'moment/locale/fr'; // Import French locale for month names
@@ -19,15 +19,20 @@ function formatDate(inputDate) {
 
 export default function DemandeCongeDetails({ route, navigation }) {
     let { demande } = route.params;
+    const [modalVisible, setModalVisible] = useState(false);
+    const [comment, setComment] = useState('');
+    const acceptDemande = () => {
 
-    const acceptDemande = (id) => {
-
-        Alert.alert(`accepte demande ${id}`);
+        Alert.alert(`accepte demande ${demande.id}`);
     }
-    const refuseDemande = (id) => {
-        Alert.alert(`refuse demande ${id}`);
+    const refuseDemande = () => {
+        if (comment === '') {
+            Alert.alert('Veuillez ajouter un commentaire');
+            return;
+        }
+        setModalVisible(false);
+        Alert.alert('Refuser demande ' + demande.id, 'Comment: ' + comment);
     }
-
 
     return (
         <View style={styles.container}>
@@ -96,14 +101,45 @@ export default function DemandeCongeDetails({ route, navigation }) {
 
             {demande.status == "En attente" && (
                 <View style={styles.btns}>
-                    <TouchableOpacity style={[styles.btn, styles.btn_accept]} onPress={() => { acceptDemande(demande.id) }}>
+                    <TouchableOpacity style={[styles.btn, styles.btn_accept]} onPress={() => { acceptDemande() }}>
                         <Text style={styles.btnText1}>Accepter</Text>
                     </TouchableOpacity>
-                    <TouchableOpacity style={[styles.btn, styles.btn_reject]} onPress={() => { refuseDemande(demande.id) }}>
+                    <TouchableOpacity style={[styles.btn, styles.btn_reject]} onPress={() => { setModalVisible(true) }}>
                         <Text style={styles.btnText2}>Refuser</Text>
                     </TouchableOpacity>
                 </View>
             )}
+
+            {/* Modal for refuse */}
+            <Modal
+                animationType="slide"
+                transparent={true}
+                visible={modalVisible}
+                onRequestClose={() => {
+                    setModalVisible(!modalVisible);
+                }}
+            >
+                <View style={styles.modalOverlay}>
+                    <View style={styles.modalView}>
+                        <TouchableOpacity style={styles.close}
+                            onPress={() => setModalVisible(false)}
+                        >
+                            <Ionicons name="close-circle-sharp" size={40} color="red" />
+                        </TouchableOpacity>
+                        <Text style={styles.modalTitle}>Ajouter un commentaire</Text>
+                        <TextInput
+                            style={styles.input}
+                            placeholder="Cause de refus"
+                            value={comment}
+                            onChangeText={setComment}
+                            placeholderTextColor="#aaa"
+                        />
+                        <TouchableOpacity style={styles.modalButton} onPress={() => { refuseDemande() }}>
+                            <Text style={styles.modalButtonText}>Valider</Text>
+                        </TouchableOpacity>
+                    </View>
+                </View>
+            </Modal>
         </View>
     );
 }
@@ -241,5 +277,54 @@ const styles = StyleSheet.create({
         color: "#fff",
         fontSize: 16,
         fontWeight: "bold",
-    }
+    },
+    // Modal
+    modalOverlay: {
+        flex: 1,
+        justifyContent: 'center',
+        alignItems: 'center',
+        backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    },
+    modalView: {
+        width: '80%',
+        backgroundColor: 'white',
+        borderRadius: 10,
+        padding: 20,
+        alignItems: 'center',
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.25,
+        shadowRadius: 4,
+        elevation: 5,
+    },
+    modalTitle: {
+        fontSize: 18,
+        fontWeight: 'bold',
+        marginBottom: 15,
+    },
+    input: {
+        width: '100%',
+        padding: 10,
+        borderColor: '#ccc',
+        borderWidth: 1,
+        borderRadius: 5,
+        marginBottom: 20,
+    },
+    modalButton: {
+        backgroundColor: 'red',
+        borderRadius: 5,
+        padding: 10,
+        alignItems: 'center',
+        width: '100%',
+    },
+    modalButtonText: {
+        color: '#fff',
+        fontWeight: 'bold',
+        fontSize: 16,
+    },
+    close: {
+        position: "absolute",
+        top: -15,
+        right: -15,
+    },
 });

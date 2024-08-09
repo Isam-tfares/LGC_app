@@ -8,7 +8,7 @@ import { createStackNavigator } from '@react-navigation/stack';
 
 const Stack = createStackNavigator();
 
-function PreReceptions({ route, navigation }) {
+function Prereceptions({ route, navigation }) {
     const [search, setSearch] = useState("");
     const [selectedDate, setSelectedDate] = useState(null);
     const [isDatePickerVisible, setDatePickerVisibility] = useState(false);
@@ -117,7 +117,7 @@ function PreReceptions({ route, navigation }) {
     ];
 
     const handleReceptionPress = (reception) => {
-        navigation.navigate('Détails PreRéception', { reception });
+        navigation.navigate('Détails Pré-réception', { reception });
     };
 
     const showDatePicker = () => {
@@ -205,12 +205,12 @@ function PreReceptions({ route, navigation }) {
     );
 }
 
-export default function PreReceptionsStack({ route, navigation }) {
+export default function PrereceptionsStack({ route, navigation }) {
     const { id: intervention_id } = route.params || {}; // Destructure and set default empty object
 
     useEffect(() => {
         if (intervention_id) {
-            navigation.navigate('Détails PreRéception', { id: intervention_id });
+            navigation.navigate('Détails Pré-réception', { id: intervention_id });
         }
         else {
             console.log("No intervention_id");
@@ -218,14 +218,14 @@ export default function PreReceptionsStack({ route, navigation }) {
     }, [intervention_id, navigation]);
 
     return (
-        <Stack.Navigator initialRouteName="Listes PreReceptions">
+        <Stack.Navigator initialRouteName="Listes Pré-réceptions">
             <Stack.Screen
-                name="Listes PreReceptions"
-                component={PreReceptions}
+                name="Listes Pré-réceptions"
+                component={Prereceptions}
                 options={{ headerShown: false }}
             />
             <Stack.Screen
-                name="Détails PreRéception"
+                name="Détails Pré-réception"
                 component={PreReceptionDetails}
             />
         </Stack.Navigator>
