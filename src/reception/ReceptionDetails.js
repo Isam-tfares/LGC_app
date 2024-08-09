@@ -1,9 +1,12 @@
-import React from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, Alert } from 'react-native';
+import React, { useState, useEffect } from 'react';
+import { View, Text, StyleSheet, TouchableOpacity, Alert, Image, Modal, TextInput } from 'react-native';
 import { Button } from 'react-native-elements';
 import { ScrollView } from 'react-native-gesture-handler';
+import { Ionicons } from '@expo/vector-icons';
 
 export default function ReceptionDetails({ route, navigation }) {
+    const [imageModalVisible, setImageModalVisible] = useState(false);
+    const [image, setImage] = useState('https://image.slidesharecdn.com/redactionprojetintervention-100614145220-phpapp02/85/Redaction-d-un-projet-d-intervention-2-320.jpg');
     let { reception } = route.params;
     if (route.params.id) {
         console.log("fetch reception of intervention_id", route.params.id);
@@ -28,6 +31,9 @@ export default function ReceptionDetails({ route, navigation }) {
             nbr_jrs: '7,28',
         };
     }
+    const closeImageModal = () => {
+        setImageModalVisible(null);
+    };
     return (
         <ScrollView>
             <View style={styles.container}>
@@ -97,10 +103,27 @@ export default function ReceptionDetails({ route, navigation }) {
                         <Text style={styles.text}>{reception.nbr_jrs}</Text>
                     </View>
                     <View>
-                        <Button title="Voir PV" color="blue" onPress={() => { Alert.alert('Voir PV') }} />
+                        <Button title="Voir PV" color="blue" onPress={() => { setImageModalVisible(true) }} />
                     </View>
                 </View>
             </View>
+
+            {/* PV image */}
+            {imageModalVisible && (
+                <Modal visible={true} transparent={true} onRequestClose={closeImageModal}>
+                    <View style={styles.modalContainer}>
+                        <View style={styles.relativeView}>
+                            <Image source={{ uri: image }} style={styles.fullScreenImage} />
+                            <TouchableOpacity style={styles.close}
+                                onPress={closeImageModal}
+                            >
+                                <Ionicons name="close-circle-sharp" size={40} color="red" />
+                            </TouchableOpacity>
+                        </View>
+                    </View>
+
+                </Modal>
+            )}
         </ScrollView>
     );
 }
@@ -138,5 +161,39 @@ const styles = StyleSheet.create({
     text: {
         fontSize: 16,
         fontWeight: 'bold',
+    },
+    modalContainer: {
+        backgroundColor: 'rgba(0, 0, 0, 0.8)',
+        flex: 1,
+    },
+    relativeView: {
+        flex: 1,
+        justifyContent: 'center',
+        alignItems: 'center',
+        position: "relative",
+    },
+    fullScreenImage: {
+        width: '90%',
+        height: '70%',
+        borderRadius: 10,
+    },
+    closeButton: {
+        position: 'absolute',
+        top: "14%",
+        right: '4%',
+        backgroundColor: 'red',
+        padding: 15,
+        borderRadius: 10
+    },
+    closeButtonText: {
+        color: '#fff',
+        fontWeight: 'bold',
+    },
+    close: {
+        position: "absolute",
+        top: "13%",
+        right: '1%',
+        backgroundColor: "#fff",
+        borderRadius: 100
     },
 });

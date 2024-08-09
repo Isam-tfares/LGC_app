@@ -17,6 +17,8 @@ import PVReceptions from './src/reception/PVReceptions';
 import ReceptionsStack from './src/reception/Receptions';
 import PreReceptionsStack from './src/reception/PreReceptions';
 import NewReception from './src/technicien/NewReception';
+import Conges from './src/chef/Conges';
+import CongesStack from './src/chef/Conges';
 
 const Drawer = createDrawerNavigator();
 
@@ -55,7 +57,7 @@ export default function App() {
           <Drawer.Screen name="PreRéceptions" component={PreReceptionsStack} />
           <Drawer.Screen name="Réceptions" component={ReceptionsStack} />
           <Drawer.Screen name="Notes de frais" component={NoteFrais} />
-          <Drawer.Screen name="Congés" component={Conge} />
+          <Drawer.Screen name="Demandes de congés" component={CongesStack} />
           <Drawer.Screen name="Déconnexion">
             {() => {
               return (

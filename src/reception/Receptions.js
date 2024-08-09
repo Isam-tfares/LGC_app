@@ -206,16 +206,18 @@ function Receptions({ route, navigation }) {
 }
 export default function PreReceptionsStack({ route, navigation }) {
     console.log("route params ", route.params);
-    const { id: intervention_id } = route.params || {}; // Destructure and set default empty object
-
+    let { id: intervention_id } = route.params || {}; // Destructure and set default empty object
+    console.log("intervention_id ", intervention_id);
     useEffect(() => {
         if (intervention_id) {
-            navigation.navigate('Détails Réception', { id: intervention_id });
+            let tmp = intervention_id;
+            intervention_id = {};
+            navigation.navigate('Détails Réception', { id: tmp });
         }
-    }, [intervention_id, navigation]);
+    }, [intervention_id]);
 
     return (
-        <Stack.Navigator initialRouteName="Listes PreReceptions">
+        <Stack.Navigator initialRouteName="Listes Receptions">
             <Stack.Screen
                 name="Listes Receptions"
                 component={Receptions}
