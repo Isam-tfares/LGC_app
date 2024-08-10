@@ -6,9 +6,9 @@ import DateTimePickerModal from 'react-native-modal-datetime-picker';
 import moment from 'moment';
 
 export default function AddIntervention({ modalVisible, setModalVisible, technicien }) {
-    const clients = ["client 1", "client 2", "client 3", "client 4", "client 5"];
-    const projects = ["project 10", "project 11", "project 12", "project 13", "project 14", "project 15"];
-    const prestations = ["prestation 1", "prestation 2", "prestation 3", "prestation 4", "prestation 5", "prestation 6", "prestation 7", "prestation 8", "prestation 9", "prestation 10"];
+    const [clients, setClients] = useState(["client 1", "client 2", "client 3", "client 4", "client 5"]);
+    const [projects, setProjects] = useState(["project 10", "project 11", "project 12", "project 13", "project 14", "project 15"]);
+    const [prestations, setPrestations] = useState(["prestation 1", "prestation 2", "prestation 3", "prestation 4", "prestation 5", "prestation 6", "prestation 7", "prestation 8", "prestation 9", "prestation 10"]);
     const [selectedClient, setSelectedClient] = useState('');
     const [selectedProject, setSelectedProject] = useState('');
     const [selectedPrestation, setSelectedPrestation] = useState('');

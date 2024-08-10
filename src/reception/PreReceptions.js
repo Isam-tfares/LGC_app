@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { View, Text, StyleSheet, FlatList, TextInput, TouchableOpacity } from 'react-native';
 import DateTimePickerModal from "react-native-modal-datetime-picker";
+import Fontisto from '@expo/vector-icons/Fontisto';
 import { EvilIcons } from '@expo/vector-icons';
 import moment from 'moment';
 import PreReceptionDetails from './PreReceptionDetails';
@@ -10,10 +11,11 @@ const Stack = createStackNavigator();
 
 function Prereceptions({ route, navigation }) {
     const [search, setSearch] = useState("");
-    const [selectedDate, setSelectedDate] = useState(null);
     const [isDatePickerVisible, setDatePickerVisibility] = useState(false);
-
-    const receptions = [
+    const [dateType, setDateType] = useState('');
+    const [fromDate, setFromDate] = useState(null);
+    const [toDate, setToDate] = useState(null);
+    const [receptions, setReceptions] = useState([
         {
             n_reception: '4848',
             n_intervention: 1,
@@ -23,7 +25,7 @@ function Prereceptions({ route, navigation }) {
             technicien: 'Technician 1',
             prestation: 'Prestation 1',
             materiaux: 'Material 1',
-            date_reception: '2024-07-25',
+            date_reception: '09-08-2024',
             nbr_echantillon: '10',
             etat_recuperation: 'Récupérée',
             preleve: 'LGC',
@@ -43,7 +45,7 @@ function Prereceptions({ route, navigation }) {
             technicien: 'Technician 2',
             prestation: 'Prestation 2',
             materiaux: 'Material 2',
-            date_reception: '2024-07-24',
+            date_reception: '08-08-2024',
             nbr_echantillon: '15',
             etat_recuperation: 'non récupérée',
             preleve: 'LGC',
@@ -63,7 +65,7 @@ function Prereceptions({ route, navigation }) {
             technicien: 'Technician 1',
             prestation: 'Prestation 1',
             materiaux: 'Material 1',
-            date_reception: '2024-07-25',
+            date_reception: '09-08-2024',
             nbr_echantillon: '10',
             etat_recuperation: 'Récupérée',
             preleve: 'LGC',
@@ -83,7 +85,7 @@ function Prereceptions({ route, navigation }) {
             technicien: 'Technician 2',
             prestation: 'Prestation 2',
             materiaux: 'Material 2',
-            date_reception: '2024-07-24',
+            date_reception: '08-08-2024',
             nbr_echantillon: '15',
             etat_recuperation: 'non récupérée',
             preleve: 'LGC',
@@ -103,7 +105,7 @@ function Prereceptions({ route, navigation }) {
             technicien: 'Technician 2',
             prestation: 'Prestation 2',
             materiaux: 'Material 2',
-            date_reception: '2024-07-24',
+            date_reception: '08-08-2024',
             nbr_echantillon: '15',
             etat_recuperation: 'non récupérée',
             preleve: 'LGC',
@@ -114,13 +116,22 @@ function Prereceptions({ route, navigation }) {
             BL: '67890',
             nbr_jrs: '7,14,28',
         },
-    ];
+    ]);
+    useEffect(() => {
+        // Initialize dates
+        const secondDate = moment().add(7, 'day').format("DD/MM/YYYY");
+        const firstDate = moment().subtract(7, 'day').format("DD/MM/YYYY");
+
+        setFromDate(firstDate);
+        setToDate(secondDate);
+    }, []);
 
     const handleReceptionPress = (reception) => {
         navigation.navigate('Détails Pré-réception', { reception });
     };
 
-    const showDatePicker = () => {
+    const showDatePicker = (type) => {
+        setDateType(type);
         setDatePickerVisibility(true);
     };
 
@@ -128,10 +139,33 @@ function Prereceptions({ route, navigation }) {
         setDatePickerVisibility(false);
     };
 
+    const validateDateRange = (nextDate) => {
+        if (fromDate) {
+            const fromDateObj = moment(fromDate, "DD/MM/YYYY");
+            const toDateObj = moment(nextDate, "DD/MM/YYYY");
+
+            if (fromDateObj.isAfter(toDateObj)) {
+                return false;
+            }
+        }
+        return true;
+    };
+
+    // Handle date selection
     const handleConfirm = (date) => {
-        setSelectedDate(date);
+        const formattedDate = moment(date).format("DD-MM-YYYY");
+        if (dateType === 'from') {
+            setFromDate(formattedDate);
+        } else {
+            if (!validateDateRange(formattedDate)) {
+                Alert.alert("Plage de dates non valide", "La date De doit être antérieure ou égale à la date À.");
+            } else {
+                setToDate(formattedDate);
+            }
+        }
         hideDatePicker();
     };
+
 
     const filterReceptions = () => {
         let filteredReceptions = receptions;
@@ -147,15 +181,33 @@ function Prereceptions({ route, navigation }) {
             );
         }
 
-        if (selectedDate) {
-            const formattedDate = moment(selectedDate).format('YYYY-MM-DD');
-            filteredReceptions = filteredReceptions.filter(reception =>
-                reception.date_reception === formattedDate
-            );
-        }
+        // Convert fromDate and toDate to Date objects
+        const fromDateObj = fromDate ? moment(fromDate, "DD-MM-YYYY").toDate() : null;
+        const toDateObj = toDate ? moment(toDate, "DD-MM-YYYY").toDate() : null;
+
+        // Convert intervention dates to Date objects
+        filteredReceptions = filteredReceptions.filter(reception => {
+            const receptionDate = moment(reception.date_reception, "DD-MM-YYYY").toDate();
+
+            // Filter by search query
+            const searchMatch = search === "" ||
+                reception.client.toLowerCase().includes(search.toLowerCase()) ||
+                reception.project.toLowerCase().includes(search.toLowerCase()) ||
+                reception.technicien.toLowerCase().includes(search.toLowerCase()) ||
+                reception.prestation.toLowerCase().includes(search.toLowerCase()) ||
+                reception.materiaux.toLowerCase().includes(search.toLowerCase()) ||
+                reception.n_reception.toLowerCase().includes(search.toLowerCase());
+
+            // Filter by date range
+            const dateMatch = (!fromDateObj || receptionDate >= fromDateObj) &&
+                (!toDateObj || receptionDate <= toDateObj);
+
+            return searchMatch && dateMatch;
+        });
 
         return filteredReceptions;
     };
+
 
     return (
         <View style={styles.container}>
@@ -169,11 +221,26 @@ function Prereceptions({ route, navigation }) {
                 <EvilIcons name="search" size={24} color="black" style={styles.searchIcon} />
             </View>
 
-            <TouchableOpacity style={styles.datePickerButton} onPress={showDatePicker}>
-                <Text style={styles.datePickerButtonText}>
-                    {selectedDate ? moment(selectedDate).format('DD/MM/YYYY') : 'Sélectionner Date'}
-                </Text>
-            </TouchableOpacity>
+            <View style={styles.DateView}>
+                <View style={styles.view}>
+                    <TouchableOpacity onPress={() => showDatePicker('from')}>
+                        <Fontisto name="date" size={33} color="#0853a1" />
+                    </TouchableOpacity>
+                    <View>
+                        <Text style={styles.text}>De date</Text>
+                        <Text style={styles.textDate}>{fromDate}</Text>
+                    </View>
+                </View>
+                <View style={styles.view}>
+                    <TouchableOpacity onPress={() => showDatePicker('to')}>
+                        <Fontisto name="date" size={33} color="#0853a1" />
+                    </TouchableOpacity>
+                    <View>
+                        <Text style={styles.text}>A date</Text>
+                        <Text style={styles.textDate}>{toDate}</Text>
+                    </View>
+                </View>
+            </View>
 
             <DateTimePickerModal
                 isVisible={isDatePickerVisible}
@@ -189,7 +256,7 @@ function Prereceptions({ route, navigation }) {
                     <TouchableOpacity style={styles.receptionItem} onPress={() => handleReceptionPress(item)}>
                         <View style={styles.itemHeader}>
                             <Text style={styles.itemTitle}>Project: {item.project}</Text>
-                            <Text style={styles.itemDate}>{moment(item.date_reception).format('DD/MM/YYYY')}</Text>
+                            <Text style={styles.itemDate}>{moment(item.date_reception, "DD-MM-YYYY").format('DD/MM/YYYY')}</Text>
                         </View>
                         <View style={styles.itemBody}>
                             <Text style={[styles.itemText, { fontWeight: "bold" }]}>N° réception: {item.n_reception}</Text>
@@ -294,5 +361,27 @@ const styles = StyleSheet.create({
     itemText: {
         fontSize: 16,
         color: '#555',
+    },
+    DateView: {
+        flexDirection: "row",
+        justifyContent: "space-between",
+        alignItems: "center",
+        padding: 10,
+        paddingHorizontal: 30,
+    },
+    view: {
+        width: "30%",
+        flexDirection: "row",
+    },
+    text: {
+        color: "#777",
+        fontSize: 13,
+        marginLeft: 10,
+    },
+    textDate: {
+        color: "#0853a1",
+        fontSize: 14,
+        marginLeft: 10,
+        fontWeight: "bold",
     },
 });

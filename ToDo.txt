@@ -6,3 +6,4 @@
 >>Intervention Details (champs to display)
 >>in route intervention => prereception or reception details
   the navigation is done if intervention_id is changed
+>> technicien Intervention faite -> add button for show reception 

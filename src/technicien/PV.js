@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text, TouchableOpacity, StyleSheet, Image, Alert } from 'react-native';
 import { Picker } from '@react-native-picker/picker';
-import DateTimePickerModal from 'react-native-modal-datetime-picker';
+// import DateTimePickerModal from 'react-native-modal-datetime-picker';
 import moment from 'moment';
 import * as ImagePicker from 'expo-image-picker';
 import { Ionicons } from '@expo/vector-icons';
@@ -12,7 +12,7 @@ export default function PV({ navigation, route }) {
     const [selectedIntervention, setSelectedIntervention] = useState(intervention_id);
     const [image, setImage] = useState(null);
     const [selectedDate, setSelectedDate] = useState(new Date());
-    const [isDatePickerVisible, setDatePickerVisibility] = useState(false);
+    // const [isDatePickerVisible, setDatePickerVisibility] = useState(false);
 
     const interventions = [1, 2, 3, 4, 5, 6];
     useEffect(() => {
@@ -39,18 +39,18 @@ export default function PV({ navigation, route }) {
         setImage(null);
     };
 
-    const showDatePicker = () => {
-        setDatePickerVisibility(true);
-    };
+    // const showDatePicker = () => {
+    //     setDatePickerVisibility(true);
+    // };
 
-    const hideDatePicker = () => {
-        setDatePickerVisibility(false);
-    };
+    // const hideDatePicker = () => {
+    //     setDatePickerVisibility(false);
+    // };
 
-    const handleConfirm = (date) => {
-        setSelectedDate(date);
-        hideDatePicker();
-    };
+    // const handleConfirm = (date) => {
+    //     setSelectedDate(date);
+    //     hideDatePicker();
+    // };
 
     const handlePrepareData = () => {
         if (!selectedIntervention) {

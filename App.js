@@ -75,6 +75,7 @@ export default function App() {
       <NavigationContainer>
         <Drawer.Navigator initialRouteName="Interventions">
           <Drawer.Screen name="Interventions" component={InterventionsStackRec} />
+          <Drawer.Screen name="Pré-réceptions" component={PrereceptionsStack} />
           <Drawer.Screen name="Réceptions" component={ReceptionsStack} />
           <Drawer.Screen name="PVs" component={PVReceptions} />
           <Drawer.Screen name="Notes de frais" component={NoteFrais} />

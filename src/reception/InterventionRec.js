@@ -1,11 +1,23 @@
 import React, { useState } from 'react';
-import { Button, View, Text, StyleSheet, Alert, TouchableOpacity, Modal, TextInput } from 'react-native';
-import AddReception from './AddReception';
+import { View, Text, StyleSheet, Alert, TouchableOpacity, Modal, TextInput } from 'react-native';
 
 export default function InterventionRec({ route, navigation }) {
     const { intervention } = route.params;
-    const [AddModalVisible, setAddModalVisible] = useState(false);
+    const [modalVisible, setModalVisible] = useState(false);
+    const [comment, setComment] = useState('');
 
+    const handleAnnuler = () => {
+        // Logic to handle the comment submission or cancellation
+        Alert.alert('Comment: ' + comment);
+        setModalVisible(false);
+    };
+    const validateIntervention = (intervention_id, status) => {
+        if (status == "pre") {
+            navigation.navigate('Pré-réceptions', { "id": intervention_id });
+        } else {
+            navigation.navigate('Réceptions', { "id": intervention_id });
+        }
+    };
     return (
         <View style={styles.container}>
             <View style={styles.card}>
@@ -27,11 +39,11 @@ export default function InterventionRec({ route, navigation }) {
                 </View>
                 <View style={styles.row}>
                     <Text style={styles.title}>Prestation : </Text>
-                    <Text style={styles.text}>{intervention.Prestation ? intervention.Prestation : ""}</Text>
+                    <Text style={styles.text}>{intervention.prestation ? intervention.prestation : ""}</Text>
                 </View>
                 <View style={styles.row}>
                     <Text style={styles.title}>Matériaux : </Text>
-                    <Text style={styles.text}>{intervention.Materiaux ? intervention.Materiaux : ""}</Text>
+                    <Text style={styles.text}>{intervention.materiaux ? intervention.materiaux : ""}</Text>
                 </View>
 
                 <View style={styles.row}>
@@ -40,34 +52,78 @@ export default function InterventionRec({ route, navigation }) {
                 </View>
 
                 <View style={styles.row}>
+                    <Text style={styles.title}>Observation : </Text>
+                    <Text>{intervention.obs ? intervention.obs : ""}</Text>
+                </View>
+                <View style={styles.row}>
                     <Text style={styles.title}>Etat d'intervention : </Text>
-                    <Text style={[styles.text, intervention.status == "faite" ? styles.valide : (intervention.status == "annulée" ? styles.annule : styles.enCours)]}
+                    <Text style={[styles.text, intervention.status == "Faite" ? styles.valide : (intervention.status == "Annulée" ? styles.annule : styles.enCours)]}
 
                     >{intervention.status}</Text>
                 </View>
-
-                {intervention.status == "faite" && (
-                    intervention.reception == "faite" ? (
-                        <View style={styles.row}>
-                            <Text style={styles.title}>Etat réception : </Text>
-                            <Text style={[styles.text, intervention.reception == "faite" ? styles.valide : styles.enCours]}
+                {(intervention.status == "Faite") ?
+                    intervention.reception == "Faite" ?
+                        (<><View style={styles.row}>
+                            <Text style={styles.title}>Etat de réception : </Text>
+                            <Text style={[styles.text, intervention.reception == "Faite" ? styles.valide : (intervention.status == "Annulée" ? styles.annule : styles.enCours)]}
 
                             >{intervention.reception}</Text>
+
                         </View>
-                    ) : (
-                        <View style={styles.buttonContainer}>
-                            <TouchableOpacity
-                                style={[styles.button, styles.confirmButton]}
-                                onPress={() => setAddModalVisible(true)}
-                            >
-                                <Text style={styles.buttonText}>Confirmer récéption</Text>
-                            </TouchableOpacity>
-                        </View>
-                    )
-                )}
+                            <View style={styles.buttonView}>
+                                <TouchableOpacity style={[styles.button, styles.confirmButton]} onPress={() => { validateIntervention(intervention.id, "re") }}>
+                                    <Text style={styles.buttonText}>Voir réception</Text>
+                                </TouchableOpacity>
+                            </View>
+                        </>)
+                        :
+                        (<>
+                            <View style={styles.row}>
+                                <Text style={styles.title}>Etat de réception : </Text>
+                                <Text style={[styles.text, intervention.reception == "Faite" ? styles.valide : (intervention.status == "Annulée" ? styles.annule : styles.enCours)]}
+
+                                >{intervention.reception}</Text>
+                            </View>
+                            <View style={styles.buttonContainer}>
+                                <TouchableOpacity style={[styles.button, styles.confirmButton]} onPress={() => { validateIntervention(intervention.id, "pre") }}>
+                                    <Text style={styles.buttonText}>Voir pré-réception</Text>
+                                </TouchableOpacity>
+                                {/* <TouchableOpacity style={[styles.button, styles.cancelButton]} onPress={() => { setModalVisible(true) }}>
+                                <Text style={styles.buttonText}>Annuler</Text>
+                            </TouchableOpacity> */}
+                            </View>
+                        </>
+                        )
+                    :
+                    ("")
+                }
+
             </View>
 
-            <AddReception modalVisible={AddModalVisible} setModalVisible={setAddModalVisible} intervention={intervention} />
+            <Modal
+                animationType="slide"
+                transparent={true}
+                visible={modalVisible}
+                onRequestClose={() => {
+                    setModalVisible(!modalVisible);
+                }}
+            >
+                <View style={styles.modalOverlay}>
+                    <View style={styles.modalView}>
+                        <Text style={styles.modalTitle}>Ajouter un commentaire</Text>
+                        <TextInput
+                            style={styles.input}
+                            placeholder="Comment"
+                            value={comment}
+                            onChangeText={setComment}
+                            placeholderTextColor="#ccc"
+                        />
+                        <TouchableOpacity style={styles.modalButton} onPress={handleAnnuler}>
+                            <Text style={styles.modalButtonText}>Valider</Text>
+                        </TouchableOpacity>
+                    </View>
+                </View>
+            </Modal>
         </View>
     );
 }
@@ -105,6 +161,11 @@ const styles = StyleSheet.create({
     text: {
         fontSize: 16,
         fontWeight: 'bold',
+    },
+    buttonView: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        width: '100%',
     },
     buttonContainer: {
         flexDirection: 'row',

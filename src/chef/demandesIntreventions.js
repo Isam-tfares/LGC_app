@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, FlatList, TextInput, Alert, Modal } from 'react-native';
 import { Picker } from '@react-native-picker/picker';
 import moment from 'moment';
@@ -6,7 +6,6 @@ import { Ionicons } from '@expo/vector-icons';
 import { EvilIcons } from '@expo/vector-icons';
 import Fontisto from '@expo/vector-icons/Fontisto';
 import DateTimePickerModal from 'react-native-modal-datetime-picker';
-import { ScrollView } from 'react-native-gesture-handler';
 
 export default function DemandesInterventions({ navigation }) {
     const [search, setSearch] = useState("");
@@ -37,6 +36,16 @@ export default function DemandesInterventions({ navigation }) {
     // const objects = ["Objet 1", "Objet 2", "Objet 3", "Objet 4", "Objet 5", "Objet 6", "Objet 7", "Objet 8", "Objet 9", "Objet 10"];
     const prestations = ["Prestation 1", "Prestation 2", "Prestation 3", "Prestation 4", "Prestation 5", "Prestation 6", "Prestation 7", "Prestation 8", "Prestation 9", "Prestation 10"];
     const techniciens = ["Technicien 1", "Technicien 2", "Technicien 3", "Technicien 4", "Technicien 5"];
+    // Initialize dates
+    useEffect(() => {
+        // Initialize dates
+        // const today = moment().format("DD/MM/YYYY");
+        const secondDate = moment().add(7, 'day').format("DD/MM/YYYY");
+        const firstDate = moment().subtract(7, 'day').format("DD/MM/YYYY");
+
+        setFromDate(firstDate);
+        setToDate(secondDate);
+    }, []);
     // Show date picker
     const showDatePicker = (type) => {
         setDateType(type);

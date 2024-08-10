@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, FlatList, TextInput, Alert } from 'react-native';
 import moment from 'moment';
 import { Picker } from '@react-native-picker/picker';
@@ -19,17 +19,27 @@ function Interventions({ navigation }) {
     const [toDate, setToDate] = useState(null);
     const [modalVisible, setModalVisible] = useState(false);
     const [isDatePickerVisible, setDatePickerVisibility] = useState(false);
-
-    const navbar = ["Tous", "Faites", "En cours", "Annulées"];
-    const techniciens = ["Technicien 1", "Technicien 2", "Technicien 3", "Technicien 4", "Technicien 5"];
-    const interventions = [
+    const [techniciens, setTechniciens] = useState(["Technicien 1", "Technicien 2", "Technicien 3", "Technicien 4", "Technicien 5"]);
+    const [interventions, setInterventions] = useState([
         { id: 1, client: 'Client 1', projet: 'Projet 1', object: "Objet 1", adresse: 'Adresse 1', technicien: "Techinicien 1", date: "07/08/2024", type: 'Type 1', status: "faite", reception: "faite" },
         { id: 2, client: 'Client 2', projet: 'Projet 2', object: "Objet 2", adresse: 'Adresse 2', technicien: "Techinicien 2", date: "07/08/2024", type: 'Type 2', status: "faite", reception: "En cours" },
         { id: 3, client: 'Client 3', projet: 'Projet 3', object: "Objet 3", adresse: 'Adresse 3', technicien: "Techinicien 3", date: "07/08/2024", type: 'Type 3', status: "annulée" },
         { id: 4, client: 'Client 4', projet: 'Projet 4', object: "Objet 4", adresse: 'Adresse 4', technicien: "Techinicien 4", date: "08/08/2024", type: 'Type 4', status: "faite", reception: "faite" },
         { id: 5, client: 'Client 5', projet: 'Projet 5', object: "Objet 5", adresse: 'Adresse 5', technicien: "Techinicien 5", date: "08/08/2024", type: 'Type 5', status: "En cours" },
         { id: 6, client: 'Client 6', projet: 'Projet 6', object: "Objet 6", adresse: 'Adresse 6', technicien: "Techinicien 6", date: "08/08/2024", type: 'Type 6', status: "En cours" },
-    ];
+    ]);
+    useEffect(() => {
+        // Initialize dates
+        // const today = moment().format("DD/MM/YYYY");
+        const secondDate = moment().add(7, 'day').format("DD/MM/YYYY");
+        const firstDate = moment().subtract(7, 'day').format("DD/MM/YYYY");
+
+        setFromDate(firstDate);
+        setToDate(secondDate);
+    }, []);
+    const navbar = ["Tous", "Faites", "En cours", "Annulées"];
+
+
     // Show date picker
     const showDatePicker = (type) => {
         setDateType(type);

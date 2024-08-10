@@ -13,7 +13,7 @@ export default function Intervention({ route, navigation }) {
     };
     const validateIntervention = (intervention_id, status) => {
         if (status == "pre") {
-            navigation.navigate('PreRéceptions', { "id": intervention_id });
+            navigation.navigate('Pré-réceptions', { "id": intervention_id });
         } else {
             navigation.navigate('Réceptions', { "id": intervention_id });
         }
@@ -87,7 +87,7 @@ export default function Intervention({ route, navigation }) {
                             </View>
                             <View style={styles.buttonContainer}>
                                 <TouchableOpacity style={[styles.button, styles.confirmButton]} onPress={() => { validateIntervention(intervention.id, "pre") }}>
-                                    <Text style={styles.buttonText}>Voir preréception</Text>
+                                    <Text style={styles.buttonText}>Voir pré-réception</Text>
                                 </TouchableOpacity>
                                 {/* <TouchableOpacity style={[styles.button, styles.cancelButton]} onPress={() => { setModalVisible(true) }}>
                                 <Text style={styles.buttonText}>Annuler</Text>
