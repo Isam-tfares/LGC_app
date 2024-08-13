@@ -3,17 +3,17 @@ import { View, Text, StyleSheet, TouchableOpacity, Alert, ScrollView, Image } fr
 import moment from 'moment';
 import 'moment/locale/fr'; // Import French locale for month names
 import Ionicons from '@expo/vector-icons/Ionicons';
-
 import Fontisto from '@expo/vector-icons/Fontisto';
 import DateTimePickerModal from 'react-native-modal-datetime-picker';
 import DemandeCongeDetails from './DemandeCongeDetails';
 import { createStackNavigator } from '@react-navigation/stack';
+import { useSelector } from 'react-redux';
 
 const Stack = createStackNavigator();
 
 function formatDate(inputDate) {
     // Parse the date using moment
-    const date = moment(inputDate, "DD/MM/YYYY");
+    const date = moment(inputDate, "YYYYMMDD")
 
     // Format the date to the desired format
     const day = date.format('D');
@@ -24,179 +24,62 @@ function formatDate(inputDate) {
     return { "day": day, "month": month, "year": year };
 }
 console.log(formatDate("10/08/2024").day, formatDate("10/08/2024").month, formatDate("10/08/2024").year);
-function Conges({ route, navigation }) {
+function Conges({ navigation, route, reload, setReload }) {
+    const TOKEN = useSelector(state => state.user.token);
 
     const [clicked, setClicked] = useState(1);
     const [dateType, setDateType] = useState('');
-    const [fromDate, setFromDate] = useState(null);
-    const [toDate, setToDate] = useState(null);
+    const [fromDate, setFromDate] = useState(moment().subtract(1, 'month').format("DD/MM/YYYY"));
+    // const [reload, setReload] = useState(false);
+    const [toDate, setToDate] = useState(moment().format("DD/MM/YYYY"));
     const [isDatePickerVisible, setDatePickerVisibility] = useState(false);
-    const [congesData, setCongesData] = useState([
-        {
-            id: 1,
-            fullname: "Alice Dupont",
-            conge_type: "Congé payé",
-            imageUrl: null,
-            date_debut: "10/08/2024",
-            date_fin: "20/08/2024",
-            date_demande: "07/08/2024",
-            nbr_days: 10,
-            status: "Accepté",
-            obs: null,
-            user_type: "Technicien"
-        },
-        {
-            id: 2,
-            fullname: "Bob Martin",
-            conge_type: "Congé maladie",
-            imageUrl: null,
-            date_debut: "12/08/2024",
-            date_fin: "15/08/2024",
-            date_demande: "06/08/2024",
-            nbr_days: 4,
-            status: "Accepté",
-            obs: null,
-            user_type: "Technicien"
-        },
-        {
-            id: 3,
-            fullname: "Charlie Brown",
-            conge_type: "Congé maternité",
-            imageUrl: null,
-            date_debut: "12/08/2024",
-            date_fin: "01/09/2024",
-            date_demande: "05/08/2024",
-            nbr_days: 21,
-            status: "Accepté",
-            obs: null,
-            user_type: "Technicien"
-        },
-        {
-            id: 4,
-            fullname: "Diana Prince",
-            conge_type: "Congé sans solde",
-            imageUrl: null,
-            date_debut: "01/09/2024",
-            date_fin: "10/09/2024",
-            date_demande: "04/08/2024",
-            nbr_days: 10,
-            status: "Accepté",
-            obs: null,
-            user_type: "Technicien"
-        },
-        {
-            id: 5,
-            fullname: "Evan Harris",
-            conge_type: "Congé parental",
-            imageUrl: null,
-            date_debut: "05/09/2024",
-            date_fin: "25/09/2024",
-            date_demande: "03/08/2024",
-            nbr_days: 21,
-            status: "Accepté",
-            obs: null,
-            user_type: "Technicien"
-        },
-        {
-            id: 6,
-            fullname: "Fiona Green",
-            conge_type: "Congé sabbatique",
-            imageUrl: null,
-            date_debut: "01/09/2024",
-            date_fin: "10/09/2024",
-            date_demande: "02/08/2024",
-            nbr_days: 10,
-            status: "Accepté",
-            obs: null,
-            user_type: "Technicien"
-        },
-        {
-            id: 7,
-            fullname: "George Black",
-            conge_type: "Congé payé",
-            imageUrl: null,
-            date_debut: "10/09/2024",
-            date_fin: "20/09/2024",
-            date_demande: "05/08/2024",
-            nbr_days: 10,
-            status: "Accepté",
-            obs: null,
-            user_type: "Technicien"
-        },
-        {
-            id: 8,
-            fullname: "Hannah White",
-            conge_type: "Congé maladie",
-            imageUrl: null,
-            date_debut: "15/09/2024",
-            date_fin: "20/09/2024",
-            date_demande: "10/08/2024",
-            nbr_days: 5,
-            status: "Accepté",
-            obs: null,
-            user_type: "Technicien"
-        },
-        {
-            id: 9,
-            fullname: "Ian Blue",
-            conge_type: "Congé payé",
-            imageUrl: null,
-            date_debut: "01/10/2024",
-            date_fin: "10/10/2024",
-            date_demande: "01/08/2024",
-            nbr_days: 10,
-            status: "Refusé",
-            obs: "Budget limité pour les congés payés.",
-            user_type: "Technicien"
-        },
-        {
-            id: 10,
-            fullname: "Jack Red",
-            conge_type: "Congé maternité",
-            imageUrl: null,
-            date_debut: "15/10/2024",
-            date_fin: "30/10/2024",
-            date_demande: "07/08/2024",
-            nbr_days: 15,
-            status: "Refusé",
-            obs: "Documents médicaux manquants."
-            , user_type: "Technicien"
-        },
-        {
-            id: 11,
-            fullname: "Kelly Green",
-            conge_type: "Congé parental",
-            imageUrl: null,
-            date_debut: "01/11/2024",
-            date_fin: "10/11/2024",
-            date_demande: "08/08/2024",
-            nbr_days: 10,
-            status: "En attente",
-            obs: null,
-            user_type: "Technicien"
-        },
-        {
-            id: 12,
-            fullname: "Liam Grey",
-            conge_type: "Congé sabbatique",
-            imageUrl: null,
-            date_debut: "15/11/2024",
-            date_fin: "25/11/2024",
-            date_demande: "09/08/2024",
-            nbr_days: 10,
-            status: "En attente",
-            obs: null,
-            user_type: "Technicien"
-        }
-    ]);
+    const [congesData, setCongesData] = useState([]);
     useEffect(() => {
-        // Initialize dates
-        const today = moment().format("DD/MM/YYYY");
-        const oneMonthAgo = moment().subtract(1, 'month').format("DD/MM/YYYY");
+        fetchData();
+    }, [fromDate, toDate, reload]);
 
-        setFromDate(oneMonthAgo);
-        setToDate(today);
-    }, []);
+    const fetchData = async () => {
+        try {
+            const API_URL = 'http://10.0.2.2/LGC_backend/?page=DemandesConges';
+            const fromDateAPI = parseInt(moment(fromDate, "DD/MM/YYYY").format('YYYYMMDD'));
+            const toDateAPI = parseInt(moment(toDate, "DD/MM/YYYY").format('YYYYMMDD'));
+            const response = await fetch(API_URL, {
+                method: 'POST',
+                headers: {
+                    'Authorization': `Bearer ${TOKEN}`,
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ "fromDate": fromDateAPI, "toDate": toDateAPI }),
+            });
+
+            if (!response.ok) {
+                throw new Error(` HTTP error! Status: ${response.status}`);
+            }
+
+            const contentType = response.headers.get('content-type');
+            let data;
+
+            if (contentType && contentType.includes('application/json')) {
+                data = await response.json();
+            } else {
+                const text = await response.text();
+                try {
+                    data = JSON.parse(text);
+                } catch (error) {
+                    console.error('Error  parsing JSON:', error);
+                    // Handle non-JSON data if necessary
+                    return;
+                }
+            }
+
+            if (data) {
+                // console.log(data);
+                setCongesData(data);
+            }
+        } catch (error) {
+            console.error('Error fetching data:', error);
+        }
+    };
 
     const DemandeCongeClick = (demande) => {
         navigation.navigate('Détails Demande Congé', { demande });
@@ -236,32 +119,15 @@ function Conges({ route, navigation }) {
         }
         hideDatePicker();
     };
-    const filterData = () => {
-        // Parse fromDate and toDate to moment objects
-        const from = fromDate ? moment(fromDate, "DD/MM/YYYY") : null;
-        const to = toDate ? moment(toDate, "DD/MM/YYYY") : null;
-
-        return congesData.filter(conge => {
-            const dateDemande = moment(conge.date_demande, "DD/MM/YYYY");
-
-            // Check if the dateDemande falls within the fromDate and toDate range
-            const isWithinDateRange = (!from || dateDemande.isSameOrAfter(from)) &&
-                (!to || dateDemande.isSameOrBefore(to));
-
-            // Filter by status and date range
-            if (clicked === 1) { // En attente
-                return conge.status === "En attente" && isWithinDateRange;
-            } else if (clicked === 2) { // Accepté
-                return conge.status === "Accepté" && isWithinDateRange;
-            } else if (clicked === 3) { // Refusé
-                return conge.status === "Refusé" && isWithinDateRange;
-            } else {
-                return isWithinDateRange; // If no filter is selected, return by date range only
-            }
-        });
-    };
-
-
+    const filterConges = (conges) => {
+        if (clicked == 1) {
+            return conges.filter(conge => conge.etat_demande == 1);
+        } else if (clicked == 2) {
+            return conges.filter(conge => conge.etat_demande == 2);
+        } else {
+            return conges.filter(conge => conge.etat_demande == 0);
+        }
+    }
     return (
         <View style={styles.container}>
             <View style={styles.DateView}>
@@ -304,30 +170,30 @@ function Conges({ route, navigation }) {
             </View>
             <ScrollView>
                 <View style={styles.demandesView}>
-                    {filterData(congesData).map((conge, index) => (
+                    {filterConges(congesData)?.map((conge, index) => (
                         <TouchableOpacity key={index} onPress={() => { DemandeCongeClick(conge) }}>
                             <View style={styles.conge}>
-                                <View style={styles.box}>
+                                <View style={[styles.box, { width: "60%" }]}>
                                     {conge.imageUrl ?
                                         (<Image source={{ uri: conge.imageUrl }} style={{ width: 50, height: 50, borderRadius: 25 }} />) :
                                         (<Image source={require('../../assets/profile.jpeg')} style={{ width: 50, height: 50, borderRadius: 25 }} />)
                                     }
-                                    <View>
-                                        <Text style={styles.textInfo}>{conge.fullname}</Text>
-                                        <Text style={styles.conge_type}>{conge.conge_type}</Text>
+                                    <View style={{ flexWrap: "wrap" }}>
+                                        <Text style={styles.textInfo}>{conge.Nom_personnel}</Text>
+                                        <Text style={styles.labelle}>{conge.labelle}</Text>
                                     </View>
                                 </View>
-                                <View style={styles.box}>
+                                <View style={[styles.box, { width: "40%" }]}>
                                     <View style={styles.dateView}>
-                                        <Text style={styles.day}>{formatDate(conge.date_debut).day}</Text>
-                                        <Text style={styles.monthyear}>{formatDate(conge.date_debut).month} {formatDate(conge.date_debut).year}</Text>
+                                        <Text style={styles.day}>{formatDate(conge.start_date).day}</Text>
+                                        <Text style={styles.monthyear}>{formatDate(conge.start_date).month} {formatDate(conge.start_date).year}</Text>
                                     </View>
                                     <View style={{ padding: 5 }}>
                                         <Ionicons name="arrow-forward" size={24} color="#888" />
                                     </View>
                                     <View style={styles.dateView}>
-                                        <Text style={styles.day}>{formatDate(conge.date_fin).day}</Text>
-                                        <Text style={styles.monthyear}>{formatDate(conge.date_fin).month} {formatDate(conge.date_fin).year}</Text>
+                                        <Text style={styles.day}>{formatDate(conge.end_date).day}</Text>
+                                        <Text style={styles.monthyear}>{formatDate(conge.end_date).month} {formatDate(conge.end_date).year}</Text>
                                     </View>
                                 </View>
 
@@ -341,17 +207,21 @@ function Conges({ route, navigation }) {
 }
 
 export default function CongesStack() {
+    const [reload, setReload] = useState(false);
     return (
         <Stack.Navigator initialRouteName="Conges">
             <Stack.Screen
                 name="Conges"
                 component={Conges}
                 options={{ headerShown: false }}
+                initialParams={{ reload, setReload }}
             />
+
             <Stack.Screen
                 name="Détails Demande Congé"
-                component={DemandeCongeDetails}
+                children={(props) => <DemandeCongeDetails {...props} reload={reload} setReload={setReload} />}
             />
+
         </Stack.Navigator>
     );
 }
@@ -428,7 +298,7 @@ const styles = StyleSheet.create({
         fontWeight: "bold",
         marginLeft: 10,
     },
-    conge_type: {
+    labelle: {
         fontSize: 14,
         marginLeft: 10,
         color: "#7a7a7a",

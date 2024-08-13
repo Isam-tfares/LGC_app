@@ -6,6 +6,7 @@ import AntDesign from '@expo/vector-icons/AntDesign';
 import { createStackNavigator } from '@react-navigation/stack';
 import Intervention from './Intervention';
 import AddIntervention from './AddIntervention';
+import { useSelector } from 'react-redux';
 
 const generateDaysOfMonth = (month, year) => {
     const startOfMonth = moment(`${month} ${year}`, 'MMMM YYYY').startOf('month');
@@ -19,7 +20,9 @@ const generateDaysOfMonth = (month, year) => {
     return daysArray;
 };
 
-function Programme({ navigation }) {
+function Programme({ navigation, reload, setReload }) {
+    const TOKEN = useSelector(state => state.user.token);
+
     moment.locale('fr');
     const technicien = 10;
     const [currentDay, setCurrentDay] = useState(moment());
@@ -27,29 +30,61 @@ function Programme({ navigation }) {
     const [loading, setLoading] = useState(false);
     const [monthSelected, setMonthSelected] = useState(moment().format('MMMM'));
     const [yearSelected, setYearSelected] = useState(moment().format('YYYY'));
-    const [interventions, setInterventions] = useState([
-        { id: 1, client: 'Client 1', projet: 'Projet 1', object: "Objet 1", adresse: 'Adresse 1', technicien: "Techinicien 1", date: "04/08/2024", materiaux: "béton", prestation: 'Prestation 1', status: "faite", reception: "faite" },
-        { id: 2, client: 'Client 2', projet: 'Projet 2', object: "Objet 2", adresse: 'Adresse 2', technicien: "Techinicien 1", date: "04/08/2024", materiaux: "béton", prestation: 'Prestation 2', status: "faite", reception: "En cours" },
-        { id: 3, client: 'Client 3', projet: 'Projet 3', object: "Objet 3", adresse: 'Adresse 3', technicien: "Techinicien 1", date: "04/08/2024", materiaux: "béton", prestation: 'Prestation 3', status: "annulée", obs: "commentaire sur annulation d\'intervention" },
-        { id: 4, client: 'Client 4', projet: 'Projet 4', object: "Objet 4", adresse: 'Adresse 4', technicien: "Techinicien 1", date: "05/08/2024", materiaux: "béton", prestation: 'Prestation 4', status: "faite", reception: "faite" },
-        { id: 5, client: 'Client 5', projet: 'Projet 5', object: "Objet 5", adresse: 'Adresse 5', technicien: "Techinicien 1", date: "05/08/2024", materiaux: "béton", prestation: 'Prestation 5', status: "En cours" },
-        { id: 6, client: 'Client 6', projet: 'Projet 6', object: "Objet 6", adresse: 'Adresse 6', technicien: "Techinicien 1", date: "05/08/2024", materiaux: "béton", prestation: 'Prestation 6', status: "En cours" },
-        { id: 7, client: 'Client 4', projet: 'Projet 4', object: "Objet 4", adresse: 'Adresse 4', technicien: "Techinicien 1", date: "05/08/2024", materiaux: "béton", prestation: 'Prestation 4', status: "faite", reception: "faite" }
-    ]);
+    const [interventions, setInterventions] = useState([]);
     const daysOfMonth = generateDaysOfMonth(monthSelected, yearSelected);
-
     useEffect(() => {
-        setLoading(true);
-        console.log(currentDay.format('D'), monthSelected, yearSelected);
-        console.log("here fetch interentions from server");
-        setLoading(false);
-    }, [currentDay]);
+        // setLoading(true);
+        fetchData();
+    }, [currentDay, reload]);
 
-    const filterInterventionsbyDay = () => {
-        return interventions.filter(item => {
-            return moment(item.date, 'D/M/YYYY').isSame(currentDay, 'day');
-        });
+    const fetchData = async () => {
+        try {
+            setLoading(true);
+
+            // Format the date as YYYYMMDD
+            const dateAPI = parseInt(moment(currentDay).format('YYYYMMDD'));
+
+            const API_URL = 'http://10.0.2.2/LGC_backend/?page=Programme';
+            const response = await fetch(API_URL, {
+                method: 'POST',
+                headers: {
+                    'Authorization': `Bearer ${TOKEN}`,
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ "date": dateAPI }),
+            });
+
+            if (!response.ok) {
+                throw new Error(`HTTP error! Status: ${response.status}`);
+            }
+
+            const contentType = response.headers.get('content-type');
+            let data;
+
+            if (contentType && contentType.includes('application/json')) {
+                data = await response.json();
+            } else {
+                const text = await response.text();
+                try {
+                    data = JSON.parse(text);
+                } catch (error) {
+                    console.error('Error parsing JSON:', error);
+                    // Handle non-JSON data if necessary
+                    return;
+                }
+            }
+
+            if (data) {
+                // console.log("DATA", data);
+                setInterventions(data);
+            }
+        } catch (error) {
+            console.error('Error fetching data:', error);
+        } finally {
+            setLoading(false); // Ensure loading state is turned off after fetch
+        }
     };
+
 
     const interventionClick = (intervention) => {
         navigation.navigate('Intervention', { intervention });
@@ -113,24 +148,24 @@ function Programme({ navigation }) {
                         (<ActivityIndicator color={"#0853a1"} />)
                         :
                         (<FlatList
-                            data={filterInterventionsbyDay()}
-                            keyExtractor={(item) => item.id.toString()}
+                            data={interventions}
+                            keyExtractor={(item) => item.intervention_id.toString()}
                             renderItem={({ item }) => (
                                 <TouchableOpacity
                                     style={styles.intervention}
                                     onPress={() => interventionClick(item)}
                                 >
-                                    <View style={styles.idView}><Text style={styles.id}>N° Intervention : {item.id}</Text></View>
-                                    <Text style={styles.Project}>{item.projet}</Text>
-                                    <Text style={styles.client}>Objet : {item.object}</Text>
-                                    <Text style={styles.client}>Client : {item.client}</Text>
-                                    <Text style={styles.technicien}>Technicien: {item.technicien}</Text>
+                                    <View style={styles.idView}><Text style={styles.id}>N° Intervention : {item.intervention_id}</Text></View>
+                                    <Text style={styles.Project}>{item.abr_projet}</Text>
+                                    <Text style={styles.client}>Objet : {item.Objet_projet}</Text>
+                                    <Text style={styles.client}>Client : {item.abr_client}</Text>
+                                    <Text style={styles.technicien}>Technicien: {item.Nom_personnel}</Text>
                                     <View style={{ flexDirection: "row", alignItems: "center", marginTop: 10 }}>
                                         <Text style={styles.status}>État : </Text>
-                                        <Text style={item.status == "faite" ? styles.valide : (item.status == "annulée" ? styles.annule : styles.enCours)}>{item.status}</Text>
+                                        <Text style={item.status == 2 ? styles.valide : (item.status == 0 ? styles.annule : styles.enCours)}>{item.status == 1 ? "En cours" : item.status == 2 ? "Faite" : "Annulée"}</Text>
                                     </View>
                                     <View style={styles.dateView}>
-                                        <Text style={styles.dateText}>{item.date}</Text>
+                                        <Text style={styles.dateText}>{item.date_intervention}</Text>
                                     </View>
                                 </TouchableOpacity>
                             )}
@@ -145,16 +180,19 @@ function Programme({ navigation }) {
 const Stack = createStackNavigator();
 
 export default function ProgrammeStack() {
+    const [reload, setReload] = useState(false);
+    console.log(reload);
     return (
         <Stack.Navigator initialRouteName="ProgrammeScreen">
             <Stack.Screen
                 name="ProgrammeScreen"
                 component={Programme}
                 options={{ headerShown: false }}
+                initialParams={{ reload, setReload }}
             />
             <Stack.Screen
                 name="Intervention"
-                component={Intervention}
+                children={(props) => <Intervention {...props} reload={reload} setReload={setReload} />}
             />
         </Stack.Navigator>
     );
@@ -221,6 +259,7 @@ const styles = StyleSheet.create({
     Project: {
         fontWeight: "bold",
         fontSize: 22,
+        marginTop: 5
     },
     client: {
         color: "#8d8d8d",
@@ -277,7 +316,7 @@ const styles = StyleSheet.create({
     },
     idView: {
         position: "absolute",
-        top: 10,
+        top: 0,
         right: 10
     },
     id: {

@@ -1,15 +1,41 @@
-import React, { useState } from 'react';
+// src/screens/Login.js
+import React, { useState, useEffect } from 'react';
 import { View, TextInput, Alert, StyleSheet, TouchableOpacity, Text, Image, KeyboardAvoidingView, ScrollView, Platform, SafeAreaView } from 'react-native';
+import { useDispatch, useSelector } from 'react-redux';
+import { setUser } from '../actions/userActions'; // Update path as needed
 
-const Login = ({ isLogined, setLogined, setToken }) => {
-
+const Login = ({ isLogined, setLogined }) => {
+    const dispatch = useDispatch();
     const [username, setUsername] = useState('');
     const [password, setPassword] = useState('');
     const [errorUsername, setErrorUsername] = useState('');
     const [errorPassword, setErrorPassword] = useState('');
+
+    const user = useSelector(state => state.user);
+    useEffect(() => {
+        if (user.user) {
+            switch (user.user.user_type) {
+                case 'technicien':
+                    setLogined(1);
+                    break;
+                case 'chef':
+                    setLogined(2);
+                    break;
+                case 'receptionneur':
+                    setLogined(3);
+                    break;
+                case 'essayeur':
+                    setLogined(4);
+                    break;
+                default:
+                    Alert.alert('Accès non autorisé');
+            }
+        }
+    }, [user, setLogined]);
+
     const handleLogin = async () => {
         if (username === '') {
-            setErrorUsername('Veuillez entrer une adresse Username valide.');
+            setErrorUsername('Veuillez entrer un Username valide.');
             return;
         }
 
@@ -18,7 +44,7 @@ const Login = ({ isLogined, setLogined, setToken }) => {
             return;
         }
 
-        const API_URL = 'http://10.0.2.2/HFSQL_PHP/login.php';
+        const API_URL = 'http://10.0.2.2/LGC_backend/?page=login';
 
         try {
             const response = await fetch(API_URL, {
@@ -27,11 +53,7 @@ const Login = ({ isLogined, setLogined, setToken }) => {
                     Accept: 'application/json',
                     'Content-Type': 'application/json',
                 },
-                body: JSON.stringify({
-
-                    username,
-                    password,
-                }),
+                body: JSON.stringify({ username, password }),
             });
 
             if (!response.ok) {
@@ -39,38 +61,24 @@ const Login = ({ isLogined, setLogined, setToken }) => {
             }
 
             const data = await response.json();
-            // console.log(JSON.stringify(data))
+
             if (data.message === 'Login successful.') {
                 const token = data.jwt;
-                setToken(token);
                 const user = data.user;
-                // console.log(JSON.stringify(user)) // to save this data
-                const userType = user?.user_type; // Access the userType property if present
-
-                if (userType === 'technicien') {
-                    setLogined(1);
-                } else if (userType === 'chef') {
-                    setLogined(2);
-                } else if (userType === 'receptionneur') {
-                    setLogined(3);
-                } else if (userType === 'essayeur') {
-                    setLogined(4);
-                } else {
-                    Alert.alert('Accès non autorisé'); // Alert if userType doesn't match expected roles
-                }
+                dispatch(setUser(user, token));
             } else {
                 Alert.alert(data.message);
             }
         } catch (error) {
-            console.error(error); // Log the error for debugging
+            console.error(error);
             Alert.alert('Erreur de connexion');
         } finally {
-            setErrorUsername(''); // Clear error messages after the request completes
+            setErrorUsername('');
             setErrorPassword('');
         }
     };
 
-    const keyboardVerticalOffset = Platform.OS === 'ios' ? 80 : 0; // Adjust as needed
+    const keyboardVerticalOffset = Platform.OS === 'ios' ? 80 : 0;
 
     return (
         <SafeAreaView style={styles.safeArea}>

@@ -1,24 +1,111 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { View, Modal, Text, TouchableOpacity, StyleSheet, Alert } from "react-native";
 import { Picker } from '@react-native-picker/picker';
 import { Ionicons } from '@expo/vector-icons';
 import DateTimePickerModal from 'react-native-modal-datetime-picker';
 import moment from 'moment';
+import { useSelector, useDispatch } from 'react-redux';
+import { setData } from '../actions/dataActions';
 
 export default function AddIntervention({ modalVisible, setModalVisible }) {
-    const clients = ["client 1", "client 2", "client 3", "client 4", "client 5"];
-    const projects = ["project 10", "project 11", "project 12", "project 13", "project 14", "project 15"];
-    // const objects = ["object 1", "object 2", "object 3", "object 4", "object 5", "object 6", "object 7", "object 8", "object 9", "object 10"];
-    const prestations = ["prestation 1", "prestation 2", "prestation 3", "prestation 4", "prestation 5", "prestation 6", "prestation 7", "prestation 8", "prestation 9", "prestation 10"];
-    const techniciens = ["technicien 1", "technicien 2", "technicien 3", "technicien 4", "technicien 5"];
+    const TOKEN = useSelector(state => state.user.token);
+    const dispatch = useDispatch();
+    const [clients, setClients] = useState(useSelector(state => state.data.clients));
+    const [projects, setProjects] = useState(useSelector(state => state.data.projects));
+    const [prestations, setPrestations] = useState(useSelector(state => state.data.prestations));
+    const [techniciens, setTechniciens] = useState(useSelector(state => state.data.techniciens));
 
     const [selectedClient, setSelectedClient] = useState('');
     const [selectedProject, setSelectedProject] = useState('');
-    // const [selectedObject, setSelectedObject] = useState('');
     const [selectedTechnician, setSelectedTechnician] = useState('');
     const [selectedPrestation, setSelectedPrestation] = useState('');
     const [selectedDate, setSelectedDate] = useState(null);
     const [isDatePickerVisible, setDatePickerVisibility] = useState(false);
+
+    useEffect(() => {
+        getData();
+    }, []);
+
+    const getData = () => {
+        if (!clients || !projects || !prestations || !techniciens) {
+            const API_URL = 'http://10.0.2.2/LGC_backend/?page=addInterventionInterface';
+            fetchData(API_URL, TOKEN);
+        }
+    }
+
+    const fetchData = async (url, token) => {
+        try {
+            const response = await fetch(url, {
+                method: 'GET',
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'Content-Type': 'application/json'
+                },
+            });
+
+            if (!response.ok) {
+                throw new Error(`HTTP error! Status: ${response.status}`);
+            }
+
+            const contentType = response.headers.get('content-type');
+            let data;
+
+            if (contentType && contentType.includes('application/json')) {
+                data = await response.json();
+            } else {
+                const text = await response.text();
+                data = JSON.parse(text);
+            }
+            if (Object.keys(data)) {
+                setTechniciens(data.techniciens);
+                setClients(data.clients);
+                setProjects(data.projects);
+                setPrestations(data.phases);
+                dispatch(setData(data.clients, data.projects, data.phases, data.techniciens));
+
+            }
+        } catch (error) {
+            console.error('Error fetching data:', error);
+        }
+    };
+
+    const insertIntervention = async (url, token, date) => {
+        try {
+            const response = await fetch(url, {
+                method: 'POST',
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(
+                    { "technicien_id": selectedTechnician, "projet_id": selectedProject, "client_id": selectedClient, "date_intervention": date, "IDPhase": selectedPrestation }
+                )
+            });
+
+            if (!response.ok) {
+                throw new Error(`HTTP error! Status: ${response.status}`);
+            }
+
+            const contentType = response.headers.get('content-type');
+            let data;
+
+            if (contentType && contentType.includes('application/json')) {
+                data = await response.json();
+            } else {
+                const text = await response.text();
+                data = JSON.parse(text);
+            }
+            if (data != null) {
+                if (data) {
+                    Alert.alert("Intervention ajoutée avec succès");
+                } else {
+                    Alert.alert("Un problème est survenu lors de l'ajout de l'intervention");
+                }
+            }
+        } catch (error) {
+            console.error('Error fetching data:', error);
+        }
+    };
 
     const showDatePicker = () => {
         setDatePickerVisibility(true);
@@ -33,9 +120,23 @@ export default function AddIntervention({ modalVisible, setModalVisible }) {
         hideDatePicker();
     };
 
+
     const handleAddIntervention = () => {
-        Alert.alert('Intervention ajoutée',
-            `Client: ${selectedClient}\nProject: ${selectedProject}\nTechnician: ${selectedTechnician}\nPrestation: ${selectedPrestation}\nDate: ${selectedDate ? moment(selectedDate).format('MM/DD/YYYY') : 'No date selected'}`);
+        // check if inputs are correct
+        if (!selectedClient || !selectedProject || !selectedTechnician || !selectedPrestation || !selectedDate) {
+            Alert.alert('Erreur', 'Veuillez remplir tous les champs');
+            return;
+        }
+        API_URL = "http://10.0.2.2/LGC_backend/?page=AddIntervention";
+        date = parseInt(moment(selectedDate).format('YYYYMMDD'));
+        insertIntervention(API_URL, TOKEN, date);
+        // reset the values
+        setSelectedClient('');
+        setSelectedDate(null);
+        setSelectedPrestation('');
+        setSelectedProject('');
+        setSelectedTechnician('');
+
         setModalVisible(false);
     };
 
@@ -64,9 +165,14 @@ export default function AddIntervention({ modalVisible, setModalVisible }) {
                         style={styles.picker}
                     >
                         <Picker.Item label="Séléctionner Client" value="" />
-                        {clients.map((client, index) => (
-                            <Picker.Item key={index} label={client} value={client} />
-                        ))}
+                        {clients ? (
+                            clients?.map((client, index) => (
+                                <Picker.Item key={index} label={client.abr_client} value={client.IDClient} />
+                            ))) : (
+                            <></>
+                        )
+                        }
+
                     </Picker>
 
                     <Text style={styles.label}>Projet</Text>
@@ -76,22 +182,10 @@ export default function AddIntervention({ modalVisible, setModalVisible }) {
                         style={styles.picker}
                     >
                         <Picker.Item label="Séléctionner Projet" value="" />
-                        {projects.map((project, index) => (
-                            <Picker.Item key={index} label={project} value={project} />
+                        {projects?.map((project, index) => (
+                            <Picker.Item key={index} label={project.abr_projet} value={project.IDProjet} />
                         ))}
                     </Picker>
-
-                    {/* <Text style={styles.label}>Objet</Text>
-                    <Picker
-                        selectedValue={selectedObject}
-                        onValueChange={(itemValue, itemIndex) => setSelectedObject(itemValue)}
-                        style={styles.picker}
-                    >
-                        <Picker.Item label="Séléctionner Objet" value="" />
-                        {objects.map((object, index) => (
-                            <Picker.Item key={index} label={object} value={object} />
-                        ))}
-                    </Picker> */}
 
                     <Text style={styles.label}>Technicien</Text>
                     <Picker
@@ -100,8 +194,8 @@ export default function AddIntervention({ modalVisible, setModalVisible }) {
                         style={styles.picker}
                     >
                         <Picker.Item label="Séléctionner Technicien" value="" />
-                        {techniciens.map((technician, index) => (
-                            <Picker.Item key={index} label={technician} value={technician} />
+                        {techniciens?.map((technician, index) => (
+                            <Picker.Item key={index} label={technician.nom_complet} value={technician.user_id} />
                         ))}
                     </Picker>
 
@@ -112,8 +206,8 @@ export default function AddIntervention({ modalVisible, setModalVisible }) {
                         style={styles.picker}
                     >
                         <Picker.Item label="Séléctionner Prestation" value="" />
-                        {prestations.map((prestation, index) => (
-                            <Picker.Item key={index} label={prestation} value={prestation} />
+                        {prestations?.map((prestation, index) => (
+                            <Picker.Item key={index} label={prestation.libelle} value={prestation.IDPhase} />
                         ))}
                     </Picker>
 

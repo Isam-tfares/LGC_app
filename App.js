@@ -1,9 +1,12 @@
 import * as React from 'react';
+import { Provider } from 'react-redux';
+// import { PersistGate } from 'redux-persist/integration/react';
 import { createDrawerNavigator } from '@react-navigation/drawer';
 import { NavigationContainer } from '@react-navigation/native';
 import { useState } from 'react';
 import { View, Text } from 'react-native';
 
+import store from './src/store';
 import PV from './src/technicien/PV';
 import NoteFrais from './src/screens/NoteFrais';
 import Conge from './src/screens/Conge';
@@ -24,71 +27,84 @@ import DemandesInterventions from './src/chef/demandesIntreventions';
 const Drawer = createDrawerNavigator();
 
 export default function App() {
-  const [isLogined, setLogined] = useState(2);
-  const [token, setToken] = useState('');
-  console.log('token:', token);
-
+  const [isLogined, setLogined] = useState(false);
+  console.log('logined', isLogined);
   if (!isLogined) {
-    return <Login isLogined={isLogined} setLogined={setLogined} setToken={setToken} />;
+    return (
+      <Provider store={store}>
+        <Login isLogined={isLogined} setLogined={setLogined} />
+      </Provider>);
   } else if (isLogined === 1) { // technicien
     return (
-      <NavigationContainer>
-        <Drawer.Navigator initialRouteName="Programme">
-          <Drawer.Screen name="Programme" component={ProgrammeStack} />
-          <Drawer.Screen name="Nouvelle réception" component={NewReception} />
-          <Drawer.Screen name="PVs" component={PV} />
-          <Drawer.Screen name="Notes de frais" component={NoteFrais} />
-          <Drawer.Screen name="Congés" component={Conge} />
-          <Drawer.Screen name="Déconnexion">
-            {() => {
-              return (
-                <Deconnexion setLogined={setLogined} setToken={setToken} />
-              );
-            }}
-          </Drawer.Screen>
-        </Drawer.Navigator>
-      </NavigationContainer>
+      <Provider store={store}>
+        {/* <PersistGate> */}
+        <NavigationContainer>
+          <Drawer.Navigator initialRouteName="Programme">
+            <Drawer.Screen name="Programme" component={ProgrammeStack} />
+            <Drawer.Screen name="Nouvelle réception" component={NewReception} />
+            <Drawer.Screen name="PVs" component={PV} />
+            <Drawer.Screen name="Notes de frais" component={NoteFrais} />
+            <Drawer.Screen name="Congés" component={Conge} />
+            <Drawer.Screen name="Déconnexion">
+              {() => {
+                return (
+                  <Deconnexion setLogined={setLogined} />
+                );
+              }}
+            </Drawer.Screen>
+          </Drawer.Navigator>
+        </NavigationContainer>
+        {/* </PersistGate> */}
+      </Provider>
     );
   } else if (isLogined === 2) { // chef
     return (
-      <NavigationContainer>
-        <Drawer.Navigator initialRouteName="Interventions">
-          <Drawer.Screen name="Interventions" component={InterventionsStack} />
-          {/* <Drawer.Screen name="Programmes && techniciens" component={Programmes} /> */}
-          <Drawer.Screen name="Demandes des interventions" component={DemandesInterventions} />
-          <Drawer.Screen name="Pré-réceptions" component={PrereceptionsStack} />
-          <Drawer.Screen name="Réceptions" component={ReceptionsStack} />
-          <Drawer.Screen name="Notes de frais" component={NoteFrais} />
-          <Drawer.Screen name="Demandes de congés" component={CongesStack} />
-          <Drawer.Screen name="Déconnexion">
-            {() => {
-              return (
-                <Deconnexion setLogined={setLogined} setToken={setToken} />
-              );
-            }}
-          </Drawer.Screen>
-        </Drawer.Navigator>
-      </NavigationContainer>
+      <Provider store={store}>
+        {/* <PersistGate> */}
+        <NavigationContainer>
+          <Drawer.Navigator initialRouteName="Interventions">
+            <Drawer.Screen name="Interventions" component={InterventionsStack} />
+            {/* <Drawer.Screen name="Programmes && techniciens" component={Programmes} /> */}
+            <Drawer.Screen name="Demandes des interventions" component={DemandesInterventions} />
+            <Drawer.Screen name="Pré-réceptions" component={PrereceptionsStack} />
+            <Drawer.Screen name="Réceptions" component={ReceptionsStack} />
+            <Drawer.Screen name="Notes de frais" component={NoteFrais} />
+            <Drawer.Screen name="Demandes de congés" component={CongesStack} />
+            <Drawer.Screen name="Déconnexion">
+              {() => {
+                return (
+                  <Deconnexion setLogined={setLogined} />
+                );
+              }}
+            </Drawer.Screen>
+          </Drawer.Navigator>
+        </NavigationContainer>
+        {/* </PersistGate> */}
+      </Provider>
     );
   } else if (isLogined === 3) { // reception
     return (
-      <NavigationContainer>
-        <Drawer.Navigator initialRouteName="Interventions">
-          <Drawer.Screen name="Interventions" component={InterventionsStackRec} />
-          <Drawer.Screen name="Pré-réceptions" component={PrereceptionsStack} />
-          <Drawer.Screen name="Réceptions" component={ReceptionsStack} />
-          <Drawer.Screen name="PVs" component={PVReceptions} />
-          <Drawer.Screen name="Notes de frais" component={NoteFrais} />
-          <Drawer.Screen name="Congés" component={Conge} />
-          <Drawer.Screen name="Déconnexion">
-            {() => {
-              return (
-                <Deconnexion setLogined={setLogined} setToken={setToken} />
-              );
-            }}
-          </Drawer.Screen>
-        </Drawer.Navigator>
-      </NavigationContainer>
+      <Provider store={store}>
+        {/* <PersistGate> */}
+        <NavigationContainer>
+          <Drawer.Navigator initialRouteName="Interventions">
+            <Drawer.Screen name="Interventions" component={InterventionsStackRec} />
+            <Drawer.Screen name="Pré-réceptions" component={PrereceptionsStack} />
+            <Drawer.Screen name="Réceptions" component={ReceptionsStack} />
+            <Drawer.Screen name="PVs" component={PVReceptions} />
+            <Drawer.Screen name="Notes de frais" component={NoteFrais} />
+            <Drawer.Screen name="Congés" component={Conge} />
+            <Drawer.Screen name="Déconnexion">
+              {() => {
+                return (
+                  <Deconnexion setLogined={setLogined} />
+                );
+              }}
+            </Drawer.Screen>
+          </Drawer.Navigator>
+        </NavigationContainer>
+        {/* </PersistGate> */}
+      </Provider>
     )
   } else if (isLogined === 4) { // labo
     return (

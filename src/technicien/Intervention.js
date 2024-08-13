@@ -1,23 +1,67 @@
 import React, { useState } from 'react';
 import { View, Text, StyleSheet, Alert, TouchableOpacity, Modal, TextInput } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import { useSelector } from 'react-redux';
 
-export default function Intervention({ route, navigation }) {
+export default function Intervention({ route, navigation, reload, setReload }) {
+    const TOKEN = useSelector(state => state.user.token)
     const { intervention } = route.params;
     const [modalVisible, setModalVisible] = useState(false);
     const [comment, setComment] = useState('');
 
+    const annulateIntervention = async () => {
+
+        let API_URL = 'http://10.0.2.2/LGC_backend/?page=annulerIntervention';
+        try {
+            const response = await fetch(API_URL, {
+                method: 'POST',
+                headers: {
+                    'Authorization': `Bearer ${TOKEN}`,
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(
+                    { "obs": comment, "intervention_id": intervention.intervention_id }
+                )
+            });
+
+            if (!response.ok) {
+                throw new Error(`HTTP error! Status: ${response.status}`);
+            }
+
+            const contentType = response.headers.get('content-type');
+            let data;
+
+            if (contentType && contentType.includes('application/json')) {
+                data = await response.json();
+            } else {
+                const text = await response.text();
+                data = JSON.parse(text);
+            }
+            if (data != null) {
+                if (data) {
+                    Alert.alert("Intervention annulée avec succès");
+                    setReload(!reload);
+                } else {
+                    Alert.alert("Un problème est survenu lors du annulation du intervention");
+                }
+            }
+        } catch (error) {
+            console.error('Error fetching data:', error);
+        }
+    };
     const annulerIntervention = () => {
         // Logic to handle the comment submission or cancellation
         if (comment === '') {
             Alert.alert('Veuillez ajouter un commentaire');
             return;
         }
-        Alert.alert("Intervention annulée avec succès");
+        annulateIntervention();
         setModalVisible(false);
+        navigation.goBack();
     };
     const validateIntervention = (intervention_id) => {
-        navigation.navigate('Nouvelle réception', { "id": intervention_id });
+        Alert.alert("Validate")
+        // navigation.navigate('Nouvelle réception', { "id": intervention_id });
     };
 
     return (
@@ -25,58 +69,59 @@ export default function Intervention({ route, navigation }) {
             <View style={styles.card}>
                 <View style={styles.row}>
                     <Text style={styles.title}>N° Intervention :</Text>
-                    <Text style={styles.text}>{intervention.id}</Text>
+                    <Text style={styles.text}>{intervention.intervention_id}</Text>
                 </View>
                 <View style={styles.row}>
                     <Text style={styles.title}>Client:</Text>
-                    <Text style={styles.text}>{intervention.client}</Text>
+                    <Text style={styles.text}>{intervention.abr_client}</Text>
                 </View>
                 <View style={styles.row}>
                     <Text style={styles.title}>Projet : </Text>
-                    <Text style={styles.text}>{intervention.projet}</Text>
+                    <Text style={styles.text}>{intervention.abr_projet}</Text>
                 </View>
                 <View style={styles.row}>
                     <Text style={styles.title}>Objet : </Text>
-                    <Text style={styles.text}>{intervention.object}</Text>
+                    <Text style={styles.text}>{intervention.Objet_Projet}</Text>
                 </View>
                 <View style={styles.row}>
                     <Text style={styles.title}>Prestation : </Text>
-                    <Text style={styles.text}>{intervention.prestation}</Text>
+                    <Text style={styles.text}>{intervention.libelle}</Text>
                 </View>
                 <View style={styles.row}>
                     <Text style={styles.title}>Matériaux : </Text>
-                    <Text style={styles.text}>{intervention.materiaux}</Text>
+                    <Text style={styles.text}>{intervention.materiaux ?? ""}</Text>
                 </View>
 
                 <View style={styles.row}>
                     <Text style={styles.title}>Lieu de prélévement : </Text>
-                    <Text style={styles.text}>{intervention.adresse}</Text>
+                    <Text style={styles.text}>{intervention.adresse ?? ""}</Text>
                 </View>
-                {intervention.status === 'annulée' ? (
+                {intervention.status == 0 ? (
                     <View style={styles.row}>
                         <Text style={styles.title}>Observation : </Text>
                         <Text style={styles.obs}>{intervention.obs}</Text>
                     </View>
                 ) : <></>}
-                {intervention.status === 'faite' ? (
-                    <View style={styles.row}>
-                        <Text style={styles.title}>Etat d'intervention : </Text>
-                        <Text style={[styles.text, intervention.status == "faite" ? styles.valide : (intervention.status == "annulée" ? styles.annule : styles.enCours)]}
+                {/* {intervention.status == 2 ? ( */}
+                <View style={styles.row}>
+                    <Text style={styles.title}>Etat d'intervention : </Text>
+                    <Text style={[styles.text, intervention.status == 2 ? styles.valide : (intervention.status == 0 ? styles.annule : styles.enCours)]}
 
-                        >{intervention.status}</Text>
-                    </View>) : <></>}
-                {(intervention.status == "faite") ?
+                    >{intervention.status == 0 ? "Annulée" : intervention.status == 1 ? "En cours" : "Faite"}</Text>
+                </View>
+                {/* ) : <></>} */}
+                {(intervention.status == 2) ?
                     <View style={styles.row}>
                         <Text style={styles.title}>Etat de réception : </Text>
-                        <Text style={[styles.text, intervention.reception == "faite" ? styles.valide : (intervention.status == "annulée" ? styles.annule : styles.enCours)]}
+                        <Text style={[styles.text, intervention.etat_reception == 1 ? styles.valide : styles.enCours]}
 
-                        >{intervention.reception}</Text>
+                        >{intervention.etat_reception == 1 ? "Faite" : "En cours"}</Text>
                     </View>
                     : ""
                 }
-                {intervention.status === 'En cours' ? (
+                {intervention.status == 1 ? (
                     <View style={styles.buttonContainer}>
-                        <TouchableOpacity style={[styles.button, styles.confirmButton]} onPress={() => { validateIntervention(intervention.id) }}>
+                        <TouchableOpacity style={[styles.button, styles.confirmButton]} onPress={() => { validateIntervention(intervention.intervention_id) }}>
                             <Text style={styles.buttonText}>Valider</Text>
                         </TouchableOpacity>
                         <TouchableOpacity style={[styles.button, styles.cancelButton]} onPress={() => { setModalVisible(true) }}>
@@ -144,11 +189,10 @@ const styles = StyleSheet.create({
     },
     row: {
         flexDirection: 'row',
-        alignItems: "center",
         marginBottom: 20,
         paddingEnd: 5,
         justifyContent: "space-between",
-        flexWrap: "wrap",
+        width: "100%"
     },
     title: {
         fontSize: 16,
@@ -157,6 +201,7 @@ const styles = StyleSheet.create({
     text: {
         fontSize: 16,
         fontWeight: 'bold',
+        width: "80%",
     },
     obs: {
         fontSize: 15,

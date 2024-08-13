@@ -3,11 +3,11 @@ import { View, Text, StyleSheet, Image, Alert, TouchableOpacity, Modal, TextInpu
 import Ionicons from '@expo/vector-icons/Ionicons';
 import moment from 'moment';
 import 'moment/locale/fr'; // Import French locale for month names
+import { useSelector } from 'react-redux';
 
 function formatDate(inputDate) {
     // Parse the date using moment
-    const date = moment(inputDate, "DD/MM/YYYY");
-
+    const date = moment(inputDate, "YYYYMMDD");
     // Format the date to the desired format
     const day = date.format('D');
     const month = date.format('MMM');
@@ -17,21 +17,107 @@ function formatDate(inputDate) {
     return { "day": day, "month": month.slice(0, -1), "year": year };
 }
 
-export default function DemandeCongeDetails({ route, navigation }) {
+export default function DemandeCongeDetails({ navigation, route, reload, setReload }) {
+    const TOKEN = useSelector(state => state.user.token);
     let { demande } = route.params;
+    console.log("demande", demande);
     const [modalVisible, setModalVisible] = useState(false);
     const [comment, setComment] = useState('');
-    const acceptDemande = () => {
 
-        Alert.alert(`accepte demande ${demande.id}`);
+    // confirme intervention function
+    const confirmeDemande = async () => {
+        let API_URL = 'http://10.0.2.2/LGC_backend/?page=AcceptDemandeConge';
+        try {
+            const response = await fetch(API_URL, {
+                method: 'POST',
+                headers: {
+                    'Authorization': `Bearer ${TOKEN}`,
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(
+                    { "conge_id": demande.conge_id }
+                )
+            });
+
+            if (!response.ok) {
+                throw new Error(`HTTP error! Status: ${response.status}`);
+            }
+
+            const contentType = response.headers.get('content-type');
+            let data;
+
+            if (contentType && contentType.includes('application/json')) {
+                data = await response.json();
+            } else {
+                const text = await response.text();
+                data = JSON.parse(text);
+            }
+            if (data != null) {
+                if (data) {
+                    Alert.alert("Demande acceptée avec succès");
+                    setReload(!reload);
+                } else {
+                    Alert.alert("Un problème est survenu lors de l'acceptation de la demande");
+                }
+            }
+        } catch (error) {
+            console.error('Error fetching data:', error);
+        }
+    };
+    // refuser demande intervention function
+    const annulateDemande = async () => {
+        let API_URL = 'http://10.0.2.2/LGC_backend/?page=RejectDemandeConge';
+        try {
+            const response = await fetch(API_URL, {
+                method: 'POST',
+                headers: {
+                    'Authorization': `Bearer ${TOKEN}`,
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(
+                    { "obs": comment, "conge_id": demande.conge_id }
+                )
+            });
+
+            if (!response.ok) {
+                throw new Error(`HTTP error! Status: ${response.status}`);
+            }
+
+            const contentType = response.headers.get('content-type');
+            let data;
+
+            if (contentType && contentType.includes('application/json')) {
+                data = await response.json();
+            } else {
+                const text = await response.text();
+                data = JSON.parse(text);
+            }
+            if (data != null) {
+                if (data) {
+                    Alert.alert("Demande refusée avec succès");
+                    setReload(!reload);
+                } else {
+                    Alert.alert("Un problème est survenu lors du refus de la demande");
+                }
+            }
+        } catch (error) {
+            console.error('Error fetching data:', error);
+        }
+    };
+    const acceptDemande = () => {
+        confirmeDemande();
+        navigation.goBack();
     }
     const refuseDemande = () => {
         if (comment === '') {
-            Alert.alert('Veuillez ajouter un commentaire');
+            Alert.alert('Veuillez ajouter un commentaire ');
             return;
         }
+        annulateDemande();
         setModalVisible(false);
-        Alert.alert('Refuser demande ' + demande.id, 'Comment: ' + comment);
+        setComment('');
+        setReload(!reload);
+        navigation.goBack();
     }
 
     return (
@@ -43,8 +129,8 @@ export default function DemandeCongeDetails({ route, navigation }) {
                     (<Image source={require('../../assets/profile.jpeg')} style={{ width: 50, height: 50, borderRadius: 25 }} />)
                 }
                 <View>
-                    <Text style={styles.fullname}>{demande.fullname}</Text>
-                    <Text style={styles.user_type}>{demande.user_type}</Text>
+                    <Text style={styles.fullname}>{demande.Nom_personnel}</Text>
+                    <Text style={styles.user_type}>{demande.user_type ?? ""}</Text>
                 </View>
 
             </View>
@@ -54,14 +140,14 @@ export default function DemandeCongeDetails({ route, navigation }) {
                 </View>
                 <View style={styles.dateContainer}>
                     <View style={styles.dateView}>
-                        <Text style={styles.date}>{formatDate(demande.date_debut).day} {formatDate(demande.date_debut).month}</Text>
+                        <Text style={styles.date}>{formatDate(demande.start_date).day} {formatDate(demande.start_date).month}</Text>
                         <View style={{ paddingHorizontal: 5 }}>
                             <Ionicons name="arrow-forward" size={20} color="black" />
                         </View>
-                        <Text style={styles.date}>{formatDate(demande.date_fin).day} {formatDate(demande.date_fin).month}</Text>
+                        <Text style={styles.date}>{formatDate(demande.end_date).day} {formatDate(demande.end_date).month}</Text>
                     </View>
-                    <View style={styles.conge_typeView}>
-                        <Text style={styles.conge_type}>{demande.conge_type}</Text>
+                    <View style={styles.labelleView}>
+                        <Text style={styles.labelle}>{demande.labelle}</Text>
                     </View>
                 </View>
             </View>
@@ -71,19 +157,19 @@ export default function DemandeCongeDetails({ route, navigation }) {
                     <Text style={styles.title}>Nombre des jours</Text>
                 </View>
                 <View style={{ paddingVertical: 5 }}>
-                    <Text style={styles.label}>{demande.nbr_days} jours</Text>
+                    <Text style={styles.label}>{demande.jours_pris} jours</Text>
                 </View>
             </View>
 
             <View style={styles.box2}>
                 <Text style={styles.title2}>Etat général</Text>
                 <View style={styles.statusView}>
-                    <View style={demande.status == "En attente" ? styles.waiting : demande.status == "Accepté" ? styles.accpeted : styles.rejected}></View>
-                    <Text style={styles.status}>{demande.status}</Text>
+                    <View style={demande.etat_demande == 1 ? styles.waiting : demande.etat_demande == 2 ? styles.accpeted : styles.rejected}></View>
+                    <Text style={styles.status}>{demande.etat_demande == 1 ? "En attente" : demande.etat_demande == 2 ? "Acceptée" : "Refusée"}</Text>
                 </View>
             </View>
 
-            {demande.status == "Refusé" && (
+            {demande.etat_demande == 0 && (
                 <View style={styles.box2}>
                     <Text style={styles.title2}>Raison du refus</Text>
                     <View style={styles.statusView}>
@@ -95,11 +181,11 @@ export default function DemandeCongeDetails({ route, navigation }) {
             <View style={styles.box2}>
                 <Text style={styles.title2}>Date du demande</Text>
                 <View style={styles.statusView}>
-                    <Text style={styles.status}>{demande.date_demande}</Text>
+                    <Text style={styles.status}>{moment(demande.date_demande, "YYYYMMDD").format("DD/MM/YYYY") || 'N/A'}</Text>
                 </View>
             </View>
 
-            {demande.status == "En attente" && (
+            {demande.etat_demande == 1 && (
                 <View style={styles.btns}>
                     <TouchableOpacity style={[styles.btn, styles.btn_accept]} onPress={() => { acceptDemande() }}>
                         <Text style={styles.btnText1}>Accepter</Text>
@@ -191,13 +277,13 @@ const styles = StyleSheet.create({
         fontSize: 20,
         fontWeight: "bold",
     },
-    conge_typeView: {
+    labelleView: {
         padding: 5,
         borderRadius: 5,
         borderColor: "#4b6aff",
         borderWidth: 2,
     },
-    conge_type: {
+    labelle: {
         color: "#4b6aff",
         fontSize: 16,
         fontWeight: "bold",

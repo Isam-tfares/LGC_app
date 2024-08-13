@@ -6,12 +6,15 @@ import { Ionicons } from '@expo/vector-icons';
 import { EvilIcons } from '@expo/vector-icons';
 import Fontisto from '@expo/vector-icons/Fontisto';
 import DateTimePickerModal from 'react-native-modal-datetime-picker';
+import { useSelector } from 'react-redux';
 
 export default function DemandesInterventions({ navigation }) {
+    const TOKEN = useSelector(state => state.user.token);
+
     const [search, setSearch] = useState("");
     const [dateType, setDateType] = useState('');
-    const [fromDate, setFromDate] = useState(null);
-    const [toDate, setToDate] = useState(null);
+    const [fromDate, setFromDate] = useState(moment().subtract(7, 'day').format("DD/MM/YYYY"));
+    const [toDate, setToDate] = useState(moment().add(7, 'day').format("DD/MM/YYYY"));
     const [selectedClient, setSelectedClient] = useState('');
     const [selectedProject, setSelectedProject] = useState('');
     const [adresse, setAdresse] = useState('');
@@ -23,29 +26,144 @@ export default function DemandesInterventions({ navigation }) {
     const [isDatePickerVisible, setDatePickerVisibility] = useState(false);
     const [comment, setComment] = useState('');
     const [selectedIntervention, setSelectedIntervention] = useState(null);
-    const [interventions, setInterventions] = useState([
-        { id: 1, client: 'Client 1', projet: 'Projet 1', object: "Objet 1", adresse: 'Adresse 1', technicien: "Technicien 1", date: "07/08/2024", prestation: 'Prestation 1' },
-        { id: 2, client: 'Client 2', projet: 'Projet 2', object: "Objet 2", adresse: 'Adresse 2', technicien: "Technicien 2", date: "07/08/2024", prestation: 'Prestation 2' },
-        { id: 3, client: 'Client 3', projet: 'Projet 3', object: "Objet 3", adresse: 'Adresse 3', technicien: "Technicien 3", date: "07/08/2024", prestation: 'Prestation 3' },
-        { id: 4, client: 'Client 4', projet: 'Projet 4', object: "Objet 4", adresse: 'Adresse 4', technicien: "Technicien 4", date: "08/08/2024", prestation: 'Prestation 4' },
-        { id: 5, client: 'Client 5', projet: 'Projet 5', object: "Objet 5", adresse: 'Adresse 5', technicien: "Technicien 5", date: "08/08/2024", prestation: 'Prestation 5' },
-        { id: 6, client: 'Client 6', projet: 'Projet 6', object: "Objet 6", adresse: 'Adresse 6', technicien: "Technicien 6", date: "08/08/2024", prestation: 'Prestation 6' },
-    ]);
-    const clients = ["Client 1", "Client 2", "Client 3", "Client 4", "Client 5"];
-    const projects = ["Projet 1", "Projet 2", "Projet 3", "Projet 4", "Projet 5"];
-    // const objects = ["Objet 1", "Objet 2", "Objet 3", "Objet 4", "Objet 5", "Objet 6", "Objet 7", "Objet 8", "Objet 9", "Objet 10"];
-    const prestations = ["Prestation 1", "Prestation 2", "Prestation 3", "Prestation 4", "Prestation 5", "Prestation 6", "Prestation 7", "Prestation 8", "Prestation 9", "Prestation 10"];
-    const techniciens = ["Technicien 1", "Technicien 2", "Technicien 3", "Technicien 4", "Technicien 5"];
-    // Initialize dates
-    useEffect(() => {
-        // Initialize dates
-        // const today = moment().format("DD/MM/YYYY");
-        const secondDate = moment().add(7, 'day').format("DD/MM/YYYY");
-        const firstDate = moment().subtract(7, 'day').format("DD/MM/YYYY");
+    const [interventions, setInterventions] = useState([]);
+    const [reload, setReload] = useState(false);
 
-        setFromDate(firstDate);
-        setToDate(secondDate);
-    }, []);
+    const [clients, setClients] = useState(useSelector(state => state.data.clients));
+    const [projects, setProjects] = useState(useSelector(state => state.data.projects));
+    const [prestations, setPrestations] = useState(useSelector(state => state.data.prestations));
+    const [techniciens, setTechniciens] = useState(useSelector(state => state.data.techniciens));
+
+    // get Demandes Interventions
+    useEffect(() => {
+        fetchData();
+    }, [fromDate, toDate, reload]);
+
+    const fetchData = async () => {
+        try {
+            const API_URL = 'http://10.0.2.2/LGC_backend/?page=DemandesInterventions';
+            const fromDateAPI = parseInt(moment(fromDate, "DD/MM/YYYY").format('YYYYMMDD'));
+            const toDateAPI = parseInt(moment(toDate, "DD/MM/YYYY").format('YYYYMMDD'));
+            const response = await fetch(API_URL, {
+                method: 'POST',
+                headers: {
+                    'Authorization': `Bearer ${TOKEN}`,
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ "fromDate": fromDateAPI, "toDate": toDateAPI }),
+            });
+
+            if (!response.ok) {
+                throw new Error(`HTTP error! Status: ${response.status}`);
+            }
+
+            const contentType = response.headers.get('content-type');
+            let data;
+
+            if (contentType && contentType.includes('application/json')) {
+                data = await response.json();
+            } else {
+                const text = await response.text();
+                try {
+                    data = JSON.parse(text);
+                } catch (error) {
+                    console.error('Error  parsing JSON:', error);
+                    // Handle non-JSON data if necessary
+                    return;
+                }
+            }
+
+            if (data) {
+                // console.log(data);
+                setInterventions(data);
+            }
+        } catch (error) {
+            console.error('Error fetching data:', error);
+        }
+    };
+
+    // confirme intervention function
+    const confirmeIntervention = async () => {
+        let API_URL = 'http://10.0.2.2/LGC_backend/?page=ValidateDemandeIntervention';
+        let date = parseInt(moment(selectedDate).format('YYYYMMDD'));
+        try {
+            const response = await fetch(API_URL, {
+                method: 'POST',
+                headers: {
+                    'Authorization': `Bearer ${TOKEN}`,
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(
+                    { "technicien_id": selectedTechnician, "projet_id": selectedProject, "date_intervention": date, "IDPhase": selectedPrestation, "intervention_id": selectedIntervention.intervention_id }
+                )
+            });
+
+            if (!response.ok) {
+                throw new Error(`HTTP error! Status: ${response.status}`);
+            }
+
+            const contentType = response.headers.get('content-type');
+            let data;
+
+            if (contentType && contentType.includes('application/json')) {
+                data = await response.json();
+            } else {
+                const text = await response.text();
+                data = JSON.parse(text);
+            }
+            if (data != null) {
+                if (data) {
+                    Alert.alert("Intervention  confirmée avec succès");
+                    setReload(!reload);
+                } else {
+                    Alert.alert("Un problème est survenu lors de la confirmation de l'intervention");
+                }
+            }
+        } catch (error) {
+            console.error('Error fetching data:', error);
+        }
+    };
+    // refuser demande intervention function
+    const annulateIntervention = async () => {
+        let API_URL = 'http://10.0.2.2/LGC_backend/?page=RejectDemandeIntervention';
+        try {
+            const response = await fetch(API_URL, {
+                method: 'POST',
+                headers: {
+                    'Authorization': `Bearer ${TOKEN}`,
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(
+                    { "obs": comment, "intervention_id": selectedIntervention.intervention_id }
+                )
+            });
+
+            if (!response.ok) {
+                throw new Error(`HTTP error! Status: ${response.status}`);
+            }
+
+            const contentType = response.headers.get('content-type');
+            let data;
+
+            if (contentType && contentType.includes('application/json')) {
+                data = await response.json();
+            } else {
+                const text = await response.text();
+                data = JSON.parse(text);
+            }
+            if (data != null) {
+                if (data) {
+                    Alert.alert("Intervention refusée avec succès");
+                    setReload(!reload);
+                } else {
+                    Alert.alert("Un problème est survenu lors du refus de l'intervention");
+                }
+            }
+        } catch (error) {
+            console.error('Error fetching data:', error);
+        }
+    };
+
     // Show date picker
     const showDatePicker = (type) => {
         setDateType(type);
@@ -85,26 +203,17 @@ export default function DemandesInterventions({ navigation }) {
 
     const filterInterventions = () => {
         let filteredInterventions = interventions;
-
-        // Convert fromDate and toDate to Date objects
-        const fromDateObj = fromDate ? moment(fromDate, "DD/MM/YYYY").toDate() : null;
-        const toDateObj = toDate ? moment(toDate, "DD/MM/YYYY").toDate() : null;
-
         // Convert intervention dates to Date objects
         filteredInterventions = filteredInterventions.filter(intervention => {
-            const interventionDate = moment(intervention.date, "DD/MM/YYYY").toDate();
 
             // Filter by search query
             const searchMatch = search === "" ||
-                intervention.projet.toLowerCase().includes(search.toLowerCase()) ||
-                intervention.client.toLowerCase().includes(search.toLowerCase()) ||
-                intervention.technicien.toLowerCase().includes(search.toLowerCase());
+                intervention.abr_projet.toLowerCase().includes(search.toLowerCase()) ||
+                intervention.abr_client.toLowerCase().includes(search.toLowerCase()) ||
+                intervention.Nom_personnel.toLowerCase().includes(search.toLowerCase());
 
-            // Filter by date range
-            const dateMatch = (!fromDateObj || interventionDate >= fromDateObj) &&
-                (!toDateObj || interventionDate <= toDateObj);
 
-            return searchMatch && dateMatch;
+            return searchMatch;
         });
 
         return filteredInterventions;
@@ -112,12 +221,12 @@ export default function DemandesInterventions({ navigation }) {
 
     const DemandeClick = (intervention) => {
         setSelectedIntervention(intervention);
-        setSelectedClient(intervention.client);
-        setSelectedProject(intervention.projet);
-        setSelectedTechnician(intervention.technicien);
-        setSelectedPrestation(intervention.prestation);
-        setAdresse(intervention.adresse);
-        setSelectedDate(moment(intervention.date, "DD/MM/YYYY").toDate());
+        setSelectedClient(intervention.IDClient);
+        setSelectedProject(intervention.projet_id);
+        setSelectedTechnician(intervention.technicien_id);
+        setSelectedPrestation(intervention.IDPhase);
+        setAdresse("");
+        setSelectedDate(moment(intervention.date_intervention, "YYYYMMDD"));
         setModalVisible(true);
     };
 
@@ -141,8 +250,7 @@ export default function DemandesInterventions({ navigation }) {
             Alert.alert("Date est obligatoire");
             return;
         }
-        Alert.alert('Intervention ajoutée ',
-            `Client: ${selectedClient}\nProject: ${selectedProject}\nTechnician: ${selectedTechnician}\nPrestation: ${selectedPrestation}\nDate: ${selectedDate ? moment(selectedDate).format('MM/DD/YYYY') : 'No date selected'}`);
+        confirmeIntervention();
         setModalVisible(false);
     };
 
@@ -151,7 +259,7 @@ export default function DemandesInterventions({ navigation }) {
             Alert.alert('Veuillez ajouter un commentaire');
             return;
         }
-        console.log('Refuser Intervention ' + selectedIntervention.id, 'Comment: ' + comment);
+        annulateIntervention();
         setComment('');
         setSelectedIntervention(null);
         setModalVisible2(false);
@@ -200,19 +308,21 @@ export default function DemandesInterventions({ navigation }) {
 
             <FlatList
                 data={filterInterventions()}
-                keyExtractor={(item) => item.id.toString()}
+                keyExtractor={(item) => item.intervention_id.toString()}
                 renderItem={({ item }) => (
                     <TouchableOpacity
                         style={styles.intervention}
                         onPress={() => DemandeClick(item)}
                     >
-                        <Text style={styles.Project}>{item.projet}</Text>
-                        <Text style={styles.client}>Objet : {item.object}</Text>
-                        <Text style={styles.client}>Client : {item.client}</Text>
-                        <Text style={styles.technicien}>Technicien: {item.technicien}</Text>
+                        <Text style={styles.Project}>{item.abr_projet}</Text>
+                        <Text style={styles.client}>Objet : {item.Objet_Projet}</Text>
+                        <Text style={styles.client}>Client : {item.abr_client}</Text>
+                        <Text style={styles.technicien}>Technicien: {item.Nom_personnel}</Text>
 
                         <View style={styles.dateView}>
-                            <Text style={styles.dateText}>{item.date}</Text>
+                            <Text style={styles.dateText}>
+                                {moment(item.date_intervention, "YYYYMMDD").format("DD/MM/YYYY") || 'N/A'}
+                            </Text>
                         </View>
                     </TouchableOpacity>
                 )}
@@ -245,9 +355,13 @@ export default function DemandesInterventions({ navigation }) {
                             style={styles.picker}
                         >
                             <Picker.Item label="Séléctionner Client" value="" />
-                            {clients.map((client, index) => (
-                                <Picker.Item key={index} label={client} value={client} />
-                            ))}
+                            {clients ? (
+                                clients?.map((client, index) => (
+                                    <Picker.Item key={index} label={client.abr_client} value={client.IDClient} />
+                                ))) : (
+                                <></>
+                            )
+                            }
                         </Picker>
 
                         <Text style={styles.label}>Projet</Text>
@@ -257,22 +371,10 @@ export default function DemandesInterventions({ navigation }) {
                             style={styles.picker}
                         >
                             <Picker.Item label="Séléctionner Projet" value="" />
-                            {projects.map((project, index) => (
-                                <Picker.Item key={index} label={project} value={project} />
+                            {projects?.map((project, index) => (
+                                <Picker.Item key={index} label={project.abr_projet} value={project.IDProjet} />
                             ))}
                         </Picker>
-
-                        {/* <Text style={styles.label}>Objet</Text>
-                        <Picker
-                            selectedValue={selectedObject}
-                            onValueChange={(itemValue, itemIndex) => setSelectedObject(itemValue)}
-                            style={styles.picker}
-                        >
-                            <Picker.Item label="Séléctionner Objet" value="" />
-                            {objects.map((object, index) => (
-                                <Picker.Item key={index} label={object} value={object} />
-                            ))}
-                        </Picker> */}
 
                         <Text style={styles.label}>Technicien</Text>
                         <Picker
@@ -281,8 +383,8 @@ export default function DemandesInterventions({ navigation }) {
                             style={styles.picker}
                         >
                             <Picker.Item label="Séléctionner Technicien" value="" />
-                            {techniciens.map((technician, index) => (
-                                <Picker.Item key={index} label={technician} value={technician} />
+                            {techniciens?.map((technician, index) => (
+                                <Picker.Item key={index} label={technician.nom_complet} value={technician.user_id} />
                             ))}
                         </Picker>
 
@@ -293,8 +395,8 @@ export default function DemandesInterventions({ navigation }) {
                             style={styles.picker}
                         >
                             <Picker.Item label="Séléctionner Prestation" value="" />
-                            {prestations.map((prestation, index) => (
-                                <Picker.Item key={index} label={prestation} value={prestation} />
+                            {prestations?.map((prestation, index) => (
+                                <Picker.Item key={index} label={prestation.libelle} value={prestation.IDPhase} />
                             ))}
                         </Picker>
 
@@ -432,7 +534,8 @@ const styles = StyleSheet.create({
         fontSize: 16,
         fontWeight: "bold",
         paddingLeft: 5,
-        marginTop: 5
+        marginTop: 5,
+        marginBottom: 16,
     },
     interventionText: {
         fontSize: 16,

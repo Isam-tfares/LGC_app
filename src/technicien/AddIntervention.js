@@ -1,14 +1,20 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { View, Modal, Text, TouchableOpacity, StyleSheet, Alert } from "react-native";
 import { Picker } from '@react-native-picker/picker';
 import { Ionicons } from '@expo/vector-icons';
 import DateTimePickerModal from 'react-native-modal-datetime-picker';
 import moment from 'moment';
+import { useSelector, useDispatch } from 'react-redux';
+import { setData } from '../actions/dataActions';
 
 export default function AddIntervention({ modalVisible, setModalVisible, technicien }) {
-    const [clients, setClients] = useState(["client 1", "client 2", "client 3", "client 4", "client 5"]);
-    const [projects, setProjects] = useState(["project 10", "project 11", "project 12", "project 13", "project 14", "project 15"]);
-    const [prestations, setPrestations] = useState(["prestation 1", "prestation 2", "prestation 3", "prestation 4", "prestation 5", "prestation 6", "prestation 7", "prestation 8", "prestation 9", "prestation 10"]);
+    const technicien_id = useSelector(state => state.user.user.id)
+    console.log("user", technicien_id)
+    const TOKEN = useSelector(state => state.user.token);
+    const dispatch = useDispatch();
+    const [clients, setClients] = useState(useSelector(state => state.data.clients));
+    const [projects, setProjects] = useState(useSelector(state => state.data.projects));
+    const [prestations, setPrestations] = useState(useSelector(state => state.data.prestations));
     const [selectedClient, setSelectedClient] = useState('');
     const [selectedProject, setSelectedProject] = useState('');
     const [selectedPrestation, setSelectedPrestation] = useState('');
@@ -16,6 +22,86 @@ export default function AddIntervention({ modalVisible, setModalVisible, technic
     const [selectedDate2, setSelectedDate2] = useState(null);
     const [isDatePickerVisible, setDatePickerVisibility] = useState(false);
     const [isDatePickerVisible2, setDatePickerVisibility2] = useState(false);
+
+    useEffect(() => {
+        if (!clients || !projects || !prestations) {
+            const API_URL = 'http://10.0.2.2/LGC_backend/?page=addInterventionInterface';
+            fetchData(API_URL, TOKEN);
+        }
+    }, []);
+
+    const fetchData = async (url, token) => {
+        try {
+            const response = await fetch(url, {
+                method: 'GET',
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'Content-Type': 'application/json'
+                },
+            });
+
+            if (!response.ok) {
+                throw new Error(`HTTP error! Status: ${response.status}`);
+            }
+
+            const contentType = response.headers.get('content-type');
+            let data;
+
+            if (contentType && contentType.includes('application/json')) {
+                data = await response.json();
+            } else {
+                const text = await response.text();
+                data = JSON.parse(text);
+            }
+            if (Object.keys(data)) {
+                setClients(data.clients);
+                setProjects(data.projects);
+                setPrestations(data.phases);
+                dispatch(setData(data.clients, data.projects, data.phases, data.techniciens));
+
+            }
+        } catch (error) {
+            console.error('Error fetching data:', error);
+        }
+    };
+    const insertIntervention = async (url, token, date) => {
+        try {
+            const response = await fetch(url, {
+                method: 'POST',
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(
+                    { "technicien_id": technicien_id, "projet_id": selectedProject, "date_intervention": date, "IDPhase": selectedPrestation }
+                )
+            });
+
+            if (!response.ok) {
+                throw new Error(`HTTP error! Status: ${response.status}`);
+            }
+
+            const contentType = response.headers.get('content-type');
+            let data;
+
+            if (contentType && contentType.includes('application/json')) {
+                data = await response.json();
+            } else {
+                const text = await response.text();
+                data = JSON.parse(text);
+            }
+            if (data != null) {
+                if (data) {
+                    Alert.alert("Demande Intervention ajoutée avec succès");
+                } else {
+                    Alert.alert("Un problème est survenu lors de l'ajout de l'intervention");
+                }
+            }
+        } catch (error) {
+            console.error('Error fetching data:', error);
+        }
+    };
+
     const showDatePicker = () => {
         setDatePickerVisibility(true);
     };
@@ -43,8 +129,9 @@ export default function AddIntervention({ modalVisible, setModalVisible, technic
         if (!selectedClient || !selectedProject || !selectedPrestation || !selectedDate || !selectedDate2) {
             return Alert.alert('Erreur', 'Veuillez remplir tous les champs');
         }
-        Alert.alert('Intervention ajoutée',
-            `Client: ${selectedClient}\nProject: ${selectedProject}\nTechnician: ${technicien}\nPrestation: ${selectedPrestation}\nDate 1: ${selectedDate ? moment(selectedDate).format('DD/MM/YYYY') : 'No date selected'}\nDate 2: ${selectedDate2 ? moment(selectedDate2).format('DD/MM/YYYY') : 'No date selected'}`);
+        API_URL = "http://10.0.2.2/LGC_backend/?page=addInterventionAction";
+        date = parseInt(moment(selectedDate).format('YYYYMMDD'));
+        insertIntervention(API_URL, TOKEN, date);
         setSelectedClient('');
         setSelectedProject('');
         setSelectedPrestation('');
@@ -80,9 +167,14 @@ export default function AddIntervention({ modalVisible, setModalVisible, technic
                         style={styles.picker}
                     >
                         <Picker.Item label="Séléctionner Client" value="" />
-                        {clients.map((client, index) => (
-                            <Picker.Item key={index} label={client} value={client} />
-                        ))}
+                        {clients ? (
+                            clients?.map((client, index) => (
+                                <Picker.Item key={index} label={client.abr_client} value={client.IDClient} />
+                            ))) : (
+                            <></>
+                        )
+                        }
+
                     </Picker>
 
                     <Text style={styles.label}>Projet</Text>
@@ -92,8 +184,8 @@ export default function AddIntervention({ modalVisible, setModalVisible, technic
                         style={styles.picker}
                     >
                         <Picker.Item label="Séléctionner Projet" value="" />
-                        {projects.map((project, index) => (
-                            <Picker.Item key={index} label={project} value={project} />
+                        {projects?.map((project, index) => (
+                            <Picker.Item key={index} label={project.abr_projet} value={project.IDProjet} />
                         ))}
                     </Picker>
 
@@ -104,8 +196,8 @@ export default function AddIntervention({ modalVisible, setModalVisible, technic
                         style={styles.picker}
                     >
                         <Picker.Item label="Séléctionner Prestation" value="" />
-                        {prestations.map((prestation, index) => (
-                            <Picker.Item key={index} label={prestation} value={prestation} />
+                        {prestations?.map((prestation, index) => (
+                            <Picker.Item key={index} label={prestation.libelle} value={prestation.IDPhase} />
                         ))}
                     </Picker>
 
