@@ -7,7 +7,9 @@ import { useSelector } from 'react-redux';
 import moment from 'moment';
 
 export default function PreReceptionDetails({ route, navigation }) {
-    const TOKEN = useSelector(state => state.user.token); // Move this line inside the component
+    const TOKEN = useSelector(state => state.user.token);
+    const IMAGES_URL = "http://10.0.2.2/LGC_backend/pvs/";
+
     let { reception } = route.params;
 
     const [imageModalVisible, setImageModalVisible] = useState(false);
@@ -15,7 +17,11 @@ export default function PreReceptionDetails({ route, navigation }) {
     const [image, setImage] = useState(null);
     const [receptionState, setReceptionState] = useState(reception);
 
-
+    useEffect(() => {
+        if (receptionState.PVPath) {
+            setImage(IMAGES_URL + receptionState.PVPath);
+        }
+    }, [receptionState]);
     if (route.params.id) {
         console.log("fetch Prereception of intervention_id", route.params.id);
         fetchPreReception(route.params.id, TOKEN);
