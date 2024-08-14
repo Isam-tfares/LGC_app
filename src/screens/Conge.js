@@ -1,50 +1,135 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, TextInput, Alert, ScrollView } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, TextInput, Alert, ScrollView, ActivityIndicator } from 'react-native';
 import DateTimePickerModal from "react-native-modal-datetime-picker";
 import AntDesign from '@expo/vector-icons/AntDesign';
 import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
 import Entypo from '@expo/vector-icons/Entypo';
 import { Picker } from '@react-native-picker/picker';
+import moment from 'moment';
+import 'moment/locale/fr'; // Import French locale for month names
+import { useSelector } from 'react-redux';
 
 export default function Conge({ navigation }) {
+    const TOKEN = useSelector(state => state.user.token);
 
     // State variables for input values
     const [showenSection, setShowenSection] = useState(false);
+    const [showenSection2, setShowenSection2] = useState(false);
     const [availableDays, setAvailableDays] = useState(15);
-    const [years, setYears] = useState([2022, 2023, 2024]);
-    const [year, setYear] = useState(2024);
+    const [years, setYears] = useState();
+    const [year, setYear] = useState(moment().year());
     const [selectedMotif, setSelectedMotif] = useState('');
     const [autreMotif, setAutreMotif] = useState('');
     const [fromDate, setFromDate] = useState('');
     const [toDate, setToDate] = useState('');
+    const [fromDateAPI, setFromDateAPI] = useState('');
+    const [toDateAPI, setToDateAPI] = useState('');
     const [nbr_days, setNbr_days] = useState(0);
     const [isDatePickerVisible, setDatePickerVisibility] = useState(false);
     const [dateType, setDateType] = useState('');
-    const [conges, setConges] = useState([
-        { "id": 1, "start_date": "2024-01-01", "end_date": "2024-01-02", "nbr_jrs": 2 },
-        { "id": 2, "start_date": "2024-04-03", "end_date": "2024-04-10", "nbr_jrs": 8 },
-        { "id": 3, "start_date": "2024-07-01", "end_date": "2024-07-05", "nbr_jrs": 5 },
-    ]);
-    const [motifs_conges, setMotifsConges] = useState([
-        { "id": 1, "motif": "Annuel" },
-        { "id": 2, "motif": "Maladie" },
-        { "id": 3, "motif": "Mariage" },
-        { "id": 4, "motif": "Naissance" },
-        { "id": 5, "motif": "Décès" },
-        { "id": 6, "motif": "Autre" },
-    ]);
+    const [conges, setConges] = useState([]);
+    const [demandesConges, setDemandesConges] = useState([]);
+    const [motifs_conges, setMotifsConges] = useState([]);
+    const [reload, setReload] = useState(false);
+    const [loading, setLoading] = useState(false);
+
+
     useEffect(() => {
-        // Fetch motifs conges from the API
-        console.log("Fetching motifs conges from the API");
-        // setMotifsConges;
-    }, []);
-    useEffect(() => {
-        console.log("Fetching conges from the API");
-        // Fetch available days and conges historique from the API
-    }, [year]);
+        fetchData();
+    }, [year, reload]);
 
+    const fetchData = async () => {
+        try {
+            setLoading(true);
+            const API_URL = 'http://10.0.2.2/LGC_backend/?page=CongesInterface';
+            const response = await fetch(API_URL, {
+                method: 'POST',
+                headers: {
+                    'Authorization': `Bearer ${TOKEN}`,
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ "year": year }),
+            });
 
+            if (!response.ok) {
+                throw new Error(` HTTP error! Status: ${response.status}`);
+            }
 
+            const contentType = response.headers.get('content-type');
+            let data;
+
+            if (contentType && contentType.includes('application/json')) {
+                data = await response.json();
+            } else {
+                const text = await response.text();
+                try {
+                    data = JSON.parse(text);
+                } catch (error) {
+                    console.error('Error parsing JSON :', error);
+                    // Handle non-JSON data if necessary
+                    return;
+                }
+            }
+
+            if (data) {
+                setConges(data.conges);
+                setMotifsConges(data.motifs);
+                setAvailableDays(data.days);
+                setYears(data.years);
+                setDemandesConges(data.demandesConges);
+            }
+        } catch (error) {
+            console.error(' Error fetching data:', error);
+        }
+        finally {
+            setLoading(false);
+        }
+    };
+
+    // confirme intervention function
+    const addDemandeConge = async () => {
+        let API_URL = 'http://10.0.2.2/LGC_backend/?page=AddDemandeConge';
+        setLoading(true);
+        try {
+            const response = await fetch(API_URL, {
+                method: 'POST',
+                headers: {
+                    'Authorization': `Bearer ${TOKEN}`,
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(
+                    { "fromDate": fromDateAPI, "toDate": toDateAPI, "year": moment().year(), "nbr_days": nbr_days, "motifsconge_id": selectedMotif, "autreMotif": autreMotif }
+                )
+            });
+
+            if (!response.ok) {
+                throw new Error(` HTTP error! Status: ${response.status}`);
+            }
+
+            const contentType = response.headers.get('content-type');
+            let data;
+
+            if (contentType && contentType.includes('application/json')) {
+                data = await response.json();
+            } else {
+                const text = await response.text();
+                data = JSON.parse(text);
+            }
+            if (data != null) {
+                if (data) {
+                    Alert.alert("Demande ajoutée avec succès");
+                    setReload(!reload);
+                } else {
+                    Alert.alert("Un problème est survenu lors de l'ajout de la demande");
+                }
+            }
+        } catch (error) {
+            console.error('Error fetching data:', error);
+        }
+        finally {
+            setLoading(false);
+        }
+    };
 
     // Show date picker
     const showDatePicker = (type) => {
@@ -62,8 +147,14 @@ export default function Conge({ navigation }) {
         const formattedDate = `${date.getDate()}/${date.getMonth() + 1}/${date.getFullYear()}`;
         if (dateType === 'from') {
             setFromDate(formattedDate);
+            const fromDateObj = moment(formattedDate, "DD/MM/YYYY");
+            const fromDateAPIFormat = fromDateObj.format("YYYYMMDD");
+            setFromDateAPI(parseInt(fromDateAPIFormat, 10));
         } else {
             setToDate(formattedDate);
+            const toDateObj = moment(formattedDate, "DD/MM/YYYY");
+            const toDateAPIFormat = toDateObj.format("YYYYMMDD");
+            setToDateAPI(parseInt(toDateAPIFormat, 10));
         }
         hideDatePicker();
     };
@@ -90,19 +181,21 @@ export default function Conge({ navigation }) {
         if (fromDateObj > toDateObj) {
             return Alert.alert('Erreur', 'La date de début doit être avant la date de fin');
         }
-
-        // Affichage des informations pour la demande
-        console.log(`Motif: ${selectedMotif}, Autre motif: ${autreMotif}, Date de début: ${fromDate}, Date de fin: ${toDate}, Nombre des jours: ${nbr_days}`);
-
-        // Affichage d'un message de succès
-        Alert.alert('Demande de congé', 'Votre demande de congé a été envoyée avec succès');
-
+        // check if nbr_days in integer
+        if (!Number.isInteger(nbr_days)) {
+            return Alert.alert('Erreur', 'Le nombre de jours doit être un entier');
+        }
+        if (nbr_days > availableDays) {
+            return Alert.alert('Erreur', 'Vous avez dépassé le nombre de jours restants');
+        }
+        addDemandeConge();
         // Réinitialisation des champs
         setFromDate('');
         setToDate('');
         setNbr_days(0);
         setSelectedMotif('');
         setAutreMotif('');
+        setReload(!reload);
     };
 
 
@@ -121,8 +214,8 @@ export default function Conge({ navigation }) {
                             onValueChange={(itemValue, itemIndex) => setYear(itemValue)}
                             style={styles.small_picker}
                         >
-                            {years.map((year, index) => (
-                                <Picker.Item key={index} label={year.toString()} value={year} />
+                            {years?.map((year, index) => (
+                                <Picker.Item key={index} label={year.annee} value={year.annee} />
                             ))}
                         </Picker>
                     </View>
@@ -140,6 +233,8 @@ export default function Conge({ navigation }) {
                 </View>
             </View>
 
+            {/* Loading */}
+            {loading ? <View style={styles.loading}><ActivityIndicator size="large" color="#4b6aff" /></View> : null}
             <View style={styles.historiqueContainer}>
                 <View style={styles.flexConatiner}>
                     <Text style={styles.title}>Historique Congés</Text>
@@ -149,11 +244,30 @@ export default function Conge({ navigation }) {
                 </View>
                 {showenSection ?
                     (<>
-                        {conges.map((item, index) => {
+                        {conges?.map((item, index) => {
                             return (
-                                <View style={styles.conge} key={item.id.toString()}>
-                                    <Text style={styles.year}>{item.start_date} -> {item.end_date}</Text>
-                                    <Text style={styles.days}>{item.nbr_jrs} Jours</Text>
+                                <View style={styles.conge} key={item.conge_id}>
+                                    <Text style={styles.year}>{moment(item.start_date, "YYYYMMDD").format("DD/MM/YYYY") || 'N/A'} -> {moment(item.end_date, "YYYYMMDD").format("DD/MM/YYYY") || 'N/A'}</Text>
+                                    <Text style={styles.days}>{item.jours_pris} Jours</Text>
+                                </View>
+                            );
+                        })}
+                    </>) : null}
+            </View>
+            <View style={styles.historiqueContainer}>
+                <View style={styles.flexConatiner}>
+                    <Text style={styles.title}>Vos Demandes</Text>
+                    <TouchableOpacity onPress={() => { setShowenSection2(!showenSection2) }}>
+                        {showenSection2 ? <Entypo name="chevron-thin-up" size={20} color="black" /> : <Entypo name="chevron-thin-down" size={24} color="black" />}
+                    </TouchableOpacity>
+                </View>
+                {showenSection2 ?
+                    (<>
+                        {demandesConges?.map((item, index) => {
+                            return (
+                                <View style={styles.conge} key={item.conge_id}>
+                                    <Text style={styles.year}>{moment(item.start_date, "YYYYMMDD").format("DD/MM/YYYY") || 'N/A'} -> {moment(item.end_date, "YYYYMMDD").format("DD/MM/YYYY") || 'N/A'}</Text>
+                                    <Text style={styles.days}>{item.jours_pris} Jours</Text>
                                 </View>
                             );
                         })}
@@ -168,8 +282,8 @@ export default function Conge({ navigation }) {
                     style={styles.input}
                 >
                     <Picker.Item label="Motif de congé" value="" />
-                    {motifs_conges.map((motif, index) => (
-                        <Picker.Item key={index} label={motif.motif} value={motif.id} />
+                    {motifs_conges?.map((motif, index) => (
+                        <Picker.Item key={index} label={motif.labelle} value={motif.motifsconge_id} />
                     ))}
                 </Picker>
                 {selectedMotif === 6 ?
@@ -206,7 +320,7 @@ export default function Conge({ navigation }) {
                     style={styles.input}
                     placeholder="Nombre des jours"
                     value={nbr_days.toString()}
-                    onChangeText={(text) => setNbr_days(parseInt(text, 10))}
+                    onChangeText={(text) => { setNbr_days(parseInt(text)) }}
                     keyboardType="numeric"
                 />
 
@@ -345,6 +459,12 @@ const styles = StyleSheet.create({
         fontWeight: "bold",
         fontSize: 25,
         paddingBottom: 10
+    },
+    loading: {
+        position: "absolute",
+        top: "50%",
+        left: "50%",
+        zIndex: 111
     }
 });
 

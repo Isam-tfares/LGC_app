@@ -1,16 +1,9 @@
-import React, { useState } from 'react';
-import { View, Text, StyleSheet, Alert, TouchableOpacity, Modal, TextInput } from 'react-native';
+import React from 'react';
+import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 
 export default function InterventionRec({ route, navigation }) {
     const { intervention } = route.params;
-    const [modalVisible, setModalVisible] = useState(false);
-    const [comment, setComment] = useState('');
 
-    const handleAnnuler = () => {
-        // Logic to handle the comment submission or cancellation
-        Alert.alert('Comment: ' + comment);
-        setModalVisible(false);
-    };
     const validateIntervention = (intervention_id, status) => {
         if (status == "pre") {
             navigation.navigate('Pré-réceptions', { "id": intervention_id });
@@ -23,23 +16,23 @@ export default function InterventionRec({ route, navigation }) {
             <View style={styles.card}>
                 <View style={styles.row}>
                     <Text style={styles.title}>N° Intervention :</Text>
-                    <Text style={styles.text}>{intervention.id}</Text>
+                    <Text style={styles.text}>{intervention.intervention_id}</Text>
                 </View>
                 <View style={styles.row}>
                     <Text style={styles.title}>Client:</Text>
-                    <Text style={styles.text}>{intervention.client}</Text>
+                    <Text style={styles.text}>{intervention.abr_client}</Text>
                 </View>
                 <View style={styles.row}>
                     <Text style={styles.title}>Projet : </Text>
-                    <Text style={styles.text}>{intervention.projet}</Text>
+                    <Text style={styles.text}>{intervention.abr_projet}</Text>
                 </View>
                 <View style={styles.row}>
                     <Text style={styles.title}>Objet : </Text>
-                    <Text style={styles.text}>{intervention.object}</Text>
+                    <Text style={styles.text}>{intervention.Objet_Projet}</Text>
                 </View>
                 <View style={styles.row}>
                     <Text style={styles.title}>Prestation : </Text>
-                    <Text style={styles.text}>{intervention.prestation ? intervention.prestation : ""}</Text>
+                    <Text style={styles.text}>{intervention.libelle ? intervention.libelle : ""}</Text>
                 </View>
                 <View style={styles.row}>
                     <Text style={styles.title}>Matériaux : </Text>
@@ -53,25 +46,25 @@ export default function InterventionRec({ route, navigation }) {
 
                 <View style={styles.row}>
                     <Text style={styles.title}>Observation : </Text>
-                    <Text>{intervention.obs ? intervention.obs : ""}</Text>
+                    <Text style={styles.text}>{intervention.obs ? intervention.obs : ""}</Text>
                 </View>
                 <View style={styles.row}>
                     <Text style={styles.title}>Etat d'intervention : </Text>
-                    <Text style={[styles.text, intervention.status == "Faite" ? styles.valide : (intervention.status == "Annulée" ? styles.annule : styles.enCours)]}
-
-                    >{intervention.status}</Text>
+                    <Text style={[styles.text, intervention.status == 2 ? styles.valide : (intervention.status == 0 ? styles.annule : styles.enCours)]}>
+                        {intervention.status == 1 ? "En cours" : intervention.status == 0 ? "Annulée" : "Faite"}</Text>
                 </View>
-                {(intervention.status == "Faite") ?
-                    intervention.reception == "Faite" ?
+                {(intervention.status == 2) ?
+                    intervention.etat_reception == 1 ?
                         (<><View style={styles.row}>
                             <Text style={styles.title}>Etat de réception : </Text>
-                            <Text style={[styles.text, intervention.reception == "Faite" ? styles.valide : (intervention.status == "Annulée" ? styles.annule : styles.enCours)]}
-
-                            >{intervention.reception}</Text>
+                            <Text style={[styles.text, intervention.etat_reception == 1 ?
+                                styles.valide : (intervention.status == 0 ? styles.annule : styles.enCours)]}>
+                                {intervention.etat_reception}
+                            </Text>
 
                         </View>
                             <View style={styles.buttonView}>
-                                <TouchableOpacity style={[styles.button, styles.confirmButton]} onPress={() => { validateIntervention(intervention.id, "re") }}>
+                                <TouchableOpacity style={[styles.button, styles.confirmButton]} onPress={() => { validateIntervention(intervention.intervention_id, "re") }}>
                                     <Text style={styles.buttonText}>Voir réception</Text>
                                 </TouchableOpacity>
                             </View>
@@ -80,17 +73,14 @@ export default function InterventionRec({ route, navigation }) {
                         (<>
                             <View style={styles.row}>
                                 <Text style={styles.title}>Etat de réception : </Text>
-                                <Text style={[styles.text, intervention.reception == "Faite" ? styles.valide : (intervention.status == "Annulée" ? styles.annule : styles.enCours)]}
+                                <Text style={[styles.text, intervention.etat_reception == 1 ? styles.valide : (intervention.status == 0 ? styles.annule : styles.enCours)]}
 
                                 >{intervention.reception}</Text>
                             </View>
                             <View style={styles.buttonContainer}>
-                                <TouchableOpacity style={[styles.button, styles.confirmButton]} onPress={() => { validateIntervention(intervention.id, "pre") }}>
+                                <TouchableOpacity style={[styles.button, styles.confirmButton]} onPress={() => { validateIntervention(intervention.intervention_id, "pre") }}>
                                     <Text style={styles.buttonText}>Voir pré-réception</Text>
                                 </TouchableOpacity>
-                                {/* <TouchableOpacity style={[styles.button, styles.cancelButton]} onPress={() => { setModalVisible(true) }}>
-                                <Text style={styles.buttonText}>Annuler</Text>
-                            </TouchableOpacity> */}
                             </View>
                         </>
                         )
@@ -99,31 +89,6 @@ export default function InterventionRec({ route, navigation }) {
                 }
 
             </View>
-
-            <Modal
-                animationType="slide"
-                transparent={true}
-                visible={modalVisible}
-                onRequestClose={() => {
-                    setModalVisible(!modalVisible);
-                }}
-            >
-                <View style={styles.modalOverlay}>
-                    <View style={styles.modalView}>
-                        <Text style={styles.modalTitle}>Ajouter un commentaire</Text>
-                        <TextInput
-                            style={styles.input}
-                            placeholder="Comment"
-                            value={comment}
-                            onChangeText={setComment}
-                            placeholderTextColor="#ccc"
-                        />
-                        <TouchableOpacity style={styles.modalButton} onPress={handleAnnuler}>
-                            <Text style={styles.modalButtonText}>Valider</Text>
-                        </TouchableOpacity>
-                    </View>
-                </View>
-            </Modal>
         </View>
     );
 }
@@ -149,10 +114,11 @@ const styles = StyleSheet.create({
     },
     row: {
         flexDirection: 'row',
-        alignItems: "center",
+        // alignItems: "center",
         marginBottom: 20,
         paddingEnd: 5,
-        justifyContent: "space-between"
+        justifyContent: "space-between",
+        width: "100%",
     },
     title: {
         fontSize: 16,
@@ -161,6 +127,7 @@ const styles = StyleSheet.create({
     text: {
         fontSize: 16,
         fontWeight: 'bold',
+        width: "80%",
     },
     buttonView: {
         flexDirection: 'row',

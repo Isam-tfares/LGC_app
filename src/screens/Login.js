@@ -1,6 +1,6 @@
 // src/screens/Login.js
 import React, { useState, useEffect } from 'react';
-import { View, TextInput, Alert, StyleSheet, TouchableOpacity, Text, Image, KeyboardAvoidingView, ScrollView, Platform, SafeAreaView } from 'react-native';
+import { View, TextInput, Alert, StyleSheet, TouchableOpacity, Text, Image, KeyboardAvoidingView, ScrollView, Platform, SafeAreaView, ActivityIndicator } from 'react-native';
 import { useDispatch, useSelector } from 'react-redux';
 import { setUser } from '../actions/userActions'; // Update path as needed
 
@@ -10,6 +10,7 @@ const Login = ({ isLogined, setLogined }) => {
     const [password, setPassword] = useState('');
     const [errorUsername, setErrorUsername] = useState('');
     const [errorPassword, setErrorPassword] = useState('');
+    const [loading, setLoading] = useState(false);
 
     const user = useSelector(state => state.user);
     useEffect(() => {
@@ -45,7 +46,7 @@ const Login = ({ isLogined, setLogined }) => {
         }
 
         const API_URL = 'http://10.0.2.2/LGC_backend/?page=login';
-
+        setLoading(true);
         try {
             const response = await fetch(API_URL, {
                 method: 'POST',
@@ -75,6 +76,8 @@ const Login = ({ isLogined, setLogined }) => {
         } finally {
             setErrorUsername('');
             setErrorPassword('');
+            setLoading(false); // Ensure loading state is turned off after fetch
+
         }
     };
 
@@ -94,6 +97,9 @@ const Login = ({ isLogined, setLogined }) => {
                     <View style={{ marginBottom: 30, marginTop: 10 }}>
                         <Text style={{ color: 'white', fontSize: 24 }}>Login</Text>
                     </View>
+                    {loading ?
+                        (<ActivityIndicator color={"white"} />)
+                        : (<></>)}
                     <TextInput
                         placeholder="Nom d'utilisateur"
                         value={username}

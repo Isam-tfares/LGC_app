@@ -1,20 +1,9 @@
 import React, { useState } from 'react';
 import { Button, View, Text, StyleSheet, Alert, TouchableOpacity, Modal, TextInput } from 'react-native';
-import { useSelector } from 'react-redux';
 
 export default function Intervention({ route, navigation, reload, setReload }) {
     const { intervention } = route.params;
-    const [modalVisible, setModalVisible] = useState(false);
-    const [comment, setComment] = useState('');
 
-
-    const handleAnnuler = () => {
-        // Logic to handle the comment submission or cancellation
-        Alert.alert('Comment: ' + comment);
-        setModalVisible(false);
-        // annulateIntervention();
-        // navigation.goBack();
-    };
     const validateIntervention = (intervention_id, status) => {
         if (status == "pre") {
             navigation.navigate('Pré-réceptions', { "id": intervention_id });
@@ -62,7 +51,7 @@ export default function Intervention({ route, navigation, reload, setReload }) {
                 </View>
                 <View style={styles.row}>
                     <Text style={styles.title}>Etat d'intervention : </Text>
-                    <Text style={[styles.text, intervention.status == "faite" ? styles.valide : (intervention.status == "annulée" ? styles.annule : styles.enCours)]}>
+                    <Text style={[styles.text, intervention.status == 2 ? styles.valide : (intervention.status == 0 ? styles.annule : styles.enCours)]}>
                         {intervention.status == 1 ? "En cours" : intervention.status == 0 ? "Annulée" : "Faite"}</Text>
                 </View>
                 {(intervention.status == 2) ?
@@ -75,7 +64,7 @@ export default function Intervention({ route, navigation, reload, setReload }) {
 
                         </View>
                             <View style={styles.buttonView}>
-                                <TouchableOpacity style={[styles.button, styles.confirmButton]} onPress={() => { validateIntervention(intervention.id, "re") }}>
+                                <TouchableOpacity style={[styles.button, styles.confirmButton]} onPress={() => { validateIntervention(intervention.intervention_id, "re") }}>
                                     <Text style={styles.buttonText}>Voir réception</Text>
                                 </TouchableOpacity>
                             </View>
@@ -92,9 +81,6 @@ export default function Intervention({ route, navigation, reload, setReload }) {
                                 <TouchableOpacity style={[styles.button, styles.confirmButton]} onPress={() => { validateIntervention(intervention.intervention_id, "pre") }}>
                                     <Text style={styles.buttonText}>Voir pré-réception</Text>
                                 </TouchableOpacity>
-                                {/* <TouchableOpacity style={[styles.button, styles.cancelButton]} onPress={() => { setModalVisible(true) }}>
-                                <Text style={styles.buttonText}>Annuler</Text>
-                            </TouchableOpacity> */}
                             </View>
                         </>
                         )
@@ -103,31 +89,6 @@ export default function Intervention({ route, navigation, reload, setReload }) {
                 }
 
             </View>
-
-            <Modal
-                animationType="slide"
-                transparent={true}
-                visible={modalVisible}
-                onRequestClose={() => {
-                    setModalVisible(!modalVisible);
-                }}
-            >
-                <View style={styles.modalOverlay}>
-                    <View style={styles.modalView}>
-                        <Text style={styles.modalTitle}>Ajouter un commentaire</Text>
-                        <TextInput
-                            style={styles.input}
-                            placeholder="Comment"
-                            value={comment}
-                            onChangeText={setComment}
-                            placeholderTextColor="#ccc"
-                        />
-                        <TouchableOpacity style={styles.modalButton} onPress={handleAnnuler}>
-                            <Text style={styles.modalButtonText}>Valider</Text>
-                        </TouchableOpacity>
-                    </View>
-                </View>
-            </Modal>
         </View>
     );
 }

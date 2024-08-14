@@ -1,107 +1,149 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, Alert, Image, Modal, TextInput } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, Alert, Image, Modal, TextInput, ActivityIndicator } from 'react-native';
 import { Button } from 'react-native-elements';
 import { ScrollView } from 'react-native-gesture-handler';
 import { Ionicons } from '@expo/vector-icons';
+import { useSelector } from 'react-redux';
+import moment from 'moment';
 
 export default function PreReceptionDetails({ route, navigation }) {
-    const [imageModalVisible, setImageModalVisible] = useState(false);
-    const [image, setImage] = useState('https://image.slidesharecdn.com/redactionprojetintervention-100614145220-phpapp02/85/Redaction-d-un-projet-d-intervention-2-320.jpg');
+    const TOKEN = useSelector(state => state.user.token); // Move this line inside the component
     let { reception } = route.params;
+
+    const [imageModalVisible, setImageModalVisible] = useState(false);
+    const [loading, setLoading] = useState(false);
+    const [image, setImage] = useState(null);
+    const [receptionState, setReceptionState] = useState(reception);
+
+
     if (route.params.id) {
         console.log("fetch Prereception of intervention_id", route.params.id);
-        reception = {
-            n_reception: '4848',
-            n_intervention: 1,
-            id: '1',
-            project: 'Project A',
-            client: 'Client X',
-            technicien: 'Technician 1',
-            prestation: 'Prestation 1',
-            materiaux: 'Material 1',
-            date_reception: '2024-07-25',
-            nbr_echantillon: '10',
-            etat_recuperation: 'Récupérée',
-            preleve: 'LGC',
-            essaie: 'interne',
-            beton: 'Béton 1',
-            slump: '10 cm',
-            central: 'Plant A',
-            BL: '12345',
-            nbr_jrs: '7,28',
-        };
+        fetchPreReception(route.params.id, TOKEN);
     }
     const closeImageModal = () => {
         setImageModalVisible(null);
     };
+
+    const fetchPreReception = async (IDPre_reception, token) => {
+        setLoading(true);
+        const API_URL = 'http://10.0.2.2/LGC_backend/?page=PreReception';
+        try {
+            const response = await fetch(url, {
+                method: 'POST',
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ "IDPre_reception": IDPre_reception }),
+            });
+
+            if (!response.ok) {
+                throw new Error(`HTTP error! Status: ${response.status}`);
+            }
+
+            const contentType = response.headers.get('content-type');
+            let data;
+
+            if (contentType && contentType.includes('application/json')) {
+                data = await response.json();
+            } else {
+                const text = await response.text();
+                try {
+                    data = JSON.parse(text);
+                } catch (error) {
+                    console.error('Error parsing JSON:', error);
+                    // Handle non-JSON data if necessary
+                    return;
+                }
+            }
+
+            // check if data is Object
+            if (typeof data === 'object' && data !== null) {
+                setReceptionState(data);
+            }
+        } catch (error) {
+            console.error('Error fetching data:', error);
+        }
+        finally {
+            setLoading(false);
+        }
+    };
     return (
         <ScrollView>
             <View style={styles.container}>
+
+                {/* Loading */}
+                {loading ? <View style={styles.loading}><ActivityIndicator size="large" color="#4b6aff" /></View> : null}
+
                 <View style={styles.card}>
                     <View style={styles.row}>
-                        <Text style={styles.title}>N° réception</Text>
-                        <Text style={styles.text}>{reception.n_reception}</Text>
+                        <Text style={styles.title}>Code Bar</Text>
+                        <Text style={styles.text}>{receptionState.Observation}</Text>
                     </View>
                     <View style={styles.row}>
                         <Text style={styles.title}>Client</Text>
-                        <Text style={styles.text}>{reception.client}</Text>
+                        <Text style={styles.text}>{receptionState.abr_client}</Text>
                     </View>
                     <View style={styles.row}>
                         <Text style={styles.title}>Projet</Text>
-                        <Text style={styles.text}>{reception.project}</Text>
+                        <Text style={styles.text}>{receptionState.abr_projet}</Text>
                     </View>
                     <View style={styles.row}>
                         <Text style={styles.title}>Technicien</Text>
-                        <Text style={styles.text}>{reception.technicien}</Text>
+                        <Text style={styles.text}>{receptionState.PersonnelNom}</Text>
                     </View>
                     <View style={styles.row}>
                         <Text style={styles.title}>Prestation</Text>
-                        <Text style={styles.text}>{reception.prestation}</Text>
+                        <Text style={styles.text}>{receptionState.PhaseLibelle}</Text>
                     </View>
                     <View style={styles.row}>
                         <Text style={styles.title}>Material</Text>
-                        <Text style={styles.text}>{reception.materiaux}</Text>
+                        <Text style={styles.text}>{receptionState.MateriauxLibelle}</Text>
                     </View>
                     <View style={styles.row}>
-                        <Text style={styles.title}>Date réception</Text>
-                        <Text style={styles.text}>{reception.date_reception}</Text>
+                        <Text style={styles.title}>Date création</Text>
+                        <Text style={styles.text}>{moment(receptionState.saisiele, "YYYYMMDD").format("DD/MM/YYYY") || 'N/A'}</Text>
+                    </View>
+                    <View style={styles.row}>
+                        <Text style={styles.title}>Lieu de prélèvement</Text>
+                        <Text style={styles.text}>{moment(receptionState.Lieux_ouvrage, "YYYYMMDD").format("DD/MM/YYYY") || 'N/A'}</Text>
                     </View>
                     <View style={styles.row}>
                         <Text style={styles.title}>Nombre echantillon</Text>
-                        <Text style={styles.text}>{reception.nbr_echantillon}</Text>
+                        <Text style={styles.text}>{receptionState.nombre}</Text>
                     </View>
-                    <View style={styles.row}>
+                    {/* <View style={styles.row}>
                         <Text style={styles.title}>Etat de récupération </Text>
-                        <Text style={styles.text}>{reception.etat_recuperation}</Text>
-                    </View>
+                        <Text style={styles.text}>{receptionState.etat_recuperation}</Text>
+                    </View> */}
                     <View style={styles.row}>
                         <Text style={styles.title}>Prélevé par</Text>
-                        <Text style={styles.text}>{reception.preleve}</Text>
+                        <Text style={styles.text}>{receptionState.prelevement_par}</Text>
                     </View>
-                    <View style={styles.row}>
+                    {/* <View style={styles.row}>
                         <Text style={styles.title}>Type Essaie</Text>
-                        <Text style={styles.text}>{reception.essaie}</Text>
-                    </View>
+                        <Text style={styles.text}>{receptionState.essaie}</Text>
+                    </View> */}
                     <View style={styles.row}>
                         <Text style={styles.title}>Type Béton</Text>
-                        <Text style={styles.text}>{reception.beton}</Text>
+                        <Text style={styles.text}>{receptionState.Beton}</Text>
                     </View>
-                    <View style={styles.row}>
+                    {/* <View style={styles.row}>
                         <Text style={styles.title}>Slump</Text>
-                        <Text style={styles.text}>{reception.slump}</Text>
+                        <Text style={styles.text}>{receptionState.slump}</Text>
                     </View>
                     <View style={styles.row}>
                         <Text style={styles.title}>Central</Text>
-                        <Text style={styles.text}>{reception.central}</Text>
+                        <Text style={styles.text}>{receptionState.central}</Text>
                     </View>
                     <View style={styles.row}>
                         <Text style={styles.title}>BL</Text>
-                        <Text style={styles.text}>{reception.BL}</Text>
-                    </View>
-                    <View style={styles.row}>
+                        <Text style={styles.text}>{receptionState.BL}</Text>
+                    </View> */}
+                    {/* <View style={styles.row}>
                         <Text style={styles.title}>Nombre des jours</Text>
-                        <Text style={styles.text}>{reception.nbr_jrs}</Text>
-                    </View>
+                        <Text style={styles.text}>{receptionState.nbr_jrs}</Text>
+                    </View> */}
                     <View style={{ marginBottom: 10 }}>
                         <Button color="blue" onPress={() => setImageModalVisible(true)} title="Voir PV" />
                     </View>
@@ -164,6 +206,7 @@ const styles = StyleSheet.create({
     text: {
         fontSize: 16,
         fontWeight: 'bold',
+        width: '70%',
     },
     modalContainer: {
         backgroundColor: 'rgba(0, 0, 0, 0.8)',
@@ -198,5 +241,11 @@ const styles = StyleSheet.create({
         right: '1%',
         backgroundColor: "#fff",
         borderRadius: 100
+    },
+    loading: {
+        position: "absolute",
+        top: "50%",
+        left: "50%",
+        zIndex: 111
     },
 });

@@ -157,7 +157,7 @@ function Programme({ navigation, reload, setReload }) {
                                 >
                                     <View style={styles.idView}><Text style={styles.id}>N° Intervention : {item.intervention_id}</Text></View>
                                     <Text style={styles.Project}>{item.abr_projet}</Text>
-                                    <Text style={styles.client}>Objet : {item.Objet_projet}</Text>
+                                    <Text style={styles.client}>Objet : {item.Objet_Projet}</Text>
                                     <Text style={styles.client}>Client : {item.abr_client}</Text>
                                     <Text style={styles.technicien}>Technicien: {item.Nom_personnel}</Text>
                                     <View style={{ flexDirection: "row", alignItems: "center", marginTop: 10 }}>
@@ -165,8 +165,9 @@ function Programme({ navigation, reload, setReload }) {
                                         <Text style={item.status == 2 ? styles.valide : (item.status == 0 ? styles.annule : styles.enCours)}>{item.status == 1 ? "En cours" : item.status == 2 ? "Faite" : "Annulée"}</Text>
                                     </View>
                                     <View style={styles.dateView}>
-                                        <Text style={styles.dateText}>{item.date_intervention}</Text>
+                                        <Text style={styles.dateText}>{moment(item.date_intervention, "YYYYMMDD").format("DD/MM/YYYY") || 'N/A'}</Text>
                                     </View>
+
                                 </TouchableOpacity>
                             )}
                             ItemSeparatorComponent={() => <View style={styles.itemSeparator} />}

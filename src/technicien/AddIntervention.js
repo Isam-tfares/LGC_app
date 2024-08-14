@@ -9,13 +9,13 @@ import { setData } from '../actions/dataActions';
 
 export default function AddIntervention({ modalVisible, setModalVisible, technicien }) {
     const technicien_id = useSelector(state => state.user.user.id)
-    console.log("user", technicien_id)
     const TOKEN = useSelector(state => state.user.token);
     const dispatch = useDispatch();
     const [clients, setClients] = useState(useSelector(state => state.data.clients));
     const [projects, setProjects] = useState(useSelector(state => state.data.projects));
+    const [projectsPicker, setProjectsPicker] = useState([]);
     const [prestations, setPrestations] = useState(useSelector(state => state.data.prestations));
-    const [selectedClient, setSelectedClient] = useState('');
+    const [selectedClient, setSelectedClient] = useState("");
     const [selectedProject, setSelectedProject] = useState('');
     const [selectedPrestation, setSelectedPrestation] = useState('');
     const [selectedDate, setSelectedDate] = useState(null);
@@ -29,6 +29,15 @@ export default function AddIntervention({ modalVisible, setModalVisible, technic
             fetchData(API_URL, TOKEN);
         }
     }, []);
+    // filter projects that part of clientSelected
+    useEffect(() => {
+        if (selectedClient && projects) {
+            const filteredProjects = projects.filter(project => project.IDClient === selectedClient);
+            setProjectsPicker(filteredProjects);
+        } else {
+            setProjectsPicker([]);
+        }
+    }, [selectedClient, projects]);
 
     const fetchData = async (url, token) => {
         try {
@@ -141,6 +150,16 @@ export default function AddIntervention({ modalVisible, setModalVisible, technic
         setDatePickerVisibility(false);
         setDatePickerVisibility2(false);
     };
+    const closeModal = () => {
+        setSelectedClient('');
+        setSelectedProject('');
+        setSelectedPrestation('');
+        setSelectedDate(null);
+        setSelectedDate2(null);
+        setModalVisible(false);
+        setDatePickerVisibility(false);
+        setDatePickerVisibility2(false);
+    }
 
     return (
         <Modal
@@ -154,7 +173,7 @@ export default function AddIntervention({ modalVisible, setModalVisible, technic
             <View style={styles.modalOverlay}>
                 <View style={styles.modalView}>
                     <TouchableOpacity style={styles.close}
-                        onPress={() => setModalVisible(false)}
+                        onPress={() => closeModal()}
                     >
                         <Ionicons name="close-circle-sharp" size={40} color="red" />
                     </TouchableOpacity>
@@ -180,13 +199,25 @@ export default function AddIntervention({ modalVisible, setModalVisible, technic
                     <Text style={styles.label}>Projet</Text>
                     <Picker
                         selectedValue={selectedProject}
-                        onValueChange={(itemValue, itemIndex) => setSelectedProject(itemValue)}
+                        onValueChange={(itemValue) => setSelectedProject(itemValue)}
                         style={styles.picker}
                     >
                         <Picker.Item label="Séléctionner Projet" value="" />
-                        {projects?.map((project, index) => (
-                            <Picker.Item key={index} label={project.abr_projet} value={project.IDProjet} />
-                        ))}
+                        {selectedClient ? (
+                            projectsPicker.length > 0 ? (
+                                projectsPicker.map((project, index) => (
+                                    <Picker.Item
+                                        key={index}
+                                        label={project.abr_projet || "Nom du projet inconnu"}
+                                        value={project.IDProjet || ""}
+                                    />
+                                ))
+                            ) : (
+                                <Picker.Item label="Aucun projet disponible" value="" />
+                            )
+                        ) : (
+                            <Picker.Item label="Séléctionner client d'abord" value="" />
+                        )}
                     </Picker>
 
                     <Text style={styles.label}>Prestation</Text>

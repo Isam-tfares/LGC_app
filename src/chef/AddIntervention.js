@@ -12,6 +12,7 @@ export default function AddIntervention({ modalVisible, setModalVisible }) {
     const dispatch = useDispatch();
     const [clients, setClients] = useState(useSelector(state => state.data.clients));
     const [projects, setProjects] = useState(useSelector(state => state.data.projects));
+    const [projectsPicker, setProjectsPicker] = useState([]);
     const [prestations, setPrestations] = useState(useSelector(state => state.data.prestations));
     const [techniciens, setTechniciens] = useState(useSelector(state => state.data.techniciens));
 
@@ -25,6 +26,15 @@ export default function AddIntervention({ modalVisible, setModalVisible }) {
     useEffect(() => {
         getData();
     }, []);
+    // filter projects that part of clientSelected
+    useEffect(() => {
+        if (selectedClient && projects) {
+            const filteredProjects = projects.filter(project => project.IDClient === selectedClient);
+            setProjectsPicker(filteredProjects);
+        } else {
+            setProjectsPicker([]);
+        }
+    }, [selectedClient, projects]);
 
     const getData = () => {
         if (!clients || !projects || !prestations || !techniciens) {
@@ -140,6 +150,16 @@ export default function AddIntervention({ modalVisible, setModalVisible }) {
         setModalVisible(false);
     };
 
+    const closeModal = () => {
+        setSelectedClient('');
+        setSelectedProject('');
+        setSelectedPrestation('');
+        setSelectedDate(null);
+        setModalVisible(false);
+        setDatePickerVisibility(false);
+        setSelectedTechnician('');
+    }
+
     return (
         <Modal
             animationType="slide"
@@ -152,7 +172,7 @@ export default function AddIntervention({ modalVisible, setModalVisible }) {
             <View style={styles.modalOverlay}>
                 <View style={styles.modalView}>
                     <TouchableOpacity style={styles.close}
-                        onPress={() => setModalVisible(false)}
+                        onPress={() => closeModal()}
                     >
                         <Ionicons name="close-circle-sharp" size={40} color="red" />
                     </TouchableOpacity>
@@ -178,13 +198,25 @@ export default function AddIntervention({ modalVisible, setModalVisible }) {
                     <Text style={styles.label}>Projet</Text>
                     <Picker
                         selectedValue={selectedProject}
-                        onValueChange={(itemValue, itemIndex) => setSelectedProject(itemValue)}
+                        onValueChange={(itemValue) => setSelectedProject(itemValue)}
                         style={styles.picker}
                     >
                         <Picker.Item label="Séléctionner Projet" value="" />
-                        {projects?.map((project, index) => (
-                            <Picker.Item key={index} label={project.abr_projet} value={project.IDProjet} />
-                        ))}
+                        {selectedClient ? (
+                            projectsPicker.length > 0 ? (
+                                projectsPicker.map((project, index) => (
+                                    <Picker.Item
+                                        key={index}
+                                        label={project.abr_projet || "Nom du projet inconnu"}
+                                        value={project.IDProjet || ""}
+                                    />
+                                ))
+                            ) : (
+                                <Picker.Item label="Aucun projet disponible" value="" />
+                            )
+                        ) : (
+                            <Picker.Item label="Séléctionner client d'abord" value="" />
+                        )}
                     </Picker>
 
                     <Text style={styles.label}>Technicien</Text>

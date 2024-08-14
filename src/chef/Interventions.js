@@ -38,7 +38,7 @@ function Interventions({ navigation }) {
         const API_URL = 'http://10.0.2.2/LGC_backend/?page=interventionsChef';
 
         fetchData(API_URL, TOKEN);
-    }, [fromDateAPI, toDateAPI]); // Add dependencies here if needed
+    }, [fromDateAPI, toDateAPI]);
     const navbar = ["Tous", "Faites", "En cours", "Annulées"];
 
     const fetchData = async (url, token) => {

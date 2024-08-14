@@ -1,38 +1,88 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, FlatList, TextInput, Alert } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, FlatList, TextInput, Alert, ActivityIndicator } from 'react-native';
 import moment from 'moment';
 import Fontisto from '@expo/vector-icons/Fontisto';
 import { EvilIcons } from '@expo/vector-icons';
 import { createStackNavigator } from '@react-navigation/stack';
 import DateTimePickerModal from 'react-native-modal-datetime-picker';
 import InterventionRec from './InterventionRec';
+import { useSelector } from 'react-redux';
 
 function InterventionsRec({ navigation }) {
+    const TOKEN = useSelector(state => state.user.token); // Move this line inside the component
+
     const [search, setSearch] = useState("");
     const [clicked, setClicked] = useState(0);
     const [isDatePickerVisible, setDatePickerVisibility] = useState(false);
     const [dateType, setDateType] = useState('');
     const [fromDate, setFromDate] = useState(null);
     const [toDate, setToDate] = useState(null);
-
+    const [fromDateAPI, setFromDateAPI] = useState(null);
+    const [toDateAPI, setToDateAPI] = useState(null);
+    const [interventions, setInterventions] = useState([]);
+    const [loading, setLoading] = useState(true);
     const navbar = ["Tous", "Faites", "En cours", "Annulées"];
-    const interventions = [
-        { id: 1, client: 'Client 1', projet: 'Projet 1', object: "Objet 1", adresse: 'Adresse 1', technicien: "Techinicien 1", date: "08/08/2024", prestation: 'Prestation 1', status: "Faite", reception: "Faite" },
-        { id: 2, client: 'Client 2', projet: 'Projet 2', object: "Objet 2", adresse: 'Adresse 2', technicien: "Techinicien 2", date: "08/08/2024", prestation: 'Prestation 2', status: "Faite", reception: "En cours" },
-        { id: 3, client: 'Client 3', projet: 'Projet 3', object: "Objet 3", adresse: 'Adresse 3', technicien: "Techinicien 3", date: "08/08/2024", prestation: 'Prestation 3', status: "Annulée" },
-        { id: 4, client: 'Client 4', projet: 'Projet 4', object: "Objet 4", adresse: 'Adresse 4', technicien: "Techinicien 4", date: "09/08/2024", prestation: 'Prestation 4', status: "Faite", reception: "Faite" },
-        { id: 5, client: 'Client 5', projet: 'Projet 5', object: "Objet 5", adresse: 'Adresse 5', technicien: "Techinicien 5", date: "09/08/2024", prestation: 'Prestation 5', status: "En cours" },
-        { id: 6, client: 'Client 6', projet: 'Projet 6', object: "Objet 6", adresse: 'Adresse 6', technicien: "Techinicien 6", date: "09/08/2024", prestation: 'Prestation 6', status: "En cours" },
-    ];
+
     useEffect(() => {
         // Initialize dates
-        // const today = moment().format("DD/MM/YYYY");
         const secondDate = moment().add(7, 'day').format("DD/MM/YYYY");
         const firstDate = moment().subtract(7, 'day').format("DD/MM/YYYY");
 
+        setFromDateAPI(parseInt(moment(firstDate, "DD/MM/YYYY").format("YYYYMMDD")));
+        setToDateAPI(parseInt(moment(secondDate, "DD/MM/YYYY").format("YYYYMMDD")));
         setFromDate(firstDate);
         setToDate(secondDate);
     }, []);
+    useEffect(() => {
+        const API_URL = 'http://10.0.2.2/LGC_backend/?page=interventionsRec';
+
+        fetchData(API_URL, TOKEN);
+    }, [fromDateAPI, toDateAPI]);
+
+    const fetchData = async (url, token) => {
+        try {
+            setLoading(true);
+            const response = await fetch(url, {
+                method: 'POST',
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ "fromDate": fromDateAPI, "toDate": toDateAPI }),
+            });
+
+            if (!response.ok) {
+                throw new Error(`HTTP error! Status: ${response.status}`);
+            }
+
+            const contentType = response.headers.get('content-type');
+            let data;
+
+            if (contentType && contentType.includes('application/json')) {
+                data = await response.json();
+            } else {
+                const text = await response.text();
+                try {
+                    data = JSON.parse(text);
+                } catch (error) {
+                    console.error(' Error parsing JSON:', error);
+                    // Handle non-JSON data if necessary
+                    return;
+                }
+            }
+
+            // check if data is Object
+            if (typeof data === 'object' && data !== null) {
+                setInterventions(data);
+            }
+        } catch (error) {
+            console.error('Error fetching data:', error);
+        }
+        finally {
+            setLoading(false);
+        }
+    };
+
 
     const showDatePicker = (type) => {
         setDateType(type);
@@ -56,52 +106,49 @@ function InterventionsRec({ navigation }) {
 
     // Handle date selection
     const handleConfirm = (date) => {
-        const formattedDate = `${date.getDate()}/${date.getMonth() + 1}/${date.getFullYear()}`;
+        const formattedDate = moment(date).format("DD/MM/YYYY");
+
         if (dateType === 'from') {
             setFromDate(formattedDate);
+            const fromDateObj = moment(formattedDate, "DD/MM/YYYY");
+            const fromDateAPIFormat = fromDateObj.format("YYYYMMDD");
+            // Update API date states
+            setFromDateAPI(parseInt(fromDateAPIFormat, 10));
+
         } else {
             if (!validateDateRange(formattedDate)) {
                 Alert.alert("Plage de dates non valide", "La date  De  doit être antérieure ou égale à la date  À .");
-            }
-            else {
+            } else {
                 setToDate(formattedDate);
+                const toDateObj = moment(formattedDate, "DD/MM/YYYY");
+                const toDateAPIFormat = toDateObj.format("YYYYMMDD");
+                setToDateAPI(parseInt(toDateAPIFormat, 10));
             }
         }
         hideDatePicker();
     };
 
     const filterInterventions = () => {
-        let filteredInterventions = interventions;
+        if (!Array.isArray(interventions)) {
+            console.warn("Interventions data is not an array.");
+            return [];
+        }
 
-        // Convert fromDate and toDate to Date objects
-        const fromDateObj = fromDate ? moment(fromDate, "DD/MM/YYYY").toDate() : null;
-        const toDateObj = toDate ? moment(toDate, "DD/MM/YYYY").toDate() : null;
-
-        // Convert intervention dates to Date objects
-        filteredInterventions = filteredInterventions.filter(intervention => {
-            const interventionDate = moment(intervention.date, "DD/MM/YYYY").toDate();
-
-            // Filter by search query
+        let filteredInterventions = interventions.filter(intervention => {
             const searchMatch = search === "" ||
-                intervention.projet.toLowerCase().includes(search.toLowerCase()) ||
-                intervention.client.toLowerCase().includes(search.toLowerCase()) ||
-                intervention.technicien.toLowerCase().includes(search.toLowerCase());
-
-            // Filter by date range
-            const dateMatch = (!fromDateObj || interventionDate >= fromDateObj) &&
-                (!toDateObj || interventionDate <= toDateObj);
-
-            return searchMatch && dateMatch;
+                intervention.abr_projet.toLowerCase().includes(search.toLowerCase()) ||
+                intervention.abr_client.toLowerCase().includes(search.toLowerCase()) ||
+                intervention.Nom_personnel.toLowerCase().includes(search.toLowerCase());
+            return searchMatch;
         });
 
-        // Filter by status
         switch (navbar[clicked]) {
             case "Faites":
-                return filteredInterventions.filter(intervention => intervention.status === "Faite");
+                return filteredInterventions.filter(intervention => intervention.status == 2);
             case "En cours":
-                return filteredInterventions.filter(intervention => intervention.status === "En cours");
+                return filteredInterventions.filter(intervention => intervention.status == 1);
             case "Annulées":
-                return filteredInterventions.filter(intervention => intervention.status === "Annulée");
+                return filteredInterventions.filter(intervention => intervention.status == 0);
             case "Tous":
             default:
                 return filteredInterventions;
@@ -111,6 +158,34 @@ function InterventionsRec({ navigation }) {
     const interventionClick = (intervention) => {
         navigation.navigate('Détails Intervention', { intervention });
     };
+    const renderItem = ({ item }) => (
+        <TouchableOpacity
+            style={styles.intervention}
+            onPress={() => interventionClick(item)}
+        >
+            <View style={styles.idView}><Text style={styles.id}>N° Intervention : {item.intervention_id}</Text></View>
+
+            <Text style={styles.Project}>{item.abr_projet || 'N/A'}</Text>
+            <Text style={styles.client}>Objet : {item.Objet_Projet || 'N/A'}</Text>
+            <Text style={styles.client}>Client : {item.abr_client || 'N/A'}</Text>
+            <Text style={styles.technicien}>Technicien: {item.Nom_personnel || 'N/A'}</Text>
+            <Text style={styles.technicien}>Prestation: {item.libelle || 'N/A'}</Text>
+            <View style={{ flexDirection: "row", alignItems: "center", marginTop: 10 }}>
+                <Text style={styles.status}>Etat : </Text>
+                <Text style={item.status == 2 ? styles.valide : (item.status == 0 ? styles.annule : styles.enCours)}>
+                    {item.status == 1 ? "En cours" : item.status == 0 ? "Annulée" : "Faite"}
+                </Text>
+            </View>
+            {item.status == "Faite" ? (
+                <View style={{ flexDirection: "row", alignItems: "center", marginTop: 10 }}>
+                    <Text style={styles.status}>Etat Réception : </Text>
+                    <Text style={item.etat_reception == 1 ? styles.valide : styles.enCours}>{item.etat_reception == 1 ? "Faite" : "En cours"}</Text>
+                </View>) : (<></>)}
+            <View style={styles.dateView}>
+                <Text style={styles.dateText}>{moment(item.date_intervention, "YYYYMMDD").format("DD/MM/YYYY") || 'N/A'}</Text>
+            </View>
+        </TouchableOpacity>
+    );
 
     return (
         <View style={{ flex: 1, backgroundColor: "white", position: "relative" }}>
@@ -150,6 +225,8 @@ function InterventionsRec({ navigation }) {
                 onConfirm={handleConfirm}
                 onCancel={hideDatePicker}
             />
+            {/* Loading */}
+            {loading ? <View style={styles.loading}><ActivityIndicator size="large" color="#4b6aff" /></View> : null}
 
             <View style={styles.navBar}>
                 {navbar.map((value, index) => {
@@ -168,33 +245,8 @@ function InterventionsRec({ navigation }) {
             </View>
             <FlatList
                 data={filterInterventions()}
-                keyExtractor={(item) => item.id.toString()}
-                renderItem={({ item }) => (
-                    <TouchableOpacity
-                        style={styles.intervention}
-                        onPress={() => interventionClick(item)}
-                    >
-                        <View style={styles.idView}><Text style={styles.id}>N° Intervention : {item.id}</Text></View>
-
-                        <Text style={styles.Project}>{item.projet}</Text>
-                        <Text style={styles.client}>Objet : {item.object}</Text>
-                        <Text style={styles.client}>Client : {item.client}</Text>
-                        <Text style={styles.technicien}>Technicien: {item.technicien}</Text>
-                        <Text style={styles.client}>Etat Intervention : <Text style={item.status == "Faite" ? styles.valide : (item.status == "Annulée" ? styles.annule : styles.enCours)}>{item.status}</Text></Text>
-                        {/* <View style={{ flexDirection: "row", alignItems: "center", marginTop: 10 }}>
-                            <Text style={styles.status}>Etat Intervention : </Text>
-                            <Text style={item.status == "Faite" ? styles.valide : (item.status == "Annulée" ? styles.annule : styles.enCours)}>{item.status}</Text>
-                        </View> */}
-                        {item.status == "Faite" ? (
-                            <View style={{ flexDirection: "row", alignItems: "center", marginTop: 10 }}>
-                                <Text style={styles.status}>Etat Réception : </Text>
-                                <Text style={item.reception == "Faite" ? styles.valide : styles.enCours}>{item.reception}</Text>
-                            </View>) : (<></>)}
-                        <View style={styles.dateView}>
-                            <Text style={styles.dateText}>{item.date}</Text>
-                        </View>
-                    </TouchableOpacity>
-                )}
+                keyExtractor={(item) => item.intervention_id.toString()}
+                renderItem={renderItem}
                 ItemSeparatorComponent={() => <View style={styles.itemSeparator} />}
                 contentContainerStyle={styles.pgm}
             />
@@ -274,6 +326,12 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         marginTop: 15,
     },
+    loading: {
+        position: "absolute",
+        top: "50%",
+        left: "50%",
+        zIndex: 111
+    },
     month: {
         fontSize: 20,
         fontWeight: 'bold',
@@ -323,6 +381,7 @@ const styles = StyleSheet.create({
     Project: {
         fontWeight: "bold",
         fontSize: 22,
+        paddingTop: 15,
     },
     client: {
         color: "#8d8d8d",

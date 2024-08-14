@@ -1,85 +1,85 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, FlatList, Image, TouchableOpacity, Modal, TextInput } from 'react-native';
+import { View, Text, StyleSheet, FlatList, Image, TouchableOpacity, Modal, TextInput, ActivityIndicator } from 'react-native';
 import DateTimePickerModal from "react-native-modal-datetime-picker";
 import moment from 'moment';
 import { EvilIcons } from '@expo/vector-icons';
 import Fontisto from '@expo/vector-icons/Fontisto';
 import { Ionicons } from '@expo/vector-icons';
+import { useSelector } from 'react-redux';
 
 export default function PVReceptions({ navigation }) {
+    const TOKEN = useSelector(state => state.user.token); // Move this line inside the component
+    const IMAGES_URL = "http://10.0.2.2/LGC_backend/pvs/";
+
     const [selectedImage, setSelectedImage] = useState(null);
     const [search, setSearch] = useState("");
     const [isDatePickerVisible, setDatePickerVisibility] = useState(false);
     const [dateType, setDateType] = useState('');
     const [fromDate, setFromDate] = useState(null);
     const [toDate, setToDate] = useState(null);
+    const [fromDateAPI, setFromDateAPI] = useState(null);
+    const [toDateAPI, setToDateAPI] = useState(null);
+    const [loading, setLoading] = useState(false);
 
-    const [pvs, setPvs] = useState([
-        {
-            id: '1',
-            imageUrl: 'https://image.slidesharecdn.com/redactionprojetintervention-100614145220-phpapp02/85/Redaction-d-un-projet-d-intervention-2-320.jpg',
-            intervention_id: '12345',
-            technicien: 'Technician 1',
-            date: '10-08-2024',
-        },
-        {
-            id: '2',
-            imageUrl: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTmrg0q0HVsLfLCDETBJLx8VkpAZiyFNzf3osPqUbTkZnoMr6boCzTuGeJghE2KI9qwVf8&usqp=CAU',
-            intervention_id: '67890',
-            technicien: 'Technician 2',
-            date: '09-08-2024',
-        },
-        {
-            id: '3',
-            imageUrl: 'https://image.slidesharecdn.com/redactionprojetintervention-100614145220-phpapp02/85/Redaction-d-un-projet-d-intervention-2-320.jpg',
-            intervention_id: '12346',
-            technicien: 'Technician 1',
-            date: '09-08-2024',
-        },
-        {
-            id: '4',
-            imageUrl: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTmrg0q0HVsLfLCDETBJLx8VkpAZiyFNzf3osPqUbTkZnoMr6boCzTuGeJghE2KI9qwVf8&usqp=CAU',
-            intervention_id: '67891',
-            technicien: 'Technician 2',
-            date: '09-08-2024',
-        },
-        {
-            id: '5',
-            imageUrl: 'https://image.slidesharecdn.com/redactionprojetintervention-100614145220-phpapp02/85/Redaction-d-un-projet-d-intervention-2-320.jpg',
-            intervention_id: '12345',
-            technicien: 'Technician 1',
-            date: '08-08-2024',
-        },
-        {
-            id: '6',
-            imageUrl: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTmrg0q0HVsLfLCDETBJLx8VkpAZiyFNzf3osPqUbTkZnoMr6boCzTuGeJghE2KI9qwVf8&usqp=CAU',
-            intervention_id: '67890',
-            technicien: 'Technician 2',
-            date: '08-08-2024',
-        },
-        {
-            id: '7',
-            imageUrl: 'https://image.slidesharecdn.com/redactionprojetintervention-100614145220-phpapp02/85/Redaction-d-un-projet-d-intervention-2-320.jpg',
-            intervention_id: '12346',
-            technicien: 'Technician 1',
-            date: '07-08-2024',
-        },
-        {
-            id: '8',
-            imageUrl: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTmrg0q0HVsLfLCDETBJLx8VkpAZiyFNzf3osPqUbTkZnoMr6boCzTuGeJghE2KI9qwVf8&usqp=CAU',
-            intervention_id: '67891',
-            technicien: 'Technician 2',
-            date: '07-08-2024',
-        },
-    ]);
+    const [pvs, setPvs] = useState([]);
     useEffect(() => {
         // Initialize dates
-        const secondDate = moment().add(7, 'day').format("DD/MM/YYYY");
+        const secondDate = moment().format("DD/MM/YYYY");
         const firstDate = moment().subtract(7, 'day').format("DD/MM/YYYY");
 
+        setFromDateAPI(parseInt(moment(firstDate, "DD/MM/YYYY").format("YYYYMMDD")));
+        setToDateAPI(parseInt(moment(secondDate, "DD/MM/YYYY").format("YYYYMMDD")));
         setFromDate(firstDate);
         setToDate(secondDate);
     }, []);
+    useEffect(() => {
+        const API_URL = 'http://10.0.2.2/LGC_backend/?page=PVs';
+
+        fetchData(API_URL, TOKEN);
+    }, [fromDateAPI, toDateAPI]);
+    const fetchData = async (url, token) => {
+        try {
+            setLoading(true);
+            const response = await fetch(url, {
+                method: 'POST',
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ "fromDate": fromDateAPI, "toDate": toDateAPI }),
+            });
+
+            if (!response.ok) {
+                throw new Error(`HTTP error! Status: ${response.status}`);
+            }
+
+            const contentType = response.headers.get('content-type');
+            let data;
+
+            if (contentType && contentType.includes('application/json')) {
+                data = await response.json();
+            } else {
+                const text = await response.text();
+                try {
+                    data = JSON.parse(text);
+                } catch (error) {
+                    console.error(' Error parsing JSON:', error);
+                    // Handle non-JSON data if necessary
+                    return;
+                }
+            }
+
+            // check if data is Object
+            if (typeof data === 'object' && data !== null) {
+                setPvs(data);
+            }
+        } catch (error) {
+            console.error('Error fetching data:', error);
+        }
+        finally {
+            setLoading(false);
+        }
+    };
 
     const showDatePicker = (type) => {
         setDateType(type);
@@ -104,14 +104,23 @@ export default function PVReceptions({ navigation }) {
 
     // Handle date selection
     const handleConfirm = (date) => {
-        const formattedDate = moment(date).format("DD-MM-YYYY");
+        const formattedDate = moment(date).format("DD/MM/YYYY");
+
         if (dateType === 'from') {
             setFromDate(formattedDate);
+            const fromDateObj = moment(formattedDate, "DD/MM/YYYY");
+            const fromDateAPIFormat = fromDateObj.format("YYYYMMDD");
+            // Update API date states
+            setFromDateAPI(parseInt(fromDateAPIFormat, 10));
+
         } else {
             if (!validateDateRange(formattedDate)) {
-                Alert.alert("Plage de dates non valide", "La date De doit être antérieure ou égale à la date À.");
+                Alert.alert("Plage de dates non valide", "La date  De  doit être antérieure ou égale à la date  À .");
             } else {
                 setToDate(formattedDate);
+                const toDateObj = moment(formattedDate, "DD/MM/YYYY");
+                const toDateAPIFormat = toDateObj.format("YYYYMMDD");
+                setToDateAPI(parseInt(toDateAPIFormat, 10));
             }
         }
         hideDatePicker();
@@ -128,31 +137,13 @@ export default function PVReceptions({ navigation }) {
     const filterInterventions = () => {
         let filteredInterventions = pvs;
 
-        // if (search) {
-        //     filteredInterventions = filteredInterventions.filter(intervention =>
-        //         intervention.technicien.toLowerCase().includes(search.toLowerCase()) ||
-        //         intervention.id.toLowerCase().includes(search.toLowerCase())
-        //     );
-        // }
-
-        // Convert fromDate and toDate to Date objects
-        const fromDateObj = fromDate ? moment(fromDate, "DD-MM-YYYY").toDate() : null;
-        const toDateObj = toDate ? moment(toDate, "DD-MM-YYYY").toDate() : null;
-
         // Convert intervention dates to Date objects
         filteredInterventions = filteredInterventions.filter(intervention => {
-            const interventionDate = moment(intervention.date, "DD-MM-YYYY").toDate();
-
             // Filter by search query
             const searchMatch = search === "" ||
-                intervention.technicien.toLowerCase().includes(search.toLowerCase()) ||
-                intervention.id.toLowerCase().includes(search.toLowerCase());
-
-            // Filter by date range
-            const dateMatch = (!fromDateObj || interventionDate >= fromDateObj) &&
-                (!toDateObj || interventionDate <= toDateObj);
-
-            return searchMatch && dateMatch;
+                intervention.technicien_id.toLowerCase().includes(search.toLowerCase()) ||
+                intervention.intervention_id.toLowerCase().includes(search.toLowerCase());
+            return searchMatch;
         });
 
         return filteredInterventions;
@@ -190,6 +181,8 @@ export default function PVReceptions({ navigation }) {
                     </View>
                 </View>
             </View>
+            {/* Loading */}
+            {loading ? <View style={styles.loading}><ActivityIndicator size="large" color="#4b6aff" /></View> : null}
 
             <DateTimePickerModal
                 isVisible={isDatePickerVisible}
@@ -197,17 +190,16 @@ export default function PVReceptions({ navigation }) {
                 onConfirm={handleConfirm}
                 onCancel={hideDatePicker}
             />
-
             <FlatList
                 data={filterInterventions()}
-                keyExtractor={(item) => item.id}
+                keyExtractor={(item) => item.intervention_id}
                 renderItem={({ item }) => (
-                    <TouchableOpacity style={styles.pvCard} onPress={() => handlePVClick(item.imageUrl)}>
-                        <Image source={{ uri: item.imageUrl }} style={styles.pvImage} />
+                    <TouchableOpacity style={styles.pvCard} onPress={() => handlePVClick(IMAGES_URL + item.image_path)}>
+                        <Image source={{ uri: IMAGES_URL + item.image_path }} style={styles.pvImage} />
                         <View style={styles.pvDetails}>
-                            <Text style={styles.pvText}>N° Intervention: {item.id}</Text>
-                            <Text style={styles.pvText}>Technician: {item.technicien}</Text>
-                            <Text style={styles.pvText}>Date: {moment(item.date, "DD-MM-YYYY").format('DD/MM/YYYY')}</Text>
+                            <Text style={styles.pvText}>N° Intervention: {item.intervention_id}</Text>
+                            <Text style={styles.pvText}>Technician: {item.Nom_personnel}</Text>
+                            <Text style={styles.pvText}>Date: {moment(item.date_creation, "YYYYMMDD").format("DD/MM/YYYY") || 'N/A'}</Text>
                         </View>
                     </TouchableOpacity>
                 )}
@@ -351,4 +343,10 @@ const styles = StyleSheet.create({
         marginLeft: 10,
         fontWeight: "bold",
     },
+    loading: {
+        position: "absolute",
+        top: "50%",
+        left: "50%",
+        zIndex: 111
+    }
 });
