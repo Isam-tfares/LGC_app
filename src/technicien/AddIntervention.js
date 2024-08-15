@@ -60,7 +60,12 @@ export default function AddIntervention({ modalVisible, setModalVisible, technic
                 data = await response.json();
             } else {
                 const text = await response.text();
-                data = JSON.parse(text);
+                if (text[0] == "[" || text[0] == "{") {
+                    data = JSON.parse(text);
+                }
+                else {
+                    data = [];
+                }
             }
             if (Object.keys(data)) {
                 setClients(data.clients);

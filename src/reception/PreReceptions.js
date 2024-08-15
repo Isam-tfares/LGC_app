@@ -22,6 +22,7 @@ function Prereceptions({ route, navigation }) {
     const [toDateAPI, setToDateAPI] = useState(null);
     const [receptions, setReceptions] = useState([]);
     const [loading, setLoading] = useState(false);
+
     useEffect(() => {
         // Initialize dates
         const secondDate = moment().add(7, 'day').format("DD/MM/YYYY");
@@ -62,7 +63,11 @@ function Prereceptions({ route, navigation }) {
             } else {
                 const text = await response.text();
                 try {
-                    data = JSON.parse(text);
+                    if (text[0] == "[" || text[0] == "{") {
+                        data = JSON.parse(text);
+                    } else {
+                        data = [];
+                    }
                 } catch (error) {
                     console.error('Error parsing JSON:', error);
                     // Handle non-JSON data if necessary

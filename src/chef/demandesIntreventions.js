@@ -65,7 +65,12 @@ export default function DemandesInterventions({ navigation }) {
             } else {
                 const text = await response.text();
                 try {
-                    data = JSON.parse(text);
+                    if (text[0] == "[" || text[0] == "{") {
+                        data = JSON.parse(text);
+                    }
+                    else {
+                        data = [];
+                    }
                 } catch (error) {
                     console.error('Error  parsing JSON:', error);
                     // Handle non-JSON data if necessary

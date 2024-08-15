@@ -1,130 +1,92 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, StyleSheet, FlatList, TextInput, TouchableOpacity } from 'react-native';
+import { View, Text, StyleSheet, FlatList, TextInput, TouchableOpacity, ActivityIndicator } from 'react-native';
 import DateTimePickerModal from "react-native-modal-datetime-picker";
 import Fontisto from '@expo/vector-icons/Fontisto';
 import { EvilIcons } from '@expo/vector-icons';
 import moment from 'moment';
 import ReceptionDetails from './ReceptionDetails';
 import { createStackNavigator } from '@react-navigation/stack';
+import { useSelector } from 'react-redux';
 
 const Stack = createStackNavigator();
 
 function Receptions({ route, navigation }) {
+    const TOKEN = useSelector(state => state.user.token); // Move this line inside the component
+
     const [search, setSearch] = useState("");
     const [isDatePickerVisible, setDatePickerVisibility] = useState(false);
     const [dateType, setDateType] = useState('');
     const [fromDate, setFromDate] = useState(null);
     const [toDate, setToDate] = useState(null);
-    const [receptions, setReceptions] = useState([
-        {
-            n_reception: '4848',
-            n_intervention: 1,
-            id: '1',
-            project: 'Project A',
-            client: 'Client X',
-            technicien: 'Technician 1',
-            prestation: 'Prestation 1',
-            materiaux: 'Material 1',
-            date_reception: '09-08-2024',
-            nbr_echantillon: '10',
-            etat_recuperation: 'Récupérée',
-            preleve: 'LGC',
-            essaie: 'interne',
-            beton: 'Béton 1',
-            slump: '10 cm',
-            central: 'Plant A',
-            BL: '12345',
-            nbr_jrs: '7,28',
-        },
-        {
-            n_reception: '4849',
-            n_intervention: 2,
-            id: '2',
-            project: 'Project B',
-            client: 'Client Y',
-            technicien: 'Technician 2',
-            prestation: 'Prestation 2',
-            materiaux: 'Material 2',
-            date_reception: '08-08-2024',
-            nbr_echantillon: '15',
-            etat_recuperation: 'non récupérée',
-            preleve: 'LGC',
-            essaie: 'externe',
-            beton: 'Concrete B',
-            slump: '12 cm',
-            central: 'Plant B',
-            BL: '67890',
-            nbr_jrs: '7,14,28',
-        },
-        {
-            n_reception: '4850',
-            n_intervention: 3,
-            id: '3',
-            project: 'Project A',
-            client: 'Client X',
-            technicien: 'Technician 1',
-            prestation: 'Prestation 1',
-            materiaux: 'Material 1',
-            date_reception: '09-08-2024',
-            nbr_echantillon: '10',
-            etat_recuperation: 'Récupérée',
-            preleve: 'LGC',
-            essaie: 'interne',
-            beton: 'Béton 1',
-            slump: '10 cm',
-            central: 'Plant A',
-            BL: '12345',
-            nbr_jrs: '7,28',
-        },
-        {
-            n_reception: '4851',
-            n_intervention: 4,
-            id: '4',
-            project: 'Project B',
-            client: 'Client Y',
-            technicien: 'Technician 2',
-            prestation: 'Prestation 2',
-            materiaux: 'Material 2',
-            date_reception: '08-08-2024',
-            nbr_echantillon: '15',
-            etat_recuperation: 'non récupérée',
-            preleve: 'LGC',
-            essaie: 'externe',
-            beton: 'Concrete B',
-            slump: '12 cm',
-            central: 'Plant B',
-            BL: '67890',
-            nbr_jrs: '7,14,28',
-        },
-        {
-            n_reception: '4852',
-            n_intervention: 5,
-            id: '5',
-            project: 'Project D',
-            client: 'Client Y',
-            technicien: 'Technician 2',
-            prestation: 'Prestation 2',
-            materiaux: 'Material 2',
-            date_reception: '08-08-2024',
-            nbr_echantillon: '15',
-            etat_recuperation: 'non récupérée',
-            preleve: 'LGC',
-            essaie: 'externe',
-            beton: 'Concrete B',
-            slump: '12 cm',
-            central: 'Plant B',
-            BL: '67890',
-            nbr_jrs: '7,14,28',
-        },
-    ]);
+    const [toDateAPI, setToDateAPI] = useState(null);
+    const [fromDateAPI, setFromDateAPI] = useState(null);
+    const [loading, setLoading] = useState(false);
+    const [receptions, setReceptions] = useState([]);
     useEffect(() => {
         // Initialize dates
         const secondDate = moment().add(7, 'day').format("DD/MM/YYYY");
         const firstDate = moment().subtract(7, 'day').format("DD/MM/YYYY");
 
+        setFromDateAPI(parseInt(moment(firstDate, "DD/MM/YYYY").format("YYYYMMDD")));
+        setToDateAPI(parseInt(moment(secondDate, "DD/MM/YYYY").format("YYYYMMDD")));
         setFromDate(firstDate);
         setToDate(secondDate);
     }, []);
+    useEffect(() => {
+        const API_URL = 'http://10.0.2.2/LGC_backend/?page=ReceptionsRec';
+
+        fetchData(API_URL, TOKEN);
+    }, [fromDateAPI, toDateAPI]);
+
+    const fetchData = async (url, token) => {
+        setLoading(true);
+        try {
+            const response = await fetch(url, {
+                method: 'POST',
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ "fromDate": fromDateAPI, "toDate": toDateAPI }),
+            });
+
+            if (!response.ok) {
+                throw new Error(`HTTP error! Status : ${response.status}`);
+            }
+
+            const contentType = response.headers.get('content-type');
+            let data;
+
+            if (contentType && contentType.includes('application/json')) {
+                data = await response.json();
+            } else {
+                const text = await response.text();
+                try {
+                    if (text[0] == "[" || text[0] == "{") {
+                        data = JSON.parse(text);
+                    }
+                    else {
+                        data = [];
+                    }
+                } catch (error) {
+                    console.error('Error parsing JSON:', error);
+                    // Handle non-JSON data if necessary
+                    return;
+                }
+            }
+
+            // check if data is Object
+            if (typeof data === 'object' && data !== null) {
+                setReceptions(data);
+                console.log('Data: ', data);
+            }
+        } catch (error) {
+            console.error('Error fetching data:', error);
+        }
+        finally {
+            setLoading(false);
+        }
+    };
 
     const handleReceptionPress = (reception) => {
         navigation.navigate('Détails Réception', { reception });
@@ -153,60 +115,63 @@ function Receptions({ route, navigation }) {
 
     // Handle date selection
     const handleConfirm = (date) => {
-        const formattedDate = moment(date).format("DD-MM-YYYY");
+        const formattedDate = moment(date).format("DD/MM/YYYY");
+
         if (dateType === 'from') {
             setFromDate(formattedDate);
+            const fromDateObj = moment(formattedDate, "DD/MM/YYYY");
+            const fromDateAPIFormat = fromDateObj.format("YYYYMMDD");
+            // Update API date states
+            setFromDateAPI(parseInt(fromDateAPIFormat, 10));
+
         } else {
             if (!validateDateRange(formattedDate)) {
-                Alert.alert("Plage de dates non valide", "La date De doit être antérieure ou égale à la date À.");
+                Alert.alert("Plage de dates non valide", "La date  De  doit être antérieure ou égale à la date  À .");
             } else {
                 setToDate(formattedDate);
+                const toDateObj = moment(formattedDate, "DD/MM/YYYY");
+                const toDateAPIFormat = toDateObj.format("YYYYMMDD");
+                setToDateAPI(parseInt(toDateAPIFormat, 10));
             }
         }
         hideDatePicker();
     };
 
-
     const filterReceptions = () => {
         let filteredReceptions = receptions;
 
-        // if (search) {
-        //     filteredReceptions = filteredReceptions.filter(reception =>
-        //         reception.client.toLowerCase().includes(search.toLowerCase()) ||
-        //         reception.project.toLowerCase().includes(search.toLowerCase()) ||
-        //         reception.technicien.toLowerCase().includes(search.toLowerCase()) ||
-        //         reception.prestation.toLowerCase().includes(search.toLowerCase()) ||
-        //         reception.materiaux.toLowerCase().includes(search.toLowerCase()) ||
-        //         reception.n_reception.toLowerCase().includes(search.toLowerCase())
-        //     );
-        // }
-
-        // Convert fromDate and toDate to Date objects
-        const fromDateObj = fromDate ? moment(fromDate, "DD-MM-YYYY").toDate() : null;
-        const toDateObj = toDate ? moment(toDate, "DD-MM-YYYY").toDate() : null;
-
-        // Convert intervention dates to Date objects
-        filteredReceptions = filteredReceptions.filter(reception => {
-            const receptionDate = moment(reception.date_reception, "DD-MM-YYYY").toDate();
-
-            // Filter by search query
-            const searchMatch = search === "" ||
-                reception.client.toLowerCase().includes(search.toLowerCase()) ||
-                reception.project.toLowerCase().includes(search.toLowerCase()) ||
-                reception.technicien.toLowerCase().includes(search.toLowerCase()) ||
-                reception.prestation.toLowerCase().includes(search.toLowerCase()) ||
-                reception.materiaux.toLowerCase().includes(search.toLowerCase()) ||
-                reception.n_reception.toLowerCase().includes(search.toLowerCase());
-
-            // Filter by date range
-            const dateMatch = (!fromDateObj || receptionDate >= fromDateObj) &&
-                (!toDateObj || receptionDate <= toDateObj);
-
-            return searchMatch && dateMatch;
-        });
+        if (search) {
+            filteredReceptions = filteredReceptions.filter(reception =>
+                reception.abr_client.toLowerCase().includes(search.toLowerCase()) ||
+                reception.abr_project.toLowerCase().includes(search.toLowerCase()) ||
+                reception.PersonnelNom.toLowerCase().includes(search.toLowerCase()) ||
+                reception.PhaseLibelle.toLowerCase().includes(search.toLowerCase()) ||
+                // reception.materiaux.toLowerCase().includes(search.toLowerCase()) ||
+                reception.IDPhase_projet.toLowerCase().includes(search.toLowerCase())
+            );
+        }
 
         return filteredReceptions;
     };
+
+    const renderItem = ({ item }) => (
+        <TouchableOpacity style={styles.receptionItem} onPress={() => handleReceptionPress(item)}>
+            <View style={styles.itemHeader}>
+                <Text style={styles.itemTitle}>Project: {item.abr_project}</Text>
+                <Text style={styles.itemDate}>
+                    {moment(item.saisiele, "YYYYMMDD").format("DD/MM/YYYY") || 'N/A'}
+                </Text>
+            </View>
+            <View style={styles.itemBody}>
+                <Text style={[styles.itemText, { fontWeight: "bold" }]}>N° réception: {item.Numero}</Text>
+                <Text style={[styles.itemText, { fontWeight: "bold" }]}>Code Bar: {item.Observation}</Text>
+                <Text style={styles.itemText}>Client: {item.abr_client}</Text>
+                <Text style={styles.itemText}>Technician: {item.PersonnelNom}</Text>
+                <Text style={styles.itemText}>Prestation: {item.PhaseLibelle}</Text>
+                <Text style={styles.itemText}>Material: {item.MateriauxLibelle}</Text>
+            </View>
+        </TouchableOpacity>
+    );
 
     return (
         <View style={styles.container}>
@@ -219,6 +184,9 @@ function Receptions({ route, navigation }) {
                 />
                 <EvilIcons name="search" size={24} color="black" style={styles.searchIcon} />
             </View>
+
+            {/* Loading */}
+            {loading ? <View style={styles.loading}><ActivityIndicator size="large" color="#4b6aff" /></View> : null}
 
             <View style={styles.DateView}>
                 <View style={styles.view}>
@@ -250,22 +218,8 @@ function Receptions({ route, navigation }) {
 
             <FlatList
                 data={filterReceptions()}
-                keyExtractor={(item) => item.id}
-                renderItem={({ item }) => (
-                    <TouchableOpacity style={styles.receptionItem} onPress={() => handleReceptionPress(item)}>
-                        <View style={styles.itemHeader}>
-                            <Text style={styles.itemTitle}>Project: {item.project}</Text>
-                            <Text style={styles.itemDate}>{moment(item.date_reception, "DD-MM-YYYY").format('DD/MM/YYYY')}</Text>
-                        </View>
-                        <View style={styles.itemBody}>
-                            <Text style={[styles.itemText, { fontWeight: "bold" }]}>N° réception: {item.n_reception}</Text>
-                            <Text style={styles.itemText}>Client: {item.client}</Text>
-                            <Text style={styles.itemText}>Technician: {item.technicien}</Text>
-                            <Text style={styles.itemText}>Prestation: {item.prestation}</Text>
-                            <Text style={styles.itemText}>Material: {item.materiaux}</Text>
-                        </View>
-                    </TouchableOpacity>
-                )}
+                keyExtractor={(item) => item.IDPhase_projet.toString()}
+                renderItem={renderItem}
             />
         </View>
     );
@@ -381,5 +335,11 @@ const styles = StyleSheet.create({
         fontSize: 14,
         marginLeft: 10,
         fontWeight: "bold",
+    },
+    loading: {
+        position: "absolute",
+        top: "50%",
+        left: "50%",
+        zIndex: 111
     },
 });

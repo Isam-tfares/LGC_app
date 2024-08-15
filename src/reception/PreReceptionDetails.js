@@ -3,12 +3,19 @@ import { View, Text, StyleSheet, TouchableOpacity, Alert, Image, Modal, TextInpu
 import { Button } from 'react-native-elements';
 import { ScrollView } from 'react-native-gesture-handler';
 import { Ionicons } from '@expo/vector-icons';
+import MaterialIcons from '@expo/vector-icons/MaterialIcons';
 import { useSelector } from 'react-redux';
 import moment from 'moment';
 
 export default function PreReceptionDetails({ route, navigation }) {
     const TOKEN = useSelector(state => state.user.token);
     const IMAGES_URL = "http://10.0.2.2/LGC_backend/pvs/";
+    const ETATS_RECUPERATION = ["Réccupéré", "Non réccupéré"];
+    const PRELVES_PAR = ["LGC", "Client"];
+    const RECEPETION_TYPES = ["interne", "externe"];
+    const ESSAIES = ["Labo", "Chantier"];
+    const MODES_CONFECTION = ["mode 1", "mode 2"];
+    const MODES_FABRICATION = ["mode 1", "mode 2"];
 
     let { reception } = route.params;
 
@@ -17,22 +24,8 @@ export default function PreReceptionDetails({ route, navigation }) {
     const [image, setImage] = useState(null);
     const [receptionState, setReceptionState] = useState(reception);
 
-    useEffect(() => {
-        if (receptionState.PVPath) {
-            setImage(IMAGES_URL + receptionState.PVPath);
-        }
-    }, [receptionState]);
-    if (route.params.id) {
-        console.log("fetch Prereception of intervention_id", route.params.id);
-        fetchPreReception(route.params.id, TOKEN);
-    }
-    const closeImageModal = () => {
-        setImageModalVisible(null);
-    };
-
-    const fetchPreReception = async (IDPre_reception, token) => {
+    const fetchPreReception = async (url, IDPre_reception, token) => {
         setLoading(true);
-        const API_URL = 'http://10.0.2.2/LGC_backend/?page=PreReception';
         try {
             const response = await fetch(url, {
                 method: 'POST',
@@ -55,7 +48,12 @@ export default function PreReceptionDetails({ route, navigation }) {
             } else {
                 const text = await response.text();
                 try {
-                    data = JSON.parse(text);
+                    if (text[0] == "[" || text[0] == "{") {
+                        data = JSON.parse(text);
+                    }
+                    else {
+                        data = [];
+                    }
                 } catch (error) {
                     console.error('Error parsing JSON:', error);
                     // Handle non-JSON data if necessary
@@ -74,6 +72,22 @@ export default function PreReceptionDetails({ route, navigation }) {
             setLoading(false);
         }
     };
+
+    useEffect(() => {
+        if (receptionState.PVPath) {
+            setImage(IMAGES_URL + receptionState.PVPath);
+        }
+    }, [receptionState]);
+    if (route.params.id) {
+        console.log("fetch Prereception of intervention_id", route.params.id);
+        const API_URL = 'http://10.0.2.2/LGC_backend/?page=PreReception';
+        fetchPreReception(API_URL, route.params.id, TOKEN);
+    }
+    const closeImageModal = () => {
+        setImageModalVisible(null);
+    };
+
+
     return (
         <ScrollView>
             <View style={styles.container}>
@@ -83,7 +97,7 @@ export default function PreReceptionDetails({ route, navigation }) {
 
                 <View style={styles.card}>
                     <View style={styles.row}>
-                        <Text style={styles.title}>Code Bar</Text>
+                        <Text style={styles.title}>Code bar</Text>
                         <Text style={styles.text}>{receptionState.Observation}</Text>
                     </View>
                     <View style={styles.row}>
@@ -107,12 +121,24 @@ export default function PreReceptionDetails({ route, navigation }) {
                         <Text style={styles.text}>{receptionState.MateriauxLibelle}</Text>
                     </View>
                     <View style={styles.row}>
-                        <Text style={styles.title}>Date création</Text>
+                        <Text style={styles.title}>Date réception</Text>
                         <Text style={styles.text}>{moment(receptionState.saisiele, "YYYYMMDD").format("DD/MM/YYYY") || 'N/A'}</Text>
                     </View>
                     <View style={styles.row}>
+                        <Text style={styles.title}>Date de début</Text>
+                        <Text style={styles.text}>{moment(receptionState.date_debut, "YYYYMMDD").format("DD/MM/YYYY") || 'N/A'}</Text>
+                    </View>
+                    <View style={styles.row}>
+                        <Text style={styles.title}>Date de fin</Text>
+                        <Text style={styles.text}>{moment(receptionState.date_fin, "YYYYMMDD").format("DD/MM/YYYY") || 'N/A'}</Text>
+                    </View>
+                    <View style={styles.row}>
+                        <Text style={styles.title}>Date prévus</Text>
+                        <Text style={styles.text}>{moment(receptionState.date_prevus, "YYYYMMDD").format("DD/MM/YYYY") || 'N/A'}</Text>
+                    </View>
+                    <View style={styles.row}>
                         <Text style={styles.title}>Lieu de prélèvement</Text>
-                        <Text style={styles.text}>{moment(receptionState.Lieux_ouvrage, "YYYYMMDD").format("DD/MM/YYYY") || 'N/A'}</Text>
+                        <Text style={styles.text}>{receptionState.Lieux_ouvrage}</Text>
                     </View>
                     <View style={styles.row}>
                         <Text style={styles.title}>Nombre echantillon</Text>
@@ -124,17 +150,52 @@ export default function PreReceptionDetails({ route, navigation }) {
                     </View> */}
                     <View style={styles.row}>
                         <Text style={styles.title}>Prélevé par</Text>
-                        <Text style={styles.text}>{receptionState.prelevement_par}</Text>
+                        <Text style={styles.text}>{PRELVES_PAR[parseInt(receptionState.prelevement_par) - 1]}</Text>
                     </View>
-                    {/* <View style={styles.row}>
+                    <View style={styles.row}>
                         <Text style={styles.title}>Type Essaie</Text>
-                        <Text style={styles.text}>{receptionState.essaie}</Text>
-                    </View> */}
+                        <Text style={styles.text}>{ESSAIES[parseInt(receptionState.Essai_valide)]}</Text>
+                    </View>
                     <View style={styles.row}>
                         <Text style={styles.title}>Type Béton</Text>
-                        <Text style={styles.text}>{receptionState.Beton}</Text>
+                        <Text style={styles.text}>{receptionState.TypeBetonLibelle}</Text>
                     </View>
-                    {/* <View style={styles.row}>
+                    <View style={styles.row}>
+                        <Text style={styles.title}>Compression</Text>
+                        <View style={styles.text}>
+                            {receptionState.Compression == 1 ?
+                                <MaterialIcons name="check-box" size={24} color="black" /> :
+                                <MaterialIcons name="check-box-outline-blank" size={24} color="black" />
+                            }
+                        </View>
+                    </View>
+                    <View style={styles.row}>
+                        <Text style={styles.title}>Traction</Text>
+                        <View style={styles.text}>
+                            {receptionState.Traction == 1 ?
+                                <MaterialIcons name="check-box" size={24} color="black" /> :
+                                <MaterialIcons name="check-box-outline-blank" size={24} color="black" />
+                            }
+                        </View>
+                    </View>
+                    <View style={styles.row}>
+                        <Text style={styles.title}>Traction fend</Text>
+                        <View style={styles.text}>
+                            {receptionState.Traction_fend == 1 ?
+                                <MaterialIcons name="check-box" size={24} color="black" /> :
+                                <MaterialIcons name="check-box-outline-blank" size={24} color="black" />
+                            }
+                        </View>
+                    </View>
+                    <View style={styles.row}>
+                        <Text style={styles.title}>Type</Text>
+                        <Text style={styles.text}>{receptionState.Type}</Text>
+                    </View>
+                    <View style={styles.row}>
+                        <Text style={styles.title}>Mode</Text>
+                        <Text style={styles.text}>{receptionState.Mode}</Text>
+                    </View>
+                    <View style={styles.row}>
                         <Text style={styles.title}>Slump</Text>
                         <Text style={styles.text}>{receptionState.slump}</Text>
                     </View>
@@ -145,36 +206,40 @@ export default function PreReceptionDetails({ route, navigation }) {
                     <View style={styles.row}>
                         <Text style={styles.title}>BL</Text>
                         <Text style={styles.text}>{receptionState.BL}</Text>
-                    </View> */}
-                    {/* <View style={styles.row}>
+                    </View>
+                    <View style={styles.row}>
                         <Text style={styles.title}>Nombre des jours</Text>
                         <Text style={styles.text}>{receptionState.nbr_jrs}</Text>
-                    </View> */}
-                    <View style={{ marginBottom: 10 }}>
-                        <Button color="blue" onPress={() => setImageModalVisible(true)} title="Voir PV" />
                     </View>
                     <View>
-                        <Button color="blue" onPress={() => Alert.alert('Valider Prereception')} title="Valider Prereception" />
+                        <Button title="Voir PV" color="blue" onPress={() => { setImageModalVisible(true) }} />
                     </View>
                 </View>
             </View>
 
-            {/* PV image */}
-            {imageModalVisible && (
-                <Modal visible={true} transparent={true} onRequestClose={closeImageModal}>
-                    <View style={styles.modalContainer}>
-                        <View style={styles.relativeView}>
-                            <Image source={{ uri: image }} style={styles.fullScreenImage} />
-                            <TouchableOpacity style={styles.close}
-                                onPress={closeImageModal}
-                            >
-                                <Ionicons name="close-circle-sharp" size={40} color="red" />
-                            </TouchableOpacity>
-                        </View>
-                    </View>
+            {/* Loading */}
+            {loading ? <View style={styles.loading}><ActivityIndicator size="large" color="#4b6aff" /></View> : null}
 
-                </Modal>
-            )}
+            {/* PV image */}
+            {imageModalVisible ?
+                image ?
+                    (
+                        <Modal visible={true} transparent={true} onRequestClose={closeImageModal}>
+                            <View style={styles.modalContainer}>
+                                <View style={styles.relativeView}>
+                                    <Image source={{ uri: image }} style={styles.fullScreenImage} />
+                                    <TouchableOpacity style={styles.close}
+                                        onPress={closeImageModal}
+                                    >
+                                        <Ionicons name="close-circle-sharp" size={40} color="red" />
+                                    </TouchableOpacity>
+                                </View>
+                            </View>
+
+                        </Modal>
+                    ) :
+                    Alert.alert("Image non disponible")
+                : null}
         </ScrollView>
     );
 }
@@ -212,7 +277,7 @@ const styles = StyleSheet.create({
     text: {
         fontSize: 16,
         fontWeight: 'bold',
-        width: '70%',
+        width: '60%',
     },
     modalContainer: {
         backgroundColor: 'rgba(0, 0, 0, 0.8)',
