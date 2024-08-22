@@ -39,7 +39,7 @@ export default function AddReception({ modalVisible, setModalVisible, interventi
     const [betonSelected, setBetonSelected] = useState("");
     const [slump, setSlump] = useState("");
     const [compression, setCompression] = useState(false);
-    const [pendage, setPendage] = useState(false);
+    const [fendage, setfendage] = useState(false);
     const [flexion, setFlexion] = useState(false);
     const [confectionSelected, setConfectionSelected] = useState("mode 1");
     const [fabricationSelected, setFabricationSelected] = useState("mode 1");
@@ -365,8 +365,8 @@ export default function AddReception({ modalVisible, setModalVisible, interventi
                                     <Text style={styles.labelChekbox}>Compression</Text>
                                 </View>
                                 <View style={[styles.col, styles.checkView]}>
-                                    <Checkbox style={styles.checkbox} value={pendage} onValueChange={setPendage} />
-                                    <Text style={styles.labelChekbox}>Pendage</Text>
+                                    <Checkbox style={styles.checkbox} value={fendage} onValueChange={setfendage} />
+                                    <Text style={styles.labelChekbox}>fendage</Text>
                                 </View>
                             </View>
                             <View style={styles.grid}>

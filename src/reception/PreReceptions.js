@@ -34,12 +34,13 @@ function Prereceptions({ route, navigation }) {
         setToDate(secondDate);
     }, []);
     useEffect(() => {
-        const API_URL = 'http://10.0.2.2/LGC_backend/?page=PrereceptionsRec';
+        const API_URL = 'http://10.0.2.2/LGC_backend/?page=Prereceptions';
 
         fetchData(API_URL, TOKEN);
     }, [fromDateAPI, toDateAPI]);
 
     const fetchData = async (url, token) => {
+        if (!fromDateAPI || !toDateAPI) return;
         setLoading(true);
         try {
             const response = await fetch(url, {
@@ -81,7 +82,7 @@ function Prereceptions({ route, navigation }) {
                 console.log('Data: ', data);
             }
         } catch (error) {
-            console.error('Error fetching data:', error);
+            console.error('Error fetching data :', error);
         }
         finally {
             setLoading(false);

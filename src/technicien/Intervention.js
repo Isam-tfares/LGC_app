@@ -60,8 +60,7 @@ export default function Intervention({ route, navigation, reload, setReload }) {
         navigation.goBack();
     };
     const validateIntervention = (intervention_id) => {
-        Alert.alert("Validate")
-        // navigation.navigate('Nouvelle réception', { "id": intervention_id });
+        navigation.navigate('Nouvelle réception', { "id": intervention_id });
     };
 
     return (

@@ -1,25 +1,66 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, TouchableOpacity, StyleSheet, Image, Alert } from 'react-native';
+import { View, Text, TouchableOpacity, StyleSheet, Image, Alert, ActivityIndicator } from 'react-native';
 import { Picker } from '@react-native-picker/picker';
 // import DateTimePickerModal from 'react-native-modal-datetime-picker';
 import moment from 'moment';
 import * as ImagePicker from 'expo-image-picker';
 import { Ionicons } from '@expo/vector-icons';
+import { useSelector } from 'react-redux';
 
 export default function PV({ navigation, route }) {
-    let intervention_id = route.params ? Number.parseInt(route.params.id) : "";
-    console.log(intervention_id);
-    const [selectedIntervention, setSelectedIntervention] = useState(intervention_id);
+    const TOKEN = useSelector(state => state.user.token);
+
+    const [selectedIntervention, setSelectedIntervention] = useState(route.params ? Number.parseInt(route.params.id) : "");
     const [image, setImage] = useState(null);
     const [selectedDate, setSelectedDate] = useState(new Date());
-    // const [isDatePickerVisible, setDatePickerVisibility] = useState(false);
+    const [interventions, setInterventions] = useState([]);
+    const [loading, setLoading] = useState(false);
 
-    const interventions = [1, 2, 3, 4, 5, 6];
     useEffect(() => {
-        if (Number.isInteger(intervention_id)) {
-            setSelectedIntervention(intervention_id);
+        fetchInterventions();
+    }, [])
+    useEffect(() => {
+        if (Number.isInteger(selectedIntervention)) {
+            setSelectedIntervention(selectedIntervention);
         }
-    }, [intervention_id]);
+    }, [selectedIntervention]);
+
+    const fetchInterventions = async () => {
+        let url = "http://10.0.2.2/LGC_backend/?page=interventionsWithoutPV";
+        setLoading(true);
+        try {
+            const response = await fetch(url, {
+                method: 'GET',
+                headers: {
+                    'Authorization': `Bearer ${TOKEN}`,
+                    'Content-Type': 'application/json'
+                },
+            });
+
+            if (!response.ok) {
+                throw new Error(`HTTP error! Status: ${response.status}`);
+            }
+
+            const contentType = response.headers.get('content-type');
+            let data;
+
+            if (contentType && contentType.includes('application/json')) {
+                data = await response.json();
+            } else {
+                const text = await response.text();
+                data = JSON.parse(text);
+            }
+            if (Object.keys(data)) {
+                setInterventions(data);
+            }
+        } catch (error) {
+            console.error('Error fetching data:', error);
+        }
+        finally {
+            setLoading(false);
+        }
+    };
+
     const pickImage = async () => {
         try {
             let result = await ImagePicker.launchImageLibraryAsync({
@@ -38,19 +79,56 @@ export default function PV({ navigation, route }) {
     const removeImage = () => {
         setImage(null);
     };
+    const insertPV = async (url, token) => {
+        const formData = new FormData();
+        formData.append('intervention_id', selectedIntervention);
 
-    // const showDatePicker = () => {
-    //     setDatePickerVisibility(true);
-    // };
+        const fileName = image.split('/').pop();
+        const fileType = fileName.split('.').pop();
 
-    // const hideDatePicker = () => {
-    //     setDatePickerVisibility(false);
-    // };
+        formData.append('image', {
+            uri: image,
+            name: fileName,
+            type: `image/${fileType}`,
+        });
 
-    // const handleConfirm = (date) => {
-    //     setSelectedDate(date);
-    //     hideDatePicker();
-    // };
+        setLoading(true);
+        try {
+            const response = await fetch(url, {
+                method: 'POST',
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                },
+                body: formData
+            });
+
+            if (!response.ok) {
+                throw new Error(`HTTP error! Status: ${response.status}`);
+            }
+
+            const contentType = response.headers.get('content-type');
+            let data;
+
+            if (contentType && contentType.includes('application/json')) {
+                data = await response.json();
+            } else {
+                const text = await response.text();
+                console.log("TEXT", text)
+                data = JSON.parse(text);
+            }
+
+            if (data) {
+                Alert.alert("Réception ajoutée avec succès ");
+                fetchInterventions();
+            } else {
+                Alert.alert("Un problème est survenu lors de l'ajout de la réception");
+            }
+        } catch (error) {
+            console.error('Error fetching data:', error);
+        } finally {
+            setLoading(false);
+        }
+    };
 
     const handlePrepareData = () => {
         if (!selectedIntervention) {
@@ -58,17 +136,10 @@ export default function PV({ navigation, route }) {
             return;
         }
         if (!image) {
-            Alert.alert('Erreur', 'Veuillez charger une image.');
+            Alert.alert('Erreur', 'Veuillez charger une image. ');
             return;
         }
-
-        console.log({
-            selectedIntervention,
-            image,
-            selectedDate: moment(selectedDate).format('MM/DD/YYYY'),
-        });
-        Alert.alert('Succès', 'PV ajouté avec succès.');
-
+        insertPV('http://10.0.2.2/LGC_backend/?page=newPV', TOKEN);
         setSelectedIntervention('');
         setImage(null);
         setSelectedDate(new Date());
@@ -86,9 +157,12 @@ export default function PV({ navigation, route }) {
                 >
                     <Picker.Item label="N° Intervention " value="" />
                     {interventions.map((intervention, index) => (
-                        <Picker.Item key={index} label={intervention} value={intervention} />
+                        <Picker.Item key={index} label={intervention.intervention_id} value={intervention.intervention_id} />
                     ))}
                 </Picker>
+
+                {/* Loading */}
+                {loading ? <View style={styles.loading}><ActivityIndicator size="large" color="#4b6aff" /></View> : null}
 
                 <TouchableOpacity style={styles.uploadArea} onPress={pickImage}>
                     {image ? (
@@ -249,5 +323,11 @@ const styles = StyleSheet.create({
         fontSize: 16,
         fontWeight: 'bold',
         marginBottom: 10,
-    }
+    },
+    loading: {
+        position: "absolute",
+        top: "50%",
+        left: "50%",
+        zIndex: 111
+    },
 });

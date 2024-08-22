@@ -23,22 +23,12 @@ export default function ReceptionDetails({ route, navigation }) {
     const [loading, setLoading] = useState(false);
     const [image, setImage] = useState(null);
     const [receptionState, setReceptionState] = useState(reception);
-    console.log("receptionState", receptionState);
+    const [intervention_id, setIntervention_id] = useState(route.params.id ?? null);
 
-    useEffect(() => {
-        if (receptionState.PVPath) {
-            setImage(IMAGES_URL + receptionState.PVPath);
+    const fetchReception = async (intervention_id, token) => {
+        if (!intervention_id) {
+            return;
         }
-    }, [receptionState]);
-    if (route.params.id) {
-        console.log("fetch Preception of intervention_id", route.params.id);
-        fetchPreReception(route.params.id, TOKEN);
-    }
-    const closeImageModal = () => {
-        setImageModalVisible(null);
-    };
-
-    const fetchPreReception = async (IDPhase_projet, token) => {
         setLoading(true);
         const API_URL = 'http://10.0.2.2/LGC_backend/?page=Reception';
         try {
@@ -48,11 +38,13 @@ export default function ReceptionDetails({ route, navigation }) {
                     'Authorization': `Bearer ${token}`,
                     'Content-Type': 'application/json'
                 },
-                body: JSON.stringify({ "IDPhase_projet": IDPhase_projet }),
+                body: JSON.stringify({ "intervention_id": intervention_id }),
             });
+            console.log(JSON.stringify({ "intervention_id": intervention_id }))
+
 
             if (!response.ok) {
-                throw new Error(`HTTP error! Status: ${response.status}`);
+                throw new Error(` HTTP error! Status: ${response.status}`);
             }
 
             const contentType = response.headers.get('content-type');
@@ -62,6 +54,7 @@ export default function ReceptionDetails({ route, navigation }) {
                 data = await response.json();
             } else {
                 const text = await response.text();
+                console.log("TEXT : ", text);
                 try {
                     if (text[0] == "[" || text[0] == "{") {
                         data = JSON.parse(text);
@@ -70,7 +63,7 @@ export default function ReceptionDetails({ route, navigation }) {
                         data = [];
                     }
                 } catch (error) {
-                    console.error('Error parsing JSON:', error);
+                    console.error(' Error parsing JSON: ', error);
                     // Handle non-JSON data if necessary
                     return;
                 }
@@ -81,139 +74,160 @@ export default function ReceptionDetails({ route, navigation }) {
                 setReceptionState(data);
             }
         } catch (error) {
-            console.error(' Error fetching data:', error);
+            console.error('Error fetching data:', error);
         }
         finally {
             setLoading(false);
         }
     };
+
+    useEffect(() => {
+        if (receptionState && receptionState.PVPath) {
+            setImage(IMAGES_URL + receptionState.PVPath);
+        }
+    }, [receptionState]);
+    useEffect(() => {
+        if (intervention_id) {
+            console.log("fetch Reception of intervention_id", intervention_id);
+            fetchReception(intervention_id, TOKEN);
+        }
+    }, [intervention_id]);
+    const closeImageModal = () => {
+        setImageModalVisible(null);
+    };
+
+
     return (
         <ScrollView>
             <View style={styles.container}>
-                <View style={styles.card}>
-                    <View style={styles.row}>
-                        <Text style={styles.title}>N° réception</Text>
-                        <Text style={styles.text}>{receptionState.Numero}</Text>
-                    </View>
-                    <View style={styles.row}>
-                        <Text style={styles.title}>Code bar</Text>
-                        <Text style={styles.text}>{receptionState.Observation}</Text>
-                    </View>
-                    <View style={styles.row}>
-                        <Text style={styles.title}>Client</Text>
-                        <Text style={styles.text}>{receptionState.abr_client}</Text>
-                    </View>
-                    <View style={styles.row}>
-                        <Text style={styles.title}>Projet</Text>
-                        <Text style={styles.text}>{receptionState.abr_projet}</Text>
-                    </View>
-                    <View style={styles.row}>
-                        <Text style={styles.title}>Technicien</Text>
-                        <Text style={styles.text}>{receptionState.PersonnelNom}</Text>
-                    </View>
-                    <View style={styles.row}>
-                        <Text style={styles.title}>Prestation</Text>
-                        <Text style={styles.text}>{receptionState.PhaseLibelle}</Text>
-                    </View>
-                    <View style={styles.row}>
-                        <Text style={styles.title}>Material</Text>
-                        <Text style={styles.text}>{receptionState.MateriauxLibelle}</Text>
-                    </View>
-                    <View style={styles.row}>
-                        <Text style={styles.title}>Date réception</Text>
-                        <Text style={styles.text}>{moment(receptionState.saisiele, "YYYYMMDD").format("DD/MM/YYYY") || 'N/A'}</Text>
-                    </View>
-                    <View style={styles.row}>
-                        <Text style={styles.title}>Date de début</Text>
-                        <Text style={styles.text}>{moment(receptionState.date_debut, "YYYYMMDD").format("DD/MM/YYYY") || 'N/A'}</Text>
-                    </View>
-                    <View style={styles.row}>
-                        <Text style={styles.title}>Date de fin</Text>
-                        <Text style={styles.text}>{moment(receptionState.date_fin, "YYYYMMDD").format("DD/MM/YYYY") || 'N/A'}</Text>
-                    </View>
-                    <View style={styles.row}>
-                        <Text style={styles.title}>Date prévus</Text>
-                        <Text style={styles.text}>{moment(receptionState.date_prevus, "YYYYMMDD").format("DD/MM/YYYY") || 'N/A'}</Text>
-                    </View>
-                    <View style={styles.row}>
-                        <Text style={styles.title}>Lieu de prélèvement</Text>
-                        <Text style={styles.text}>{receptionState.Lieux_ouvrage}</Text>
-                    </View>
-                    <View style={styles.row}>
-                        <Text style={styles.title}>Nombre echantillon</Text>
-                        <Text style={styles.text}>{receptionState.nombre}</Text>
-                    </View>
-                    {/* <View style={styles.row}>
+                {/* check if receptionState is not null and not empty Object */}
+                {receptionState && Object.keys(receptionState).length > 0 ?
+                    (<View style={styles.card}>
+                        <View style={styles.row}>
+                            <Text style={styles.title}>N° réception</Text>
+                            <Text style={styles.text}>{receptionState.Numero}</Text>
+                        </View>
+                        <View style={styles.row}>
+                            <Text style={styles.title}>Code bar</Text>
+                            <Text style={styles.text}>{receptionState.Observation}</Text>
+                        </View>
+                        <View style={styles.row}>
+                            <Text style={styles.title}>Client</Text>
+                            <Text style={styles.text}>{receptionState.abr_client}</Text>
+                        </View>
+                        <View style={styles.row}>
+                            <Text style={styles.title}>Projet</Text>
+                            <Text style={styles.text}>{receptionState.abr_projet}</Text>
+                        </View>
+                        <View style={styles.row}>
+                            <Text style={styles.title}>Technicien</Text>
+                            <Text style={styles.text}>{receptionState.PersonnelNom}</Text>
+                        </View>
+                        <View style={styles.row}>
+                            <Text style={styles.title}>Prestation</Text>
+                            <Text style={styles.text}>{receptionState.PhaseLibelle}</Text>
+                        </View>
+                        <View style={styles.row}>
+                            <Text style={styles.title}>Material</Text>
+                            <Text style={styles.text}>{receptionState.MateriauxLibelle}</Text>
+                        </View>
+                        <View style={styles.row}>
+                            <Text style={styles.title}>Date réception</Text>
+                            <Text style={styles.text}>{moment(receptionState.saisiele, "YYYYMMDD").format("DD/MM/YYYY") || 'N/A'}</Text>
+                        </View>
+                        <View style={styles.row}>
+                            <Text style={styles.title}>Date de début</Text>
+                            <Text style={styles.text}>{moment(receptionState.date_debut, "YYYYMMDD").format("DD/MM/YYYY") || 'N/A'}</Text>
+                        </View>
+                        <View style={styles.row}>
+                            <Text style={styles.title}>Date de fin</Text>
+                            <Text style={styles.text}>{moment(receptionState.date_fin, "YYYYMMDD").format("DD/MM/YYYY") || 'N/A'}</Text>
+                        </View>
+                        <View style={styles.row}>
+                            <Text style={styles.title}>Date prévus</Text>
+                            <Text style={styles.text}>{moment(receptionState.date_prevus, "YYYYMMDD").format("DD/MM/YYYY") || 'N/A'}</Text>
+                        </View>
+                        <View style={styles.row}>
+                            <Text style={styles.title}>Lieu de prélèvement</Text>
+                            <Text style={styles.text}>{receptionState.Lieux_ouvrage}</Text>
+                        </View>
+                        <View style={styles.row}>
+                            <Text style={styles.title}>Nombre echantillon</Text>
+                            <Text style={styles.text}>{receptionState.nombre}</Text>
+                        </View>
+                        {/* <View style={styles.row}>
                         <Text style={styles.title}>Etat de récupération </Text>
                         <Text style={styles.text}>{receptionState.etat_recuperation}</Text>
                     </View> */}
-                    <View style={styles.row}>
-                        <Text style={styles.title}>Prélevé par</Text>
-                        <Text style={styles.text}>{PRELVES_PAR[parseInt(receptionState.prelevement_par) - 1]}</Text>
-                    </View>
-                    <View style={styles.row}>
-                        <Text style={styles.title}>Type Essaie</Text>
-                        <Text style={styles.text}>{ESSAIES[parseInt(receptionState.Essai_valide)]}</Text>
-                    </View>
-                    <View style={styles.row}>
-                        <Text style={styles.title}>Type Béton</Text>
-                        <Text style={styles.text}>{receptionState.TypeBetonLibelle}</Text>
-                    </View>
-                    <View style={styles.row}>
-                        <Text style={styles.title}>Compression</Text>
-                        <View style={styles.text}>
-                            {receptionState.Compression == 1 ?
-                                <MaterialIcons name="check-box" size={24} color="black" /> :
-                                <MaterialIcons name="check-box-outline-blank" size={24} color="black" />
-                            }
+                        <View style={styles.row}>
+                            <Text style={styles.title}>Prélevé par</Text>
+                            <Text style={styles.text}>{PRELVES_PAR[parseInt(receptionState.prelevement_par) - 1]}</Text>
                         </View>
-                    </View>
-                    <View style={styles.row}>
-                        <Text style={styles.title}>Traction</Text>
-                        <View style={styles.text}>
-                            {receptionState.Traction == 1 ?
-                                <MaterialIcons name="check-box" size={24} color="black" /> :
-                                <MaterialIcons name="check-box-outline-blank" size={24} color="black" />
-                            }
+                        <View style={styles.row}>
+                            <Text style={styles.title}>Type Essaie</Text>
+                            <Text style={styles.text}>{ESSAIES[parseInt(receptionState.Essai_valide)]}</Text>
                         </View>
-                    </View>
-                    <View style={styles.row}>
-                        <Text style={styles.title}>Traction fend</Text>
-                        <View style={styles.text}>
-                            {receptionState.Traction_fend == 1 ?
-                                <MaterialIcons name="check-box" size={24} color="black" /> :
-                                <MaterialIcons name="check-box-outline-blank" size={24} color="black" />
-                            }
+                        <View style={styles.row}>
+                            <Text style={styles.title}>Type Béton</Text>
+                            <Text style={styles.text}>{receptionState.TypeBetonLibelle}</Text>
                         </View>
-                    </View>
-                    <View style={styles.row}>
-                        <Text style={styles.title}>Type</Text>
-                        <Text style={styles.text}>{receptionState.Type}</Text>
-                    </View>
-                    <View style={styles.row}>
-                        <Text style={styles.title}>Mode</Text>
-                        <Text style={styles.text}>{receptionState.Mode}</Text>
-                    </View>
-                    <View style={styles.row}>
-                        <Text style={styles.title}>Slump</Text>
-                        <Text style={styles.text}>{receptionState.slump}</Text>
-                    </View>
-                    <View style={styles.row}>
-                        <Text style={styles.title}>Central</Text>
-                        <Text style={styles.text}>{receptionState.central}</Text>
-                    </View>
-                    <View style={styles.row}>
-                        <Text style={styles.title}>BL</Text>
-                        <Text style={styles.text}>{receptionState.BL}</Text>
-                    </View>
-                    <View style={styles.row}>
-                        <Text style={styles.title}>Nombre des jours</Text>
-                        <Text style={styles.text}>{receptionState.nbr_jrs}</Text>
-                    </View>
-                    <View>
-                        <Button title="Voir PV" color="blue" onPress={() => { setImageModalVisible(true) }} />
-                    </View>
-                </View>
+                        <View style={styles.row}>
+                            <Text style={styles.title}>Compression</Text>
+                            <View style={styles.text}>
+                                {receptionState.Compression == 1 ?
+                                    <MaterialIcons name="check-box" size={24} color="black" /> :
+                                    <MaterialIcons name="check-box-outline-blank" size={24} color="black" />
+                                }
+                            </View>
+                        </View>
+                        <View style={styles.row}>
+                            <Text style={styles.title}>Traction</Text>
+                            <View style={styles.text}>
+                                {receptionState.Traction == 1 ?
+                                    <MaterialIcons name="check-box" size={24} color="black" /> :
+                                    <MaterialIcons name="check-box-outline-blank" size={24} color="black" />
+                                }
+                            </View>
+                        </View>
+                        <View style={styles.row}>
+                            <Text style={styles.title}>Traction fend</Text>
+                            <View style={styles.text}>
+                                {receptionState.Traction_fend == 1 ?
+                                    <MaterialIcons name="check-box" size={24} color="black" /> :
+                                    <MaterialIcons name="check-box-outline-blank" size={24} color="black" />
+                                }
+                            </View>
+                        </View>
+                        <View style={styles.row}>
+                            <Text style={styles.title}>Type</Text>
+                            <Text style={styles.text}>{receptionState.Type}</Text>
+                        </View>
+                        <View style={styles.row}>
+                            <Text style={styles.title}>Mode</Text>
+                            <Text style={styles.text}>{receptionState.Mode}</Text>
+                        </View>
+                        <View style={styles.row}>
+                            <Text style={styles.title}>Slump</Text>
+                            <Text style={styles.text}>{receptionState.slump}</Text>
+                        </View>
+                        <View style={styles.row}>
+                            <Text style={styles.title}>Central</Text>
+                            <Text style={styles.text}>{receptionState.central}</Text>
+                        </View>
+                        <View style={styles.row}>
+                            <Text style={styles.title}>BL</Text>
+                            <Text style={styles.text}>{receptionState.BL}</Text>
+                        </View>
+                        <View style={styles.row}>
+                            <Text style={styles.title}>Nombre des jours</Text>
+                            <Text style={styles.text}>{receptionState.nbr_jrs}</Text>
+                        </View>
+                        <View>
+                            <Button title="Voir PV" color="blue" onPress={() => { setImageModalVisible(true) }} />
+                        </View>
+
+                    </View>)
+                    : null}
             </View>
 
             {/* Loading */}

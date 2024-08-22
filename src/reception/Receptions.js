@@ -33,12 +33,13 @@ function Receptions({ route, navigation }) {
         setToDate(secondDate);
     }, []);
     useEffect(() => {
-        const API_URL = 'http://10.0.2.2/LGC_backend/?page=ReceptionsRec';
+        const API_URL = 'http://10.0.2.2/LGC_backend/?page=Receptions';
 
         fetchData(API_URL, TOKEN);
     }, [fromDateAPI, toDateAPI]);
 
     const fetchData = async (url, token) => {
+        if (fromDateAPI === null || toDateAPI === null) return;
         setLoading(true);
         try {
             const response = await fetch(url, {

@@ -40,6 +40,9 @@ function InterventionsRec({ navigation }) {
     }, [fromDateAPI, toDateAPI]);
 
     const fetchData = async (url, token) => {
+        if (fromDateAPI === null || toDateAPI === null) {
+            return;
+        }
         try {
             setLoading(true);
             const response = await fetch(url, {
@@ -62,7 +65,6 @@ function InterventionsRec({ navigation }) {
                 data = await response.json();
             } else {
                 const text = await response.text();
-                console.log(text);
                 try {
                     if (text[0] == "[" || text[0] == "{") {
                         data = JSON.parse(text);

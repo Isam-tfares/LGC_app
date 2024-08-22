@@ -1,18 +1,22 @@
 >>the initial scroll index flatList days in Programme technicien
 >>add interface pour tecnicien for showing interventions added by him
->>Preréception values that should by default ( from DB )
->>chef interface interventions ( design select techniciens)
 >>Intervention Details (champs to display)
 >>in route intervention => prereception or reception details
   the navigation is done if intervention_id is changed
 >> technicien Intervention faite -> add button for show reception 
 
 >> Intervention details get data and display it
->> relation clients projects
 >> add reload to get new interventions
 >> double check in add intervention data 
->> token validity
->> Demandes de conge interface Nom is overflow
 >> after accept or refuse demande conge Return to demandes or fetch demande
 >> Add intervention chef 2 Dates also for DB backend
->> prereceptions problem query
+>> Programme Intervention technicien ( problem serialization )
+>> Demande Conges ( Motifs update )
+>> matriaux,natures,tableau
+>> some inputs in new reception are not inserted ( beton datas ( cymlidre,jrs,...))
+>> validate Pre_reception
+
+
+
+
+>> TOKEN validity

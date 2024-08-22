@@ -24,19 +24,18 @@ function formatDate(inputDate) {
     return { "day": day, "month": month, "year": year };
 }
 console.log(formatDate("10/08/2024").day, formatDate("10/08/2024").month, formatDate("10/08/2024").year);
-function Conges({ navigation, route, reload, setReload }) {
+function Conges({ navigation, route }) {
     const TOKEN = useSelector(state => state.user.token);
 
     const [clicked, setClicked] = useState(1);
     const [dateType, setDateType] = useState('');
     const [fromDate, setFromDate] = useState(moment().subtract(1, 'month').format("DD/MM/YYYY"));
-    // const [reload, setReload] = useState(false);
     const [toDate, setToDate] = useState(moment().format("DD/MM/YYYY"));
     const [isDatePickerVisible, setDatePickerVisibility] = useState(false);
     const [congesData, setCongesData] = useState([]);
     useEffect(() => {
         fetchData();
-    }, [fromDate, toDate, reload]);
+    }, [fromDate, toDate, route, navigation]);
 
     const fetchData = async () => {
         try {
@@ -53,7 +52,7 @@ function Conges({ navigation, route, reload, setReload }) {
             });
 
             if (!response.ok) {
-                throw new Error(` HTTP error! Status: ${response.status}`);
+                throw new Error(` HTTP error! Status : ${response.status}`);
             }
 
             const contentType = response.headers.get('content-type');
@@ -178,12 +177,12 @@ function Conges({ navigation, route, reload, setReload }) {
                     {filterConges(congesData)?.map((conge, index) => (
                         <TouchableOpacity key={index} onPress={() => { DemandeCongeClick(conge) }}>
                             <View style={styles.conge}>
-                                <View style={[styles.box, { width: "60%" }]}>
+                                <View style={[styles.box, { width: "60%", }]}>
                                     {conge.imageUrl ?
                                         (<Image source={{ uri: conge.imageUrl }} style={{ width: 50, height: 50, borderRadius: 25 }} />) :
                                         (<Image source={require('../../assets/profile.jpeg')} style={{ width: 50, height: 50, borderRadius: 25 }} />)
                                     }
-                                    <View style={{ flexWrap: "wrap" }}>
+                                    <View style={{ width: "90%" }}>
                                         <Text style={styles.textInfo}>{conge.Nom_personnel}</Text>
                                         <Text style={styles.labelle}>{conge.labelle}</Text>
                                     </View>
@@ -212,19 +211,17 @@ function Conges({ navigation, route, reload, setReload }) {
 }
 
 export default function CongesStack() {
-    const [reload, setReload] = useState(false);
     return (
         <Stack.Navigator initialRouteName="Conges">
             <Stack.Screen
                 name="Conges"
                 component={Conges}
                 options={{ headerShown: false }}
-                initialParams={{ reload, setReload }}
             />
 
             <Stack.Screen
                 name="Détails Demande Congé"
-                children={(props) => <DemandeCongeDetails {...props} reload={reload} setReload={setReload} />}
+                children={(props) => <DemandeCongeDetails {...props} />}
             />
 
         </Stack.Navigator>

@@ -23,6 +23,7 @@ import NewReception from './src/technicien/NewReception';
 import Conges from './src/chef/Conges';
 import CongesStack from './src/chef/Conges';
 import DemandesInterventions from './src/chef/demandesIntreventions';
+import AddedInterventions from './src/technicien/AddedInterventions';
 
 const Drawer = createDrawerNavigator();
 
@@ -41,6 +42,7 @@ export default function App() {
         <NavigationContainer>
           <Drawer.Navigator initialRouteName="Programme">
             <Drawer.Screen name="Programme" component={ProgrammeStack} />
+            <Drawer.Screen name="Iterventions ajoutées" component={AddedInterventions} />
             <Drawer.Screen name="Nouvelle réception" component={NewReception} />
             <Drawer.Screen name="PVs" component={PV} />
             <Drawer.Screen name="Notes de frais" component={NoteFrais} />

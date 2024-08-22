@@ -42,6 +42,7 @@ function Interventions({ navigation }) {
     const navbar = ["Tous", "Faites", "En cours", "Annulées"];
 
     const fetchData = async (url, token) => {
+        if (!fromDateAPI || !toDateAPI) return;
         try {
             const response = await fetch(url, {
                 method: 'POST',

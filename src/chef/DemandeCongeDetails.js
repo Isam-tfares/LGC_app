@@ -17,7 +17,7 @@ function formatDate(inputDate) {
     return { "day": day, "month": month.slice(0, -1), "year": year };
 }
 
-export default function DemandeCongeDetails({ navigation, route, reload, setReload }) {
+export default function DemandeCongeDetails({ navigation, route }) {
     const TOKEN = useSelector(state => state.user.token);
     let { demande } = route.params;
     console.log("demande", demande);
@@ -55,7 +55,6 @@ export default function DemandeCongeDetails({ navigation, route, reload, setRelo
             if (data != null) {
                 if (data) {
                     Alert.alert("Demande acceptée avec succès");
-                    setReload(!reload);
                 } else {
                     Alert.alert("Un problème est survenu lors de l'acceptation de la demande");
                 }
@@ -95,7 +94,6 @@ export default function DemandeCongeDetails({ navigation, route, reload, setRelo
             if (data != null) {
                 if (data) {
                     Alert.alert("Demande refusée avec succès");
-                    setReload(!reload);
                 } else {
                     Alert.alert("Un problème est survenu lors du refus de la demande");
                 }
@@ -110,13 +108,12 @@ export default function DemandeCongeDetails({ navigation, route, reload, setRelo
     }
     const refuseDemande = () => {
         if (comment === '') {
-            Alert.alert('Veuillez ajouter un commentaire ');
+            Alert.alert('Veuillez ajouter un commentaire');
             return;
         }
         annulateDemande();
         setModalVisible(false);
         setComment('');
-        setReload(!reload);
         navigation.goBack();
     }
 

@@ -39,6 +39,7 @@ export default function PVReceptions({ navigation }) {
     }, [fromDateAPI, toDateAPI]);
     const fetchData = async (url, token) => {
         try {
+            if (!fromDateAPI || !toDateAPI) return;
             setLoading(true);
             const response = await fetch(url, {
                 method: 'POST',
