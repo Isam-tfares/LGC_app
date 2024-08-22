@@ -6,17 +6,12 @@
 >> technicien Intervention faite -> add button for show reception 
 
 >> Intervention details get data and display it
->> add reload to get new interventions
 >> double check in add intervention data 
->> after accept or refuse demande conge Return to demandes or fetch demande
 >> Add intervention chef 2 Dates also for DB backend
 >> Programme Intervention technicien ( problem serialization )
 >> Demande Conges ( Motifs update )
 >> matriaux,natures,tableau
 >> some inputs in new reception are not inserted ( beton datas ( cymlidre,jrs,...))
->> validate Pre_reception
-
-
-
+>> Add REfreshing tool in All screens
 
 >> TOKEN validity

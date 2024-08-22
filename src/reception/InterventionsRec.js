@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, FlatList, TextInput, Alert, ActivityIndicator } from 'react-native';
+import React, { useState, useEffect, useCallback } from 'react';
+import { View, Text, StyleSheet, TouchableOpacity, FlatList, TextInput, Alert, RefreshControl } from 'react-native';
 import moment from 'moment';
 import Fontisto from '@expo/vector-icons/Fontisto';
 import { EvilIcons } from '@expo/vector-icons';
@@ -11,6 +11,7 @@ import { useSelector } from 'react-redux';
 function InterventionsRec({ navigation }) {
     const TOKEN = useSelector(state => state.user.token); // Move this line inside the component
 
+    const [refreshing, setRefreshing] = useState(false);
     const [search, setSearch] = useState("");
     const [clicked, setClicked] = useState(0);
     const [isDatePickerVisible, setDatePickerVisibility] = useState(false);
@@ -20,7 +21,6 @@ function InterventionsRec({ navigation }) {
     const [fromDateAPI, setFromDateAPI] = useState(null);
     const [toDateAPI, setToDateAPI] = useState(null);
     const [interventions, setInterventions] = useState([]);
-    const [loading, setLoading] = useState(true);
     const navbar = ["Tous", "Faites", "En cours", "Annulées"];
 
     useEffect(() => {
@@ -38,13 +38,17 @@ function InterventionsRec({ navigation }) {
 
         fetchData(API_URL, TOKEN);
     }, [fromDateAPI, toDateAPI]);
+    const onRefresh = useCallback(() => {
+        const API_URL = 'http://10.0.2.2/LGC_backend/?page=interventionsRec';
+        fetchData(API_URL, TOKEN);
+    }, [fromDateAPI, toDateAPI]);
 
     const fetchData = async (url, token) => {
         if (fromDateAPI === null || toDateAPI === null) {
             return;
         }
         try {
-            setLoading(true);
+            setRefreshing(true);
             const response = await fetch(url, {
                 method: 'POST',
                 headers: {
@@ -86,7 +90,7 @@ function InterventionsRec({ navigation }) {
             console.error('Error fetching data:', error);
         }
         finally {
-            setLoading(false);
+            setRefreshing(false);
         }
     };
 
@@ -232,8 +236,6 @@ function InterventionsRec({ navigation }) {
                 onConfirm={handleConfirm}
                 onCancel={hideDatePicker}
             />
-            {/* Loading */}
-            {loading ? <View style={styles.loading}><ActivityIndicator size="large" color="#4b6aff" /></View> : null}
 
             <View style={styles.navBar}>
                 {navbar.map((value, index) => {
@@ -256,6 +258,11 @@ function InterventionsRec({ navigation }) {
                 renderItem={renderItem}
                 ItemSeparatorComponent={() => <View style={styles.itemSeparator} />}
                 contentContainerStyle={styles.pgm}
+                refreshControl={
+                    <RefreshControl
+                        refreshing={refreshing}
+                        onRefresh={onRefresh}
+                    />}
             />
 
         </View>

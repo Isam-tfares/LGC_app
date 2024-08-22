@@ -1,5 +1,5 @@
-import React, { useEffect, useState } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, Alert, ScrollView, Image } from 'react-native';
+import React, { useEffect, useState, useCallback } from 'react';
+import { View, Text, StyleSheet, TouchableOpacity, Alert, ScrollView, Image, RefreshControl } from 'react-native';
 import moment from 'moment';
 import 'moment/locale/fr'; // Import French locale for month names
 import Ionicons from '@expo/vector-icons/Ionicons';
@@ -27,18 +27,25 @@ console.log(formatDate("10/08/2024").day, formatDate("10/08/2024").month, format
 function Conges({ navigation, route }) {
     const TOKEN = useSelector(state => state.user.token);
 
+    const [refreshing, setRefreshing] = useState(false);
     const [clicked, setClicked] = useState(1);
     const [dateType, setDateType] = useState('');
     const [fromDate, setFromDate] = useState(moment().subtract(1, 'month').format("DD/MM/YYYY"));
     const [toDate, setToDate] = useState(moment().format("DD/MM/YYYY"));
     const [isDatePickerVisible, setDatePickerVisibility] = useState(false);
     const [congesData, setCongesData] = useState([]);
+
+    const onRefresh = useCallback(() => {
+        fetchData();
+    }, [fromDate, toDate]);
+
     useEffect(() => {
         fetchData();
-    }, [fromDate, toDate, route, navigation]);
+    }, [fromDate, toDate]);
 
     const fetchData = async () => {
         try {
+            setRefreshing(true);
             const API_URL = 'http://10.0.2.2/LGC_backend/?page=DemandesConges';
             const fromDateAPI = parseInt(moment(fromDate, "DD/MM/YYYY").format('YYYYMMDD'));
             const toDateAPI = parseInt(moment(toDate, "DD/MM/YYYY").format('YYYYMMDD'));
@@ -82,6 +89,9 @@ function Conges({ navigation, route }) {
             }
         } catch (error) {
             console.error('Error fetching data:', error);
+        }
+        finally {
+            setRefreshing(false);
         }
     };
 
@@ -172,7 +182,13 @@ function Conges({ navigation, route }) {
                     <Text style={[styles.liText, clicked == 3 ? styles.clicked : {}]}>Refusés</Text>
                 </TouchableOpacity>
             </View>
-            <ScrollView>
+            <ScrollView
+                refreshControl={
+                    <RefreshControl
+                        refreshing={refreshing}
+                        onRefresh={onRefresh}
+                    />}
+            >
                 <View style={styles.demandesView}>
                     {filterConges(congesData)?.map((conge, index) => (
                         <TouchableOpacity key={index} onPress={() => { DemandeCongeClick(conge) }}>

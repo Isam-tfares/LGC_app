@@ -25,6 +25,11 @@ export default function PreReceptionDetails({ route, navigation }) {
     const [image, setImage] = useState(null);
     const [receptionState, setReceptionState] = useState(reception);
 
+    const handleGoBack = () => {
+        const reload = { reload: true };
+        navigation.navigate('Listes Pré-réceptions', { reload });
+    };
+
     const fetchPreReception = async (url, intervention_id, token) => {
         if (!intervention_id) {
             return;
@@ -106,7 +111,6 @@ export default function PreReceptionDetails({ route, navigation }) {
                 },
                 body: JSON.stringify({ "IDPre_reception": receptionState.IDPre_reception })
             });
-
             if (!response.ok) {
                 throw new Error(`HTTP error! Status: ${response.status}`);
             }
@@ -123,7 +127,13 @@ export default function PreReceptionDetails({ route, navigation }) {
             }
             if (data != null) {
                 if (data) {
-                    Alert.alert("Réception validée avec succès");
+                    if (data == 1) {
+                        Alert.alert("Réception validée avec succès");
+                        handleGoBack();
+                    }
+                    else {
+                        Alert.alert("Un problème est survenu lors de la validation de la réception");
+                    }
                 } else {
                     Alert.alert("Un problème est survenu lors de la validation de la réception");
                 }
@@ -274,9 +284,10 @@ export default function PreReceptionDetails({ route, navigation }) {
                         <View>
                             <Button title="Voir PV" color="blue" onPress={() => { setImageModalVisible(true) }} />
                         </View>
-                        <View style={{ marginTop: 10 }}>
-                            <Button title="Confirmer Réception" color="blue" onPress={() => { validateReception() }} />
-                        </View>
+                        {receptionState.etat_confirmation == 0 ?
+                            <View style={{ marginTop: 10 }}>
+                                <Button title="Confirmer Réception" color="blue" onPress={() => { validateReception() }} />
+                            </View> : <></>}
                     </View>) : null}
             </View>
 

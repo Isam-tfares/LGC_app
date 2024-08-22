@@ -1,5 +1,5 @@
-import React, { useEffect, useState } from 'react';
-import { View, Text, StyleSheet, FlatList, TextInput, TouchableOpacity, ActivityIndicator } from 'react-native';
+import React, { useEffect, useState, useCallback } from 'react';
+import { View, Text, StyleSheet, FlatList, TextInput, TouchableOpacity, ActivityIndicator, Alert, RefreshControl } from 'react-native';
 import DateTimePickerModal from "react-native-modal-datetime-picker";
 import Fontisto from '@expo/vector-icons/Fontisto';
 import { EvilIcons } from '@expo/vector-icons';
@@ -13,6 +13,7 @@ const Stack = createStackNavigator();
 function Prereceptions({ route, navigation }) {
     const TOKEN = useSelector(state => state.user.token); // Move this line inside the component
 
+    const [refreshing, setRefreshing] = useState(false);
     const [search, setSearch] = useState("");
     const [isDatePickerVisible, setDatePickerVisibility] = useState(false);
     const [dateType, setDateType] = useState('');
@@ -21,7 +22,6 @@ function Prereceptions({ route, navigation }) {
     const [fromDateAPI, setFromDateAPI] = useState(null);
     const [toDateAPI, setToDateAPI] = useState(null);
     const [receptions, setReceptions] = useState([]);
-    const [loading, setLoading] = useState(false);
 
     useEffect(() => {
         // Initialize dates
@@ -33,15 +33,25 @@ function Prereceptions({ route, navigation }) {
         setFromDate(firstDate);
         setToDate(secondDate);
     }, []);
+    const onRefresh = useCallback(() => {
+        const API_URL = 'http://10.0.2.2/LGC_backend/?page=Prereceptions';
+        fetchData(API_URL, TOKEN);
+    }, [fromDateAPI, toDateAPI]);
     useEffect(() => {
         const API_URL = 'http://10.0.2.2/LGC_backend/?page=Prereceptions';
-
         fetchData(API_URL, TOKEN);
     }, [fromDateAPI, toDateAPI]);
 
+    useEffect(() => {
+        if (route.params?.reload) {
+            const API_URL = 'http://10.0.2.2/LGC_backend/?page=Prereceptions';
+            fetchData(API_URL, TOKEN);
+        }
+    }, [route.params?.reload]);
+
     const fetchData = async (url, token) => {
         if (!fromDateAPI || !toDateAPI) return;
-        setLoading(true);
+        setRefreshing(true);
         try {
             const response = await fetch(url, {
                 method: 'POST',
@@ -85,7 +95,7 @@ function Prereceptions({ route, navigation }) {
             console.error('Error fetching data :', error);
         }
         finally {
-            setLoading(false);
+            setRefreshing(false);
         }
     };
 
@@ -185,8 +195,6 @@ function Prereceptions({ route, navigation }) {
                 />
                 <EvilIcons name="search" size={24} color="black" style={styles.searchIcon} />
             </View>
-            {/* Loading */}
-            {loading ? <View style={styles.loading}><ActivityIndicator size="large" color="#4b6aff" /></View> : null}
 
             <View style={styles.DateView}>
                 <View style={styles.view}>
@@ -220,6 +228,11 @@ function Prereceptions({ route, navigation }) {
                 data={filterReceptions()}
                 keyExtractor={(item) => item.IDPre_reception.toString()}
                 renderItem={renderItem}
+                refreshControl={
+                    <RefreshControl
+                        refreshing={refreshing}
+                        onRefresh={onRefresh}
+                    />}
             />
         </View>
     );

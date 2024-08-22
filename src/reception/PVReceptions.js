@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, FlatList, Image, TouchableOpacity, Modal, TextInput, ActivityIndicator } from 'react-native';
+import React, { useState, useEffect, useCallback } from 'react';
+import { View, Text, StyleSheet, FlatList, Image, TouchableOpacity, Modal, TextInput, RefreshControl } from 'react-native';
 import DateTimePickerModal from "react-native-modal-datetime-picker";
 import moment from 'moment';
 import { EvilIcons } from '@expo/vector-icons';
@@ -11,6 +11,7 @@ export default function PVReceptions({ navigation }) {
     const TOKEN = useSelector(state => state.user.token); // Move this line inside the component
     const IMAGES_URL = "http://10.0.2.2/LGC_backend/pvs/";
 
+    const [refreshing, setRefreshing] = useState(false);
     const [selectedImage, setSelectedImage] = useState(null);
     const [search, setSearch] = useState("");
     const [isDatePickerVisible, setDatePickerVisibility] = useState(false);
@@ -19,7 +20,6 @@ export default function PVReceptions({ navigation }) {
     const [toDate, setToDate] = useState(null);
     const [fromDateAPI, setFromDateAPI] = useState(null);
     const [toDateAPI, setToDateAPI] = useState(null);
-    const [loading, setLoading] = useState(false);
 
     const [pvs, setPvs] = useState([]);
     useEffect(() => {
@@ -37,10 +37,14 @@ export default function PVReceptions({ navigation }) {
 
         fetchData(API_URL, TOKEN);
     }, [fromDateAPI, toDateAPI]);
+    const onRefresh = useCallback(() => {
+        const API_URL = 'http://10.0.2.2/LGC_backend/?page=PVs';
+        fetchData(API_URL, TOKEN);
+    }, [fromDateAPI, toDateAPI]);
     const fetchData = async (url, token) => {
         try {
             if (!fromDateAPI || !toDateAPI) return;
-            setLoading(true);
+            setRefreshing(true);
             const response = await fetch(url, {
                 method: 'POST',
                 headers: {
@@ -83,7 +87,7 @@ export default function PVReceptions({ navigation }) {
             console.error('Error fetching data:', error);
         }
         finally {
-            setLoading(false);
+            setRefreshing(false);
         }
     };
 
@@ -187,8 +191,6 @@ export default function PVReceptions({ navigation }) {
                     </View>
                 </View>
             </View>
-            {/* Loading */}
-            {loading ? <View style={styles.loading}><ActivityIndicator size="large" color="#4b6aff" /></View> : null}
 
             <DateTimePickerModal
                 isVisible={isDatePickerVisible}
@@ -199,6 +201,11 @@ export default function PVReceptions({ navigation }) {
             <FlatList
                 data={filterInterventions()}
                 keyExtractor={(item) => item.intervention_id}
+                refreshControl={
+                    <RefreshControl
+                        refreshing={refreshing}
+                        onRefresh={onRefresh}
+                    />}
                 renderItem={({ item }) => (
                     <TouchableOpacity style={styles.pvCard} onPress={() => handlePVClick(IMAGES_URL + item.image_path)}>
                         <Image source={{ uri: IMAGES_URL + item.image_path }} style={styles.pvImage} />

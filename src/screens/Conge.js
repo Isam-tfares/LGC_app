@@ -1,5 +1,5 @@
-import React, { useEffect, useState } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, TextInput, Alert, ScrollView, ActivityIndicator } from 'react-native';
+import React, { useEffect, useState, useCallback } from 'react';
+import { View, Text, StyleSheet, TouchableOpacity, TextInput, Alert, ScrollView, RefreshControl } from 'react-native';
 import DateTimePickerModal from "react-native-modal-datetime-picker";
 import AntDesign from '@expo/vector-icons/AntDesign';
 import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
@@ -13,6 +13,7 @@ export default function Conge({ navigation }) {
     const TOKEN = useSelector(state => state.user.token);
 
     // State variables for input values
+    const [refreshing, setRefreshing] = useState(false);
     const [showenSection, setShowenSection] = useState(false);
     const [showenSection2, setShowenSection2] = useState(false);
     const [availableDays, setAvailableDays] = useState(15);
@@ -31,16 +32,18 @@ export default function Conge({ navigation }) {
     const [demandesConges, setDemandesConges] = useState([]);
     const [motifs_conges, setMotifsConges] = useState([]);
     const [reload, setReload] = useState(false);
-    const [loading, setLoading] = useState(false);
 
 
     useEffect(() => {
         fetchData();
     }, [year, reload]);
+    const onRefresh = useCallback(() => {
+        fetchData();
+    }, [year, reload]);
 
     const fetchData = async () => {
         try {
-            setLoading(true);
+            setRefreshing(true);
             const API_URL = 'http://10.0.2.2/LGC_backend/?page=CongesInterface';
             const response = await fetch(API_URL, {
                 method: 'POST',
@@ -88,14 +91,14 @@ export default function Conge({ navigation }) {
             console.error(' Error fetching data:', error);
         }
         finally {
-            setLoading(false);
+            setRefreshing(false);
         }
     };
 
     // confirme intervention function
     const addDemandeConge = async () => {
         let API_URL = 'http://10.0.2.2/LGC_backend/?page=AddDemandeConge';
-        setLoading(true);
+        setRefreshing(true);
         try {
             const response = await fetch(API_URL, {
                 method: 'POST',
@@ -133,7 +136,7 @@ export default function Conge({ navigation }) {
             console.error('Error fetching data:', error);
         }
         finally {
-            setLoading(false);
+            setRefreshing(false);
         }
     };
 
@@ -207,7 +210,13 @@ export default function Conge({ navigation }) {
 
 
     return (
-        <ScrollView contentContainerStyle={styles.container}>
+        <ScrollView
+            refreshControl={
+                <RefreshControl
+                    refreshing={refreshing}
+                    onRefresh={onRefresh}
+                />}
+            contentContainerStyle={styles.container}>
             <View style={styles.headerContainer}>
                 <View style={styles.header}>
                     <View style={styles.infoContainer}>
@@ -239,8 +248,7 @@ export default function Conge({ navigation }) {
                 </View>
             </View>
 
-            {/* Loading */}
-            {loading ? <View style={styles.loading}><ActivityIndicator size="large" color="#4b6aff" /></View> : null}
+
             <View style={styles.historiqueContainer}>
                 <View style={styles.flexConatiner}>
                     <Text style={styles.title}>Historique Congés</Text>

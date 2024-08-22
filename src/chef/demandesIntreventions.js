@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, FlatList, TextInput, Alert, Modal } from 'react-native';
+import React, { useState, useEffect, useCallback } from 'react';
+import { View, Text, StyleSheet, TouchableOpacity, FlatList, TextInput, Alert, Modal, RefreshControl } from 'react-native';
 import { Picker } from '@react-native-picker/picker';
 import moment from 'moment';
 import { Ionicons } from '@expo/vector-icons';
@@ -11,6 +11,7 @@ import { useSelector } from 'react-redux';
 export default function DemandesInterventions({ navigation }) {
     const TOKEN = useSelector(state => state.user.token);
 
+    const [refreshing, setRefreshing] = useState(false);
     const [search, setSearch] = useState("");
     const [dateType, setDateType] = useState('');
     const [fromDate, setFromDate] = useState(moment().subtract(7, 'day').format("DD/MM/YYYY"));
@@ -38,9 +39,13 @@ export default function DemandesInterventions({ navigation }) {
     useEffect(() => {
         fetchData();
     }, [fromDate, toDate, reload]);
+    const onRefresh = useCallback(() => {
+        fetchData();
+    }, [fromDate, toDate, reload]);
 
     const fetchData = async () => {
         try {
+            setRefreshing(true);
             const API_URL = 'http://10.0.2.2/LGC_backend/?page=DemandesInterventions';
             const fromDateAPI = parseInt(moment(fromDate, "DD/MM/YYYY").format('YYYYMMDD'));
             const toDateAPI = parseInt(moment(toDate, "DD/MM/YYYY").format('YYYYMMDD'));
@@ -85,12 +90,16 @@ export default function DemandesInterventions({ navigation }) {
         } catch (error) {
             console.error('Error fetching data:', error);
         }
+        finally {
+            setRefreshing(false);
+        }
     };
 
     // confirme intervention function
     const confirmeIntervention = async () => {
         let API_URL = 'http://10.0.2.2/LGC_backend/?page=ValidateDemandeIntervention';
         let date = parseInt(moment(selectedDate).format('YYYYMMDD'));
+        setRefreshing(true);
         try {
             const response = await fetch(API_URL, {
                 method: 'POST',
@@ -127,10 +136,14 @@ export default function DemandesInterventions({ navigation }) {
         } catch (error) {
             console.error('Error fetching data:', error);
         }
+        finally {
+            setRefreshing(false);
+        }
     };
     // refuser demande intervention function
     const annulateIntervention = async () => {
         let API_URL = 'http://10.0.2.2/LGC_backend/?page=RejectDemandeIntervention';
+        setRefreshing(true);
         try {
             const response = await fetch(API_URL, {
                 method: 'POST',
@@ -166,6 +179,9 @@ export default function DemandesInterventions({ navigation }) {
             }
         } catch (error) {
             console.error('Error fetching data:', error);
+        }
+        finally {
+            setRefreshing(true);
         }
     };
 
@@ -314,6 +330,11 @@ export default function DemandesInterventions({ navigation }) {
             <FlatList
                 data={filterInterventions()}
                 keyExtractor={(item) => item.intervention_id.toString()}
+                refreshControl={
+                    <RefreshControl
+                        refreshing={refreshing}
+                        onRefresh={onRefresh}
+                    />}
                 renderItem={({ item }) => (
                     <TouchableOpacity
                         style={styles.intervention}

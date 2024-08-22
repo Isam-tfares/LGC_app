@@ -7,7 +7,7 @@ import moment from 'moment';
 import { useSelector, useDispatch } from 'react-redux';
 import { setData } from '../actions/dataActions';
 
-export default function AddIntervention({ modalVisible, setModalVisible, technicien }) {
+export default function AddIntervention({ modalVisible, setModalVisible }) {
     const technicien_id = useSelector(state => state.user.user.id)
     const TOKEN = useSelector(state => state.user.token);
     const dispatch = useDispatch();

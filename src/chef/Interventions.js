@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, FlatList, TextInput, Alert } from 'react-native';
+import React, { useState, useEffect, useCallback } from 'react';
+import { View, Text, StyleSheet, TouchableOpacity, FlatList, TextInput, Alert, ActivityIndicator, RefreshControl } from 'react-native';
 import moment from 'moment';
 import { EvilIcons } from '@expo/vector-icons';
 import { createStackNavigator } from '@react-navigation/stack';
@@ -13,6 +13,7 @@ import { useSelector } from 'react-redux';
 function Interventions({ navigation }) {
     const TOKEN = useSelector(state => state.user.token); // Move this line inside the component
 
+    const [refreshing, setRefreshing] = useState(false);
     const [search, setSearch] = useState("");
     const [dateType, setDateType] = useState('');
     const [clicked, setClicked] = useState(0);
@@ -23,6 +24,11 @@ function Interventions({ navigation }) {
     const [modalVisible, setModalVisible] = useState(false);
     const [isDatePickerVisible, setDatePickerVisibility] = useState(false);
     const [interventions, setInterventions] = useState([]);
+
+    const onRefresh = useCallback(() => {
+        const API_URL = 'http://10.0.2.2/LGC_backend/?page=interventionsChef';
+        fetchData(API_URL, TOKEN);
+    }, []);
 
     useEffect(() => {
         // Initialize dates
@@ -43,6 +49,7 @@ function Interventions({ navigation }) {
 
     const fetchData = async (url, token) => {
         if (!fromDateAPI || !toDateAPI) return;
+        setRefreshing(true);
         try {
             const response = await fetch(url, {
                 method: 'POST',
@@ -79,10 +86,14 @@ function Interventions({ navigation }) {
             }
 
             if (data) {
+                console.log(data);
                 setInterventions(data);
             }
         } catch (error) {
             console.error('Error fetching data:', error);
+        }
+        finally {
+            setRefreshing(false);
         }
     };
 
@@ -253,10 +264,16 @@ function Interventions({ navigation }) {
                     );
                 })}
             </View>
+            {/* {loading ? (<ActivityIndicator color={"#0853a1"} />) : <></>} */}
             <FlatList
                 data={filterInterventions()}
                 keyExtractor={(item) => item.intervention_id.toString()}
                 renderItem={renderItem}
+                refreshControl={
+                    <RefreshControl
+                        refreshing={refreshing}
+                        onRefresh={onRefresh}
+                    />}
             />
 
         </View>

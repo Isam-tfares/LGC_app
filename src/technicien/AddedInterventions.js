@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, FlatList, ActivityIndicator } from 'react-native';
+import React, { useState, useEffect, useCallback } from 'react';
+import { View, Text, StyleSheet, TouchableOpacity, FlatList, ActivityIndicator, RefreshControl } from 'react-native';
 import moment from 'moment';
 import 'moment/locale/fr'; // Import French locale
 import { createStackNavigator } from '@react-navigation/stack';
@@ -10,17 +10,19 @@ function Programme({ navigation, reload, setReload }) {
     const TOKEN = useSelector(state => state.user.token);
 
     moment.locale('fr');
+    const [refreshing, setRefreshing] = useState(false);
     const [currentDay, setCurrentDay] = useState(moment());
-    const [loading, setLoading] = useState(false);
     const [interventions, setInterventions] = useState([]);
     useEffect(() => {
-        // setLoading(true);
+        fetchData();
+    }, [currentDay, reload]);
+    const onRefresh = useCallback(() => {
         fetchData();
     }, [currentDay, reload]);
 
     const fetchData = async () => {
         try {
-            setLoading(true);
+            setRefreshing(true);
 
             // Format the date as YYYYMMDD
             const dateAPI = parseInt(moment(currentDay).format('YYYYMMDD'));
@@ -67,7 +69,7 @@ function Programme({ navigation, reload, setReload }) {
         } catch (error) {
             console.error('Error fetching data:', error);
         } finally {
-            setLoading(false); // Ensure loading state is turned off after fetch
+            setRefreshing(false); // Ensure loading state is turned off after fetch
         }
     };
 
@@ -81,10 +83,15 @@ function Programme({ navigation, reload, setReload }) {
             <View style={styles.main}>
 
                 {
-                    loading ?
+                    refreshing ?
                         (<ActivityIndicator color={"#0853a1"} />)
                         :
                         (<FlatList
+                            refreshControl={
+                                <RefreshControl
+                                    refreshing={refreshing}
+                                    onRefresh={onRefresh}
+                                />}
                             data={interventions}
                             keyExtractor={(item) => item.intervention_id.toString()}
                             renderItem={({ item }) => (

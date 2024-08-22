@@ -1,5 +1,5 @@
-import React, { useState, useRef, useEffect } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, FlatList, ActivityIndicator } from 'react-native';
+import React, { useState, useRef, useEffect, useCallback } from 'react';
+import { View, Text, StyleSheet, TouchableOpacity, FlatList, ActivityIndicator, RefreshControl } from 'react-native';
 import moment from 'moment';
 import 'moment/locale/fr'; // Import French locale
 import AntDesign from '@expo/vector-icons/AntDesign';
@@ -25,21 +25,23 @@ function Programme({ navigation, reload, setReload }) {
 
     moment.locale('fr');
     const technicien = 10;
+    const [refreshing, setRefreshing] = useState(false);
     const [currentDay, setCurrentDay] = useState(moment());
     const [modalVisible, setModalVisible] = useState(false);
-    const [loading, setLoading] = useState(false);
     const [monthSelected, setMonthSelected] = useState(moment().format('MMMM'));
     const [yearSelected, setYearSelected] = useState(moment().format('YYYY'));
     const [interventions, setInterventions] = useState([]);
     const daysOfMonth = generateDaysOfMonth(monthSelected, yearSelected);
     useEffect(() => {
-        // setLoading(true);
+        fetchData();
+    }, [currentDay, reload]);
+    const onRefresh = useCallback(() => {
         fetchData();
     }, [currentDay, reload]);
 
     const fetchData = async () => {
         try {
-            setLoading(true);
+            setRefreshing(true);
 
             // Format the date as YYYYMMDD
             const dateAPI = parseInt(moment(currentDay).format('YYYYMMDD'));
@@ -86,7 +88,7 @@ function Programme({ navigation, reload, setReload }) {
         } catch (error) {
             console.error('Error fetching data:', error);
         } finally {
-            setLoading(false); // Ensure loading state is turned off after fetch
+            setRefreshing(false); // Ensure loading state is turned off after fetch
         }
     };
 
@@ -122,6 +124,7 @@ function Programme({ navigation, reload, setReload }) {
                 </View>
 
                 <FlatList
+
                     horizontal
                     data={daysOfMonth}
                     showsHorizontalScrollIndicator={false}
@@ -145,14 +148,19 @@ function Programme({ navigation, reload, setReload }) {
                     <AntDesign name="pluscircle" size={40} color="#0853a1" />
                 </TouchableOpacity>
                 <AddIntervention modalVisible={modalVisible}
-                    setModalVisible={setModalVisible} technicien={technicien} />
+                    setModalVisible={setModalVisible} />
                 {/* end add intervention */}
 
                 {
-                    loading ?
+                    refreshing ?
                         (<ActivityIndicator color={"#0853a1"} />)
                         :
                         (<FlatList
+                            refreshControl={
+                                <RefreshControl
+                                    refreshing={refreshing}
+                                    onRefresh={onRefresh}
+                                />}
                             data={interventions}
                             keyExtractor={(item) => item.intervention_id.toString()}
                             renderItem={({ item }) => (

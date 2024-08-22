@@ -137,11 +137,11 @@ export default function ReceptionDetails({ route, navigation }) {
                         </View>
                         <View style={styles.row}>
                             <Text style={styles.title}>Date de début</Text>
-                            <Text style={styles.text}>{moment(receptionState.date_debut, "YYYYMMDD").format("DD/MM/YYYY") || 'N/A'}</Text>
+                            <Text style={styles.text}>{receptionState.date_debut ? moment(receptionState.date_debut, "YYYYMMDD").format("DD/MM/YYYY") || 'N/A' : null}</Text>
                         </View>
                         <View style={styles.row}>
                             <Text style={styles.title}>Date de fin</Text>
-                            <Text style={styles.text}>{moment(receptionState.date_fin, "YYYYMMDD").format("DD/MM/YYYY") || 'N/A'}</Text>
+                            <Text style={styles.text}>{receptionState.date_fin ? moment(receptionState.date_fin, "YYYYMMDD").format("DD/MM/YYYY") || 'N/A' : null}</Text>
                         </View>
                         <View style={styles.row}>
                             <Text style={styles.title}>Date prévus</Text>

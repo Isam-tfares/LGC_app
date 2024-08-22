@@ -1,5 +1,5 @@
-import React, { useEffect, useState } from 'react';
-import { View, Text, StyleSheet, FlatList, TextInput, TouchableOpacity, ActivityIndicator } from 'react-native';
+import React, { useEffect, useState, useCallback } from 'react';
+import { View, Text, StyleSheet, FlatList, TextInput, TouchableOpacity, ActivityIndicator, RefreshControl } from 'react-native';
 import DateTimePickerModal from "react-native-modal-datetime-picker";
 import Fontisto from '@expo/vector-icons/Fontisto';
 import { EvilIcons } from '@expo/vector-icons';
@@ -13,6 +13,7 @@ const Stack = createStackNavigator();
 function Receptions({ route, navigation }) {
     const TOKEN = useSelector(state => state.user.token); // Move this line inside the component
 
+    const [refreshing, setRefreshing] = useState(false);
     const [search, setSearch] = useState("");
     const [isDatePickerVisible, setDatePickerVisibility] = useState(false);
     const [dateType, setDateType] = useState('');
@@ -20,8 +21,12 @@ function Receptions({ route, navigation }) {
     const [toDate, setToDate] = useState(null);
     const [toDateAPI, setToDateAPI] = useState(null);
     const [fromDateAPI, setFromDateAPI] = useState(null);
-    const [loading, setLoading] = useState(false);
     const [receptions, setReceptions] = useState([]);
+
+    const onRefresh = useCallback(() => {
+        const API_URL = 'http://10.0.2.2/LGC_backend/?page=Receptions';
+        fetchData(API_URL, TOKEN);
+    }, [fromDateAPI, toDateAPI]);
     useEffect(() => {
         // Initialize dates
         const secondDate = moment().add(7, 'day').format("DD/MM/YYYY");
@@ -40,7 +45,7 @@ function Receptions({ route, navigation }) {
 
     const fetchData = async (url, token) => {
         if (fromDateAPI === null || toDateAPI === null) return;
-        setLoading(true);
+        setRefreshing(true);
         try {
             const response = await fetch(url, {
                 method: 'POST',
@@ -85,7 +90,7 @@ function Receptions({ route, navigation }) {
             console.error('Error fetching data:', error);
         }
         finally {
-            setLoading(false);
+            setRefreshing(false);
         }
     };
 
@@ -186,9 +191,6 @@ function Receptions({ route, navigation }) {
                 <EvilIcons name="search" size={24} color="black" style={styles.searchIcon} />
             </View>
 
-            {/* Loading */}
-            {loading ? <View style={styles.loading}><ActivityIndicator size="large" color="#4b6aff" /></View> : null}
-
             <View style={styles.DateView}>
                 <View style={styles.view}>
                     <TouchableOpacity onPress={() => showDatePicker('from')}>
@@ -221,6 +223,11 @@ function Receptions({ route, navigation }) {
                 data={filterReceptions()}
                 keyExtractor={(item) => item.IDPhase_projet.toString()}
                 renderItem={renderItem}
+                refreshControl={
+                    <RefreshControl
+                        refreshing={refreshing}
+                        onRefresh={onRefresh}
+                    />}
             />
         </View>
     );
