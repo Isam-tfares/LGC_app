@@ -36,11 +36,6 @@ export default function Intervention({ route, navigation, reload, setReload }) {
                     <Text style={styles.text}>{intervention.libelle ? intervention.libelle : ""}</Text>
                 </View>
                 <View style={styles.row}>
-                    <Text style={styles.title}>Matériaux : </Text>
-                    <Text style={styles.text}>{intervention.materiaux ? intervention.materiaux : ""}</Text>
-                </View>
-
-                <View style={styles.row}>
                     <Text style={styles.title}>Lieu de prélévement : </Text>
                     <Text style={styles.text}>{intervention.adresse}</Text>
                 </View>

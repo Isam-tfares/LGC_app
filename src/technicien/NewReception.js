@@ -84,7 +84,6 @@ export default function NewReception({ route, navigation }) {
         }
     }, [selectedClient, projects]);
     useEffect(() => {
-        console.log("Selected Prestation", selectedPrestation);
         // if prestation is in betonPhases show section beton else hide it
         if (selectedPrestation && BetonPhases.includes(selectedPrestation)) {
             setBetonSectionVisibility(true);
@@ -126,7 +125,6 @@ export default function NewReception({ route, navigation }) {
                 data = JSON.parse(text);
             }
             if (Object.keys(data)) {
-                console.log("Data", data)
                 setClients(data.clients);
                 setProjects(data.projects);
                 setPrestations(data.phases);
@@ -146,12 +144,6 @@ export default function NewReception({ route, navigation }) {
     };
     const insertReception = async (url, token) => {
         setLoading(true);
-        console.log("Data", {
-            "intervention_id": selectedIntervention, "IDPhase": selectedPrestation, "IDProjet": selectedProject,
-            "nombre": nbr_echatillon, "IDType_beton": betonSelected, "IDMateriaux": selectedMatiere, "observation": obs,
-            "date_prevus": parseInt(moment(selectedDate, "DD/MM/YYYY").format("YYYYMMDD")), "prelevement_par": preleves.indexOf(preleve), "Compression": compression ? 1 : 0, "Traction": flexion ? 1 : 0,
-            "Lieux_ouvrage": lieu_prelevement, "Traction_fend": fendage ? 1 : 0
-        });
         // return;
         try {
             const response = await fetch(url, {

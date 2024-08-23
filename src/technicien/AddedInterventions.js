@@ -1,16 +1,18 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, FlatList, ActivityIndicator, RefreshControl } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, FlatList, ActivityIndicator, RefreshControl, TextInput } from 'react-native';
 import moment from 'moment';
 import 'moment/locale/fr'; // Import French locale
+import { EvilIcons } from '@expo/vector-icons';
 import { createStackNavigator } from '@react-navigation/stack';
-import Intervention from './Intervention';
 import { useSelector } from 'react-redux';
+import DemandeIntervention from './DemandeIntervention';
 
 function Programme({ navigation, reload, setReload }) {
     const TOKEN = useSelector(state => state.user.token);
 
     moment.locale('fr');
     const [refreshing, setRefreshing] = useState(false);
+    const [search, setSearch] = useState("");
     const [currentDay, setCurrentDay] = useState(moment());
     const [interventions, setInterventions] = useState([]);
     useEffect(() => {
@@ -73,6 +75,22 @@ function Programme({ navigation, reload, setReload }) {
         }
     };
 
+    const filterInterventions = () => {
+        if (!Array.isArray(interventions)) {
+            console.warn("Interventions data is not an array.");
+            return [];
+        }
+
+        let filteredInterventions = interventions.filter(intervention => {
+            const searchMatch = search === "" ||
+                intervention.abr_projet.toLowerCase().includes(search.toLowerCase()) ||
+                intervention.abr_client.toLowerCase().includes(search.toLowerCase()) ||
+                intervention.intervention_id.toLowerCase().includes(search.toLowerCase()) ||
+                intervention.Nom_personnel.toLowerCase().includes(search.toLowerCase());
+            return searchMatch;
+        });
+        return filteredInterventions;
+    };
 
     const interventionClick = (intervention) => {
         navigation.navigate('Demande Intervention', { intervention });
@@ -80,6 +98,16 @@ function Programme({ navigation, reload, setReload }) {
 
     return (
         <View style={{ flex: 1, backgroundColor: "white" }}>
+            <View >
+                <View style={styles.searchView}>
+                    <TextInput placeholder='rechercher' value={search} onChangeText={setSearch}
+                        style={styles.searchInput}
+                    />
+                    <EvilIcons name="search" size={24} color="black"
+                        style={styles.searchIcon}
+                    />
+                </View>
+            </View>
             <View style={styles.main}>
 
                 {
@@ -92,7 +120,7 @@ function Programme({ navigation, reload, setReload }) {
                                     refreshing={refreshing}
                                     onRefresh={onRefresh}
                                 />}
-                            data={interventions}
+                            data={filterInterventions()}
                             keyExtractor={(item) => item.intervention_id.toString()}
                             renderItem={({ item }) => (
                                 <TouchableOpacity
@@ -104,10 +132,6 @@ function Programme({ navigation, reload, setReload }) {
                                     <Text style={styles.client}>Objet : {item.Objet_Projet}</Text>
                                     <Text style={styles.client}>Client : {item.abr_client}</Text>
                                     <Text style={styles.technicien}>Technicien: {item.Nom_personnel}</Text>
-                                    <View style={{ flexDirection: "row", alignItems: "center", marginTop: 10 }}>
-                                        <Text style={styles.status}>État : </Text>
-                                        <Text style={item.status == 2 ? styles.valide : (item.status == 0 ? styles.annule : styles.enCours)}>{item.status == 1 ? "En cours" : item.status == 2 ? "Faite" : "Annulée"}</Text>
-                                    </View>
                                     <View style={styles.dateView}>
                                         <Text style={styles.dateText}>{moment(item.date_intervention, "YYYYMMDD").format("DD/MM/YYYY") || 'N/A'}</Text>
                                     </View>
@@ -126,7 +150,6 @@ const Stack = createStackNavigator();
 
 export default function AddedInterventions() {
     const [reload, setReload] = useState(false);
-    console.log(reload);
     return (
         <Stack.Navigator initialRouteName="Demandes Interventions">
             <Stack.Screen
@@ -137,7 +160,7 @@ export default function AddedInterventions() {
             />
             <Stack.Screen
                 name="Demande Intervention"
-                children={(props) => <Intervention {...props} reload={reload} setReload={setReload} />}
+                children={(props) => <DemandeIntervention {...props} />}
             />
         </Stack.Navigator>
     );
@@ -285,5 +308,21 @@ const styles = StyleSheet.create({
         bottom: "25%",
         right: "5%",
         zIndex: 20,
+    },
+    searchInput: {
+        backgroundColor: "#f2f2f2",
+        padding: 10,
+        marginBottom: 10,
+        margin: 10,
+        borderRadius: 25,
+        paddingHorizontal: 30,
+    },
+    searchView: {
+        position: "relative",
+    },
+    searchIcon: {
+        position: "absolute",
+        right: 25,
+        top: 24,
     },
 });

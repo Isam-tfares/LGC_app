@@ -20,7 +20,6 @@ export default function Conge({ navigation }) {
     const [years, setYears] = useState();
     const [year, setYear] = useState(moment().year());
     const [selectedMotif, setSelectedMotif] = useState('');
-    const [autreMotif, setAutreMotif] = useState('');
     const [fromDate, setFromDate] = useState('');
     const [toDate, setToDate] = useState('');
     const [fromDateAPI, setFromDateAPI] = useState('');
@@ -65,7 +64,6 @@ export default function Conge({ navigation }) {
                 data = await response.json();
             } else {
                 const text = await response.text();
-                console.log("Data", text);
                 try {
                     if (text[0] == "[" || text[0] == "{") {
                         data = JSON.parse(text);
@@ -107,7 +105,7 @@ export default function Conge({ navigation }) {
                     'Content-Type': 'application/json'
                 },
                 body: JSON.stringify(
-                    { "fromDate": fromDateAPI, "toDate": toDateAPI, "year": moment().year(), "nbr_days": nbr_days, "motifsconge_id": selectedMotif, "autreMotif": autreMotif }
+                    { "fromDate": fromDateAPI, "toDate": toDateAPI, "year": moment().year(), "nbr_days": nbr_days, "motifsconge_id": selectedMotif }
                 )
             });
 
@@ -175,10 +173,6 @@ export default function Conge({ navigation }) {
             return Alert.alert('Erreur', 'Veuillez remplir tous les champs');
         }
 
-        // Vérification du motif autre
-        if (selectedMotif === 6 && !autreMotif) {
-            return Alert.alert('Erreur', 'Veuillez entrer le motif');
-        }
         // Convertir les dates du format DD/MM/YYYY au format ISO
         const [fromDay, fromMonth, fromYear] = fromDate.split('/').map(Number);
         const [toDay, toMonth, toYear] = toDate.split('/').map(Number);
@@ -203,7 +197,6 @@ export default function Conge({ navigation }) {
         setToDate('');
         setNbr_days(0);
         setSelectedMotif('');
-        setAutreMotif('');
         setReload(!reload);
     };
 
@@ -300,14 +293,6 @@ export default function Conge({ navigation }) {
                         <Picker.Item key={index} label={motif.labelle} value={motif.motifsconge_id} />
                     ))}
                 </Picker>
-                {selectedMotif === 6 ?
-                    (<TextInput
-                        style={styles.input}
-                        placeholder="Entrer le motif"
-                        value={autreMotif}
-                        onChangeText={setAutreMotif}
-                    />)
-                    : null}
 
                 <Text style={styles.label}>Date de début</Text>
                 <TouchableOpacity onPress={() => showDatePicker('from')}>

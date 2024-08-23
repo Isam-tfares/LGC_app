@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { View, Text, StyleSheet, Alert, TouchableOpacity, Modal, TextInput } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useSelector } from 'react-redux';
+import moment from 'moment';
 
 export default function Intervention({ route, navigation, reload, setReload }) {
     const TOKEN = useSelector(state => state.user.token)
@@ -87,13 +88,13 @@ export default function Intervention({ route, navigation, reload, setReload }) {
                     <Text style={styles.text}>{intervention.libelle}</Text>
                 </View>
                 <View style={styles.row}>
-                    <Text style={styles.title}>Matériaux : </Text>
-                    <Text style={styles.text}>{intervention.materiaux ?? ""}</Text>
+                    <Text style={styles.title}>Lieu de prélévement : </Text>
+                    <Text style={styles.text}>{intervention.adresse ?? ""}</Text>
                 </View>
 
                 <View style={styles.row}>
-                    <Text style={styles.title}>Lieu de prélévement : </Text>
-                    <Text style={styles.text}>{intervention.adresse ?? ""}</Text>
+                    <Text style={styles.title}>Date d'intervention : </Text>
+                    <Text style={styles.text}>{intervention.date_intervention ? moment(intervention.date_intervention, "YYYYMMDD").format("DD/MM/YYYY") || 'N/A' : null}</Text>
                 </View>
                 {intervention.status == 0 ? (
                     <View style={styles.row}>

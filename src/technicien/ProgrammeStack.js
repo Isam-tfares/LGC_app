@@ -32,6 +32,7 @@ function Programme({ navigation, reload, setReload }) {
     const [yearSelected, setYearSelected] = useState(moment().format('YYYY'));
     const [interventions, setInterventions] = useState([]);
     const daysOfMonth = generateDaysOfMonth(monthSelected, yearSelected);
+
     useEffect(() => {
         fetchData();
     }, [currentDay, reload]);
@@ -110,6 +111,28 @@ function Programme({ navigation, reload, setReload }) {
         setMonthSelected(previousMonth.format('MMMM'));
         setYearSelected(previousMonth.format('YYYY'));
     };
+
+    // Initial scroll Index
+    useEffect(() => {
+        initialScroll();
+    }, []);
+
+    const list = useRef(null);
+    const initialScroll = () => {
+        let initialIndex = parseInt(currentDay.format('D')) - 2 > 0 ? parseInt(currentDay.format('D')) - 2 : 0;
+        list.current?.scrollToIndex({
+            animated: true,
+            index: initialIndex,
+        });
+    };
+
+    const onScrollToIndexFailed = (info) => {
+        const wait = new Promise(resolve => setTimeout(resolve, 500));
+        wait.then(() => {
+            list.current?.scrollToIndex({ index: info.index, animated: true });
+        });
+    };
+
     return (
         <View style={{ flex: 1, backgroundColor: "white" }}>
             <View style={styles.header}>
@@ -124,7 +147,7 @@ function Programme({ navigation, reload, setReload }) {
                 </View>
 
                 <FlatList
-
+                    ref={list}
                     horizontal
                     data={daysOfMonth}
                     showsHorizontalScrollIndicator={false}
@@ -139,6 +162,7 @@ function Programme({ navigation, reload, setReload }) {
                             <Text style={item.isSame(currentDay, 'day') ? styles.dayName2 : styles.dayName}>{item.format('ddd')}</Text>
                         </TouchableOpacity>
                     )}
+                    onScrollToIndexFailed={onScrollToIndexFailed}
                 />
             </View>
             <View style={styles.main}>
@@ -195,7 +219,6 @@ const Stack = createStackNavigator();
 
 export default function ProgrammeStack() {
     const [reload, setReload] = useState(false);
-    console.log(reload);
     return (
         <Stack.Navigator initialRouteName="ProgrammeScreen">
             <Stack.Screen
