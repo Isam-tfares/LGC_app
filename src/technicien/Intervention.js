@@ -4,7 +4,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { useSelector } from 'react-redux';
 import moment from 'moment';
 
-export default function Intervention({ route, navigation, reload, setReload }) {
+export default function Intervention({ route, navigation }) {
     const TOKEN = useSelector(state => state.user.token)
     const { intervention } = route.params;
     const [modalVisible, setModalVisible] = useState(false);
@@ -41,7 +41,6 @@ export default function Intervention({ route, navigation, reload, setReload }) {
             if (data != null) {
                 if (data) {
                     Alert.alert("Intervention annulée avec succès");
-                    setReload(!reload);
                 } else {
                     Alert.alert("Un problème est survenu lors du annulation du intervention");
                 }

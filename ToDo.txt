@@ -3,7 +3,6 @@
 
 >> double check in add intervention data 
 >> Add intervention chef 2 Dates also for DB backend
->> Programme Intervention technicien ( problem serialization )
 >> matriaux,natures,tableau
 >> some inputs in new reception are not inserted ( beton datas ( cymlidre,jrs,...))
 

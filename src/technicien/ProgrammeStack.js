@@ -20,7 +20,7 @@ const generateDaysOfMonth = (month, year) => {
     return daysArray;
 };
 
-function Programme({ navigation, reload, setReload }) {
+function Programme({ navigation }) {
     const TOKEN = useSelector(state => state.user.token);
 
     moment.locale('fr');
@@ -35,10 +35,10 @@ function Programme({ navigation, reload, setReload }) {
 
     useEffect(() => {
         fetchData();
-    }, [currentDay, reload]);
+    }, [currentDay]);
     const onRefresh = useCallback(() => {
         fetchData();
-    }, [currentDay, reload]);
+    }, [currentDay]);
 
     const fetchData = async () => {
         try {
@@ -218,18 +218,16 @@ function Programme({ navigation, reload, setReload }) {
 const Stack = createStackNavigator();
 
 export default function ProgrammeStack() {
-    const [reload, setReload] = useState(false);
     return (
         <Stack.Navigator initialRouteName="ProgrammeScreen">
             <Stack.Screen
                 name="ProgrammeScreen"
                 component={Programme}
                 options={{ headerShown: false }}
-                initialParams={{ reload, setReload }}
             />
             <Stack.Screen
                 name="Intervention"
-                children={(props) => <Intervention {...props} reload={reload} setReload={setReload} />}
+                children={(props) => <Intervention {...props} />}
             />
         </Stack.Navigator>
     );
