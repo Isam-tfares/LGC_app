@@ -46,7 +46,7 @@ function Conges({ navigation, route }) {
     const fetchData = async () => {
         try {
             setRefreshing(true);
-            const API_URL = 'http://10.0.2.2/LGC_backend/?page=DemandesConges';
+            const API_URL = 'http://192.168.43.88/LGC_backend/?page=DemandesConges';
             const fromDateAPI = parseInt(moment(fromDate, "DD/MM/YYYY").format('YYYYMMDD'));
             const toDateAPI = parseInt(moment(toDate, "DD/MM/YYYY").format('YYYYMMDD'));
             const response = await fetch(API_URL, {
@@ -83,6 +83,11 @@ function Conges({ navigation, route }) {
                 }
             }
 
+            if (data.error && data.error == "Expired token") {
+                navigation.navigate("Déconnexion");
+                console.log("Log Out");
+                return;
+            }
             if (data) {
                 // console.log(data);
                 setCongesData(data);

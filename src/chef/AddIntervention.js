@@ -38,7 +38,7 @@ export default function AddIntervention({ modalVisible, setModalVisible }) {
 
     const getData = () => {
         if (!clients || !projects || !prestations || !techniciens) {
-            const API_URL = 'http://10.0.2.2/LGC_backend/?page=addInterventionInterface';
+            const API_URL = 'http://192.168.43.88/LGC_backend/?page=addInterventionInterface';
             fetchData(API_URL, TOKEN);
         }
     }
@@ -65,6 +65,11 @@ export default function AddIntervention({ modalVisible, setModalVisible }) {
             } else {
                 const text = await response.text();
                 data = JSON.parse(text);
+            }
+            if (data.error && data.error == "Expired token") {
+                navigation.navigate("Déconnexion");
+                console.log("Log Out");
+                return;
             }
             if (Object.keys(data)) {
                 setTechniciens(data.techniciens);
@@ -105,6 +110,12 @@ export default function AddIntervention({ modalVisible, setModalVisible }) {
                 const text = await response.text();
                 data = JSON.parse(text);
             }
+            if (data.error && data.error == "Expired token") {
+                Alert.alert("Un problème est survenu lors de l'ajout de l'intervention");
+                navigation.navigate("Déconnexion");
+                console.log("Log Out");
+                return;
+            }
             if (data != null) {
                 if (data) {
                     Alert.alert("Intervention ajoutée avec succès");
@@ -137,7 +148,7 @@ export default function AddIntervention({ modalVisible, setModalVisible }) {
             Alert.alert('Erreur', 'Veuillez remplir tous les champs');
             return;
         }
-        API_URL = "http://10.0.2.2/LGC_backend/?page=AddIntervention";
+        API_URL = "http://192.168.43.88/LGC_backend/?page=AddIntervention";
         date = parseInt(moment(selectedDate).format('YYYYMMDD'));
         insertIntervention(API_URL, TOKEN, date);
         // reset the values
@@ -227,7 +238,7 @@ export default function AddIntervention({ modalVisible, setModalVisible }) {
                     >
                         <Picker.Item label="Séléctionner Technicien" value="" />
                         {techniciens?.map((technician, index) => (
-                            <Picker.Item key={index} label={technician.nom_complet} value={technician.user_id} />
+                            <Picker.Item key={index} label={technician.Nom_personnel} value={technician.user_id} />
                         ))}
                     </Picker>
 

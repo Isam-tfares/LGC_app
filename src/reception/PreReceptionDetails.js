@@ -9,7 +9,7 @@ import moment from 'moment';
 
 export default function PreReceptionDetails({ route, navigation }) {
     const TOKEN = useSelector(state => state.user.token);
-    const IMAGES_URL = "http://10.0.2.2/LGC_backend/pvs/";
+    const IMAGES_URL = "http://192.168.43.88/LGC_backend/pvs/";
     const ETATS_RECUPERATION = ["Réccupéré", "Non réccupéré"];
     const PRELVES_PAR = ["LGC", "Client"];
     const RECEPETION_TYPES = ["interne", "externe"];
@@ -23,6 +23,7 @@ export default function PreReceptionDetails({ route, navigation }) {
     const [imageModalVisible, setImageModalVisible] = useState(false);
     const [loading, setLoading] = useState(false);
     const [image, setImage] = useState(null);
+    const [intervention_id, setIntervention_id] = useState(route.params.id ?? null);
     const [receptionState, setReceptionState] = useState(reception);
 
     const handleGoBack = () => {
@@ -31,7 +32,7 @@ export default function PreReceptionDetails({ route, navigation }) {
     };
 
     const fetchPreReception = async (url, intervention_id, token) => {
-        if (!intervention_id) {
+        if (intervention_id == null) {
             return;
         }
         setLoading(true);
@@ -56,7 +57,6 @@ export default function PreReceptionDetails({ route, navigation }) {
                 data = await response.json();
             } else {
                 const text = await response.text();
-                console.log("Text", text);
                 try {
                     if (text[0] == "[" || text[0] == "{") {
                         data = JSON.parse(text);
@@ -70,7 +70,11 @@ export default function PreReceptionDetails({ route, navigation }) {
                     return;
                 }
             }
-
+            if (data.error && data.error == "Expired token") {
+                navigation.navigate("Déconnexion");
+                console.log("Log Out");
+                return;
+            }
             // check if data is Object
             if (typeof data === 'object' && data !== null) {
                 setReceptionState(data);
@@ -89,18 +93,23 @@ export default function PreReceptionDetails({ route, navigation }) {
         }
     }, [receptionState]);
     useEffect(() => {
-        if (route.params.id) {
-            console.log("fetch Prereception of intervention_id ", route.params.id);
-            const API_URL = 'http://10.0.2.2/LGC_backend/?page=PreReception';
-            fetchPreReception(API_URL, route.params.id, TOKEN);
+        if (intervention_id) {
+            console.log("fetch Prereception of intervention_id ", intervention_id);
+            const API_URL = 'http://192.168.43.88/LGC_backend/?page=PreReception';
+            fetchPreReception(API_URL, intervention_id, TOKEN);
+            navigation.setParams({ id: null });
         }
+    }, [intervention_id]);
+    useEffect(() => {
+        setIntervention_id(route.params.id);
     }, [route.params.id]);
+
     const closeImageModal = () => {
         setImageModalVisible(null);
     };
 
     const validateReception = async () => {
-        let url = 'http://10.0.2.2/LGC_backend/?page=validatePreReception';
+        let url = 'http://192.168.43.88/LGC_backend/?page=validatePreReception';
         setLoading(true);
         try {
             const response = await fetch(url, {
@@ -122,8 +131,13 @@ export default function PreReceptionDetails({ route, navigation }) {
                 data = await response.json();
             } else {
                 const text = await response.text();
-                console.log("TEXT", text);
                 data = JSON.parse(text);
+            }
+            if (data.error && data.error == "Expired token") {
+                Alert.alert("Un problème est survenu lors de la validation de la réception");
+                navigation.navigate("Déconnexion");
+                console.log("Log Out");
+                return;
             }
             if (data != null) {
                 if (data) {

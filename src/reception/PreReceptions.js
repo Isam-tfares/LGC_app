@@ -34,17 +34,17 @@ function Prereceptions({ route, navigation }) {
         setToDate(secondDate);
     }, []);
     const onRefresh = useCallback(() => {
-        const API_URL = 'http://10.0.2.2/LGC_backend/?page=Prereceptions';
+        const API_URL = 'http://192.168.43.88/LGC_backend/?page=Prereceptions';
         fetchData(API_URL, TOKEN);
     }, [fromDateAPI, toDateAPI]);
     useEffect(() => {
-        const API_URL = 'http://10.0.2.2/LGC_backend/?page=Prereceptions';
+        const API_URL = 'http://192.168.43.88/LGC_backend/?page=Prereceptions';
         fetchData(API_URL, TOKEN);
     }, [fromDateAPI, toDateAPI]);
 
     useEffect(() => {
         if (route.params?.reload) {
-            const API_URL = 'http://10.0.2.2/LGC_backend/?page=Prereceptions';
+            const API_URL = 'http://192.168.43.88/LGC_backend/?page=Prereceptions';
             fetchData(API_URL, TOKEN);
         }
     }, [route.params?.reload]);
@@ -85,11 +85,14 @@ function Prereceptions({ route, navigation }) {
                     return;
                 }
             }
-
+            if (data.error && data.error == "Expired token") {
+                navigation.navigate("Déconnexion");
+                console.log("Log Out");
+                return;
+            }
             // check if data is Object
             if (typeof data === 'object' && data !== null) {
                 setReceptions(data);
-                console.log('Data: ', data);
             }
         } catch (error) {
             console.error('Error fetching data :', error);
@@ -248,7 +251,7 @@ export default function PrereceptionsStack({ route, navigation }) {
         else {
             console.log("No intervention_id");
         }
-    }, [intervention_id, navigation]);
+    }, [route.params]);
 
     return (
         <Stack.Navigator initialRouteName="Listes Pré-réceptions">

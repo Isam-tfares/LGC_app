@@ -59,6 +59,7 @@ export default function NewReception({ route, navigation }) {
     const [nature_echantillon, setNature_echantillon] = useState("");
     const [obs, setObs] = useState("");
     const [isDatePickerVisible, setDatePickerVisibility] = useState(false);
+    const [isDatePickerVisible2, setDatePickerVisibility2] = useState(false);
     const [isBetonSectionVisible, setBetonSectionVisibility] = useState(true);
     const [loading, setLoading] = useState(false);
     useEffect(() => {
@@ -95,7 +96,7 @@ export default function NewReception({ route, navigation }) {
 
     const getData = () => {
         if (!clients || !projects || !prestations || !materiaux || !types_beton || !nature_echantillons) {
-            const API_URL = 'http://10.0.2.2/LGC_backend/?page=NewReceptionInterface';
+            const API_URL = 'http://192.168.43.88/LGC_backend/?page=NewReceptionInterface';
             fetchData(API_URL, TOKEN);
         }
     }
@@ -123,6 +124,11 @@ export default function NewReception({ route, navigation }) {
             } else {
                 const text = await response.text();
                 data = JSON.parse(text);
+            }
+            if (data.error && data.error == "Expired token") {
+                navigation.navigate("Déconnexion");
+                console.log("Log Out");
+                return;
             }
             if (Object.keys(data)) {
                 setClients(data.clients);
@@ -175,6 +181,12 @@ export default function NewReception({ route, navigation }) {
                 console.log(text);
                 data = JSON.parse(text);
             }
+            if (data.error && data.error == "Expired token") {
+                Alert.alert("Un problème est survenu lors de l'ajout de la réception");
+                navigation.navigate("Déconnexion");
+                console.log("Log Out");
+                return;
+            }
             if (data != null) {
                 if (data) {
                     Alert.alert("Réception ajoutée avec succès");
@@ -207,9 +219,13 @@ export default function NewReception({ route, navigation }) {
     const showDatePicker = () => {
         setDatePickerVisibility(true);
     };
+    const showDatePicker2 = () => {
+        setDatePickerVisibility2(true);
+    };
 
     const hideDatePicker = () => {
         setDatePickerVisibility(false);
+        setDatePickerVisibility2(false);
     };
 
     const handleConfirm = (date) => {
@@ -227,7 +243,7 @@ export default function NewReception({ route, navigation }) {
             Alert.alert('Veuillez remplir tous les champs');
             return;
         }
-        const API_URL = 'http://10.0.2.2/LGC_backend/?page=NewReception';
+        const API_URL = 'http://192.168.43.88/LGC_backend/?page=NewReception';
         insertReception(API_URL, TOKEN);
         let intervention_id = selectedIntervention;
         setSelectedClient("");
@@ -401,13 +417,13 @@ export default function NewReception({ route, navigation }) {
                             {isBetonSectionVisible ?
                                 (<View style={styles.col}>
                                     <Text style={styles.label}>Date gaché béton</Text>
-                                    <TouchableOpacity style={styles.dateButton} onPress={showDatePicker}>
+                                    <TouchableOpacity style={styles.dateButton} onPress={showDatePicker2}>
                                         <Text style={styles.dateButtonText}>
                                             {selectedDate2 ? moment(selectedDate2).format('MM/DD/YYYY') : 'Séléctionner Date'}
                                         </Text>
                                     </TouchableOpacity>
                                     <DateTimePickerModal
-                                        isVisible={isDatePickerVisible}
+                                        isVisible={isDatePickerVisible2}
                                         mode="date"
                                         onConfirm={handleConfirm2}
                                         onCancel={hideDatePicker}

@@ -7,7 +7,7 @@ import { createStackNavigator } from '@react-navigation/stack';
 import { useSelector } from 'react-redux';
 import DemandeIntervention from './DemandeIntervention';
 
-function Programme({ navigation, reload, setReload }) {
+function Programme({ navigation }) {
     const TOKEN = useSelector(state => state.user.token);
 
     moment.locale('fr');
@@ -17,10 +17,10 @@ function Programme({ navigation, reload, setReload }) {
     const [interventions, setInterventions] = useState([]);
     useEffect(() => {
         fetchData();
-    }, [currentDay, reload]);
+    }, [currentDay]);
     const onRefresh = useCallback(() => {
         fetchData();
-    }, [currentDay, reload]);
+    }, [currentDay]);
 
     const fetchData = async () => {
         try {
@@ -29,7 +29,7 @@ function Programme({ navigation, reload, setReload }) {
             // Format the date as YYYYMMDD
             const dateAPI = parseInt(moment(currentDay).format('YYYYMMDD'));
 
-            const API_URL = 'http://10.0.2.2/LGC_backend/?page=demandesInterventionsTec';
+            const API_URL = 'http://192.168.43.88/LGC_backend/?page=demandesInterventionsTec';
             const response = await fetch(API_URL, {
                 method: 'POST',
                 headers: {
@@ -63,7 +63,11 @@ function Programme({ navigation, reload, setReload }) {
                     return;
                 }
             }
-
+            if (data.error && data.error == "Expired token") {
+                navigation.navigate("Déconnexion");
+                console.log("Log Out");
+                return;
+            }
             if (data) {
                 // console.log("DATA", data);
                 setInterventions(data);
@@ -149,14 +153,12 @@ function Programme({ navigation, reload, setReload }) {
 const Stack = createStackNavigator();
 
 export default function AddedInterventions() {
-    const [reload, setReload] = useState(false);
     return (
         <Stack.Navigator initialRouteName="Demandes Interventions">
             <Stack.Screen
                 name="Demandes Interventions"
                 component={Programme}
                 options={{ headerShown: false }}
-                initialParams={{ reload, setReload }}
             />
             <Stack.Screen
                 name="Demande Intervention"

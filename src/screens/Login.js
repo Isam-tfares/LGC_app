@@ -2,6 +2,7 @@
 import React, { useState, useEffect } from 'react';
 import { View, TextInput, Alert, StyleSheet, TouchableOpacity, Text, Image, KeyboardAvoidingView, ScrollView, Platform, SafeAreaView, ActivityIndicator } from 'react-native';
 import { useDispatch, useSelector } from 'react-redux';
+import Ionicons from '@expo/vector-icons/Ionicons';
 import { setUser } from '../actions/userActions'; // Update path as needed
 
 const Login = ({ isLogined, setLogined }) => {
@@ -10,6 +11,7 @@ const Login = ({ isLogined, setLogined }) => {
     const [password, setPassword] = useState('');
     const [errorUsername, setErrorUsername] = useState('');
     const [errorPassword, setErrorPassword] = useState('');
+    const [isVisible, setVisible] = useState(false);
     const [loading, setLoading] = useState(false);
 
     const user = useSelector(state => state.user);
@@ -45,7 +47,7 @@ const Login = ({ isLogined, setLogined }) => {
             return;
         }
 
-        const API_URL = 'http://10.0.2.2/LGC_backend/?page=login';
+        const API_URL = 'http://192.168.43.88/LGC_backend/?page=login';
         setLoading(true);
         try {
             const response = await fetch(API_URL, {
@@ -112,14 +114,29 @@ const Login = ({ isLogined, setLogined }) => {
                     <View style={styles.errorC}>
                         <Text style={styles.error}>{errorUsername}</Text>
                     </View>
-                    <TextInput
-                        placeholder="Mot de passe"
-                        value={password}
-                        onChangeText={setPassword}
-                        secureTextEntry
-                        style={styles.input}
-                        placeholderTextColor="#edede9"
-                    />
+                    <View style={{ position: "relative" }}>
+
+                        {isVisible ?
+                            (<TextInput
+                                placeholder="Mot de passe"
+                                value={password}
+                                onChangeText={setPassword}
+                                style={styles.input}
+                                placeholderTextColor="#edede9" />)
+                            :
+                            (<TextInput
+                                placeholder="Mot de passe"
+                                value={password}
+                                onChangeText={setPassword}
+                                secureTextEntry
+                                style={styles.input}
+                                placeholderTextColor="#edede9" />)
+                        }
+
+                        <TouchableOpacity style={styles.eyeView} onPress={() => { setVisible(!isVisible) }}>
+                            <Ionicons name={isVisible ? "eye-off" : "eye"} size={24} color="white" />
+                        </TouchableOpacity>
+                    </View>
                     <View style={styles.errorC}>
                         <Text style={styles.error}>{errorPassword}</Text>
                     </View>
@@ -158,6 +175,13 @@ const styles = StyleSheet.create({
         borderBottomColor: 'white',
         borderBottomWidth: 2,
         color: 'white',
+        // position: "relative"
+    },
+    eyeView: {
+        position: "absolute",
+        top: "40%",
+        right: "5%",
+        zIndex: 100
     },
     btnText: {
         color: '#1c488c',

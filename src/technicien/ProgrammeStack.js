@@ -32,7 +32,7 @@ function Programme({ navigation }) {
     const [yearSelected, setYearSelected] = useState(moment().format('YYYY'));
     const [interventions, setInterventions] = useState([]);
     const daysOfMonth = generateDaysOfMonth(monthSelected, yearSelected);
-
+    console.log(interventions);
     useEffect(() => {
         fetchData();
     }, [currentDay]);
@@ -47,7 +47,7 @@ function Programme({ navigation }) {
             // Format the date as YYYYMMDD
             const dateAPI = parseInt(moment(currentDay).format('YYYYMMDD'));
 
-            const API_URL = 'http://10.0.2.2/LGC_backend/?page=Programme';
+            const API_URL = 'http://192.168.43.88/LGC_backend/?page=Programme';
             const response = await fetch(API_URL, {
                 method: 'POST',
                 headers: {
@@ -77,13 +77,15 @@ function Programme({ navigation }) {
                     }
                 } catch (error) {
                     console.error('Error parsing JSON:', error);
-                    // Handle non-JSON data if necessary
                     return;
                 }
             }
-
+            if (data.error && data.error == "Expired token") {
+                navigation.navigate("Déconnexion");
+                console.log("Log Out");
+                return;
+            }
             if (data) {
-                // console.log("DATA", data);
                 setInterventions(data);
             }
         } catch (error) {

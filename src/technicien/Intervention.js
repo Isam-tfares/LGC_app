@@ -1,18 +1,25 @@
-import React, { useState } from 'react';
-import { View, Text, StyleSheet, Alert, TouchableOpacity, Modal, TextInput } from 'react-native';
+import React, { useState, useCallback } from 'react';
+import { View, Text, StyleSheet, Alert, RefreshControl, TouchableOpacity, Modal, TextInput, ScrollView } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useSelector } from 'react-redux';
 import moment from 'moment';
+import * as Location from 'expo-location';
 
 export default function Intervention({ route, navigation }) {
     const TOKEN = useSelector(state => state.user.token)
     const { intervention } = route.params;
+    const [refreshing, setRefreshing] = useState(false);
     const [modalVisible, setModalVisible] = useState(false);
     const [comment, setComment] = useState('');
+    const [X, setX] = useState(null);
+    const [Y, setY] = useState(null);
+
+    const onRefresh = useCallback(() => {
+    }, []);
 
     const annulateIntervention = async () => {
-
-        let API_URL = 'http://10.0.2.2/LGC_backend/?page=annulerIntervention';
+        setRefreshing(true);
+        let API_URL = 'http://192.168.43.88/LGC_backend/?page=annulerIntervention';
         try {
             const response = await fetch(API_URL, {
                 method: 'POST',
@@ -38,6 +45,12 @@ export default function Intervention({ route, navigation }) {
                 const text = await response.text();
                 data = JSON.parse(text);
             }
+            if (data.error && data.error == "Expired token") {
+                Alert.alert("Un problème est survenu lors du annulation du intervention");
+                navigation.navigate("Déconnexion");
+                console.log("Log Out");
+                return;
+            }
             if (data != null) {
                 if (data) {
                     Alert.alert("Intervention annulée avec succès");
@@ -48,9 +61,12 @@ export default function Intervention({ route, navigation }) {
         } catch (error) {
             console.error('Error fetching data:', error);
         }
+        finally {
+            setRefreshing(false);
+        }
     };
+
     const annulerIntervention = () => {
-        // Logic to handle the comment submission or cancellation
         if (comment === '') {
             Alert.alert('Veuillez ajouter un commentaire');
             return;
@@ -59,111 +75,188 @@ export default function Intervention({ route, navigation }) {
         setModalVisible(false);
         navigation.goBack();
     };
+
     const validateIntervention = (intervention_id) => {
         navigation.navigate('Nouvelle réception', { "id": intervention_id });
     };
 
-    return (
-        <View style={styles.container}>
-            <View style={styles.card}>
-                <View style={styles.row}>
-                    <Text style={styles.title}>N° Intervention :</Text>
-                    <Text style={styles.text}>{intervention.intervention_id}</Text>
-                </View>
-                <View style={styles.row}>
-                    <Text style={styles.title}>Client:</Text>
-                    <Text style={styles.text}>{intervention.abr_client}</Text>
-                </View>
-                <View style={styles.row}>
-                    <Text style={styles.title}>Projet : </Text>
-                    <Text style={styles.text}>{intervention.abr_projet}</Text>
-                </View>
-                <View style={styles.row}>
-                    <Text style={styles.title}>Objet : </Text>
-                    <Text style={styles.text}>{intervention.Objet_Projet}</Text>
-                </View>
-                <View style={styles.row}>
-                    <Text style={styles.title}>Prestation : </Text>
-                    <Text style={styles.text}>{intervention.libelle}</Text>
-                </View>
-                <View style={styles.row}>
-                    <Text style={styles.title}>Lieu de prélévement : </Text>
-                    <Text style={styles.text}>{intervention.adresse ?? ""}</Text>
-                </View>
+    const addLocation = async () => {
+        setRefreshing(true);
+        try {
+            let { status } = await Location.requestForegroundPermissionsAsync();
+            if (status !== 'granted') {
+                Alert.alert('Permission to access location was denied');
+                return;
+            }
 
-                <View style={styles.row}>
-                    <Text style={styles.title}>Date d'intervention : </Text>
-                    <Text style={styles.text}>{intervention.date_intervention ? moment(intervention.date_intervention, "YYYYMMDD").format("DD/MM/YYYY") || 'N/A' : null}</Text>
-                </View>
-                {intervention.status == 0 ? (
-                    <View style={styles.row}>
-                        <Text style={styles.title}>Observation : </Text>
-                        <Text style={styles.obs}>{intervention.obs}</Text>
-                    </View>
-                ) : <></>}
-                {/* {intervention.status == 2 ? ( */}
-                <View style={styles.row}>
-                    <Text style={styles.title}>Etat d'intervention : </Text>
-                    <Text style={[styles.text, intervention.status == 2 ? styles.valide : (intervention.status == 0 ? styles.annule : styles.enCours)]}
+            let location = await Location.getCurrentPositionAsync({});
+            const { latitude, longitude } = location.coords;
 
-                    >{intervention.status == 0 ? "Annulée" : intervention.status == 1 ? "En cours" : "Faite"}</Text>
-                </View>
-                {/* ) : <></>} */}
-                {(intervention.status == 2) ?
-                    <View style={styles.row}>
-                        <Text style={styles.title}>Etat de réception : </Text>
-                        <Text style={[styles.text, intervention.etat_reception == 1 ? styles.valide : styles.enCours]}
+            setX(longitude);
+            setY(latitude);
 
-                        >{intervention.etat_reception == 1 ? "Faite" : "En cours"}</Text>
-                    </View>
-                    : ""
-                }
-                {intervention.status == 1 ? (
-                    <View style={styles.buttonContainer}>
-                        <TouchableOpacity style={[styles.button, styles.confirmButton]} onPress={() => { validateIntervention(intervention.intervention_id) }}>
-                            <Text style={styles.buttonText}>Valider</Text>
-                        </TouchableOpacity>
-                        <TouchableOpacity style={[styles.button, styles.cancelButton]} onPress={() => { setModalVisible(true) }}>
-                            <Text style={styles.buttonText}>Annuler</Text>
-                        </TouchableOpacity>
-                    </View>) : (<></>
+            console.log("X and Y: Longitude:", longitude, "Latitude:", latitude);
+
+            // Here you can call an API to save the location or do any other logic you need
+            // Example API call to save the location
+            let API_URL = 'http://192.168.43.88/LGC_backend/?page=addLocation';
+            const response = await fetch(API_URL, {
+                method: 'POST',
+                headers: {
+                    'Authorization': `Bearer ${TOKEN}`,
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(
+                    { "X": longitude, "Y": latitude, "IDProjet": intervention.IDProjet }
                 )
+            });
+            if (!response.ok) {
+                throw new Error(`HTTP error! Status: ${response.status}`);
+            }
+
+            const contentType = response.headers.get('content-type');
+            let data;
+
+            if (contentType && contentType.includes('application/json')) {
+                data = await response.json();
+            } else {
+                const text = await response.text();
+                console.log("TEXt", text);
+                data = JSON.parse(text);
+            }
+            if (data.error && data.error == "Expired token") {
+                Alert.alert("Un problème est survenu lors de l'ajout des coordonnées");
+                navigation.navigate("Déconnexion");
+                console.log("Log Out");
+                return;
+            }
+            if (data != null) {
+                if (data) {
+                    Alert.alert("Coordonnées ajoutées avec succès");
+                } else {
+                    Alert.alert("Un problème est survenu lors de l'ajout des coordonnées");
                 }
+            }
 
+        } catch (error) {
+            console.error('Error fetching location:', error);
+        }
+        finally {
+            setRefreshing(false);
+        }
+    };
 
-            </View>
-
-            {/* Annulation modal */}
-            <Modal
-                animationType="slide"
-                transparent={true}
-                visible={modalVisible}
-                onRequestClose={() => {
-                    setModalVisible(!modalVisible);
-                }}
-            >
-                <View style={styles.modalOverlay}>
-                    <View style={styles.modalView}>
-                        <TouchableOpacity style={styles.close}
-                            onPress={() => setModalVisible(false)}
-                        >
-                            <Ionicons name="close-circle-sharp" size={40} color="red" />
-                        </TouchableOpacity>
-                        <Text style={styles.modalTitle}>Ajouter un commentaire</Text>
-                        <TextInput
-                            style={styles.input}
-                            placeholder="Comment"
-                            value={comment}
-                            onChangeText={setComment}
-                            placeholderTextColor="#ccc"
-                        />
-                        <TouchableOpacity style={styles.modalButton} onPress={() => { annulerIntervention() }}>
-                            <Text style={styles.modalButtonText}>Valider</Text>
-                        </TouchableOpacity>
+    return (
+        <ScrollView
+            refreshControl={
+                <RefreshControl
+                    refreshing={refreshing}
+                    onRefresh={onRefresh}
+                />}>
+            <View style={styles.container}>
+                <View style={styles.card}>
+                    <View style={styles.row}>
+                        <Text style={styles.title}>N° Intervention :</Text>
+                        <Text style={styles.text}>{intervention.intervention_id}</Text>
                     </View>
+                    <View style={styles.row}>
+                        <Text style={styles.title}>Client:</Text>
+                        <Text style={styles.text}>{intervention.abr_client}</Text>
+                    </View>
+                    <View style={styles.row}>
+                        <Text style={styles.title}>Projet : </Text>
+                        <Text style={styles.text}>{intervention.abr_projet}</Text>
+                    </View>
+                    <View style={styles.row}>
+                        <Text style={styles.title}>Objet : </Text>
+                        <Text style={styles.text}>{intervention.Objet_Projet}</Text>
+                    </View>
+                    <View style={styles.row}>
+                        <Text style={styles.title}>Prestation : </Text>
+                        <Text style={styles.text}>{intervention.libelle}</Text>
+                    </View>
+                    <View style={styles.row}>
+                        <Text style={styles.title}>Lieu de prélévement : </Text>
+                        <Text style={styles.text}>{intervention.adresse ?? ""}</Text>
+                    </View>
+
+                    <View style={styles.row}>
+                        <Text style={styles.title}>Date d'intervention : </Text>
+                        <Text style={styles.text}>{intervention.date_intervention ? moment(intervention.date_intervention, "YYYYMMDD").format("DD/MM/YYYY") || 'N/A' : null}</Text>
+                    </View>
+                    {intervention.status == 0 ? (
+                        <View style={styles.row}>
+                            <Text style={styles.title}>Observation : </Text>
+                            <Text style={styles.obs}>{intervention.obs}</Text>
+                        </View>
+                    ) : <></>}
+                    <View style={styles.row}>
+                        <Text style={styles.title}>Etat d'intervention : </Text>
+                        <Text style={[styles.text, intervention.status == 2 ? styles.valide : (intervention.status == 0 ? styles.annule : styles.enCours)]}
+
+                        >{intervention.status == 0 ? "Annulée" : intervention.status == 1 ? "En cours" : "Faite"}</Text>
+                    </View>
+                    {(intervention.status == 2) ?
+                        <View style={styles.row}>
+                            <Text style={styles.title}>Etat de réception : </Text>
+                            <Text style={[styles.text, intervention.etat_reception == 1 ? styles.valide : styles.enCours]}
+
+                            >{intervention.etat_reception == 1 ? "Faite" : "En cours"}</Text>
+                        </View>
+                        : ""
+                    }
+
+                    {intervention.X == 0 || intervention.Y == 0 ?
+                        <View style={styles.buttonContainer}>
+                            <TouchableOpacity onPress={addLocation} style={[styles.button, styles.confirmButton]}>
+                                <Text style={styles.buttonText}>Ajouter Géolocalisation </Text>
+                            </TouchableOpacity>
+                        </View>
+                        : <></>}
+                    {intervention.status == 1 ? (
+                        <View style={styles.buttonContainer}>
+                            <TouchableOpacity style={[styles.button, styles.confirmButton]} onPress={() => { validateIntervention(intervention.intervention_id) }}>
+                                <Text style={styles.buttonText}>Valider</Text>
+                            </TouchableOpacity>
+                            <TouchableOpacity style={[styles.button, styles.cancelButton]} onPress={() => { setModalVisible(true) }}>
+                                <Text style={styles.buttonText}>Annuler</Text>
+                            </TouchableOpacity>
+                        </View>) : (<></>
+                    )}
                 </View>
-            </Modal>
-        </View>
+
+                {/* Annulation modal */}
+                <Modal
+                    animationType="slide"
+                    transparent={true}
+                    visible={modalVisible}
+                    onRequestClose={() => {
+                        setModalVisible(!modalVisible);
+                    }}
+                >
+                    <View style={styles.modalOverlay}>
+                        <View style={styles.modalView}>
+                            <TouchableOpacity style={styles.close}
+                                onPress={() => setModalVisible(false)}
+                            >
+                                <Ionicons name="close-circle-sharp" size={40} color="red" />
+                            </TouchableOpacity>
+                            <Text style={styles.modalTitle}>Ajouter un commentaire</Text>
+                            <TextInput
+                                style={styles.input}
+                                placeholder="Comment"
+                                value={comment}
+                                onChangeText={setComment}
+                                placeholderTextColor="#ccc"
+                            />
+                            <TouchableOpacity style={styles.modalButton} onPress={() => { annulerIntervention() }}>
+                                <Text style={styles.modalButtonText}>Valider</Text>
+                            </TouchableOpacity>
+                        </View>
+                    </View>
+                </Modal>
+            </View>
+        </ScrollView>
     );
 }
 

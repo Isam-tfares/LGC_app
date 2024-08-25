@@ -9,7 +9,7 @@ import moment from 'moment';
 
 export default function ReceptionDetails({ route, navigation }) {
     const TOKEN = useSelector(state => state.user.token);
-    const IMAGES_URL = "http://10.0.2.2/LGC_backend/pvs/";
+    const IMAGES_URL = "http://192.168.43.88/LGC_backend/pvs/";
     const ETATS_RECUPERATION = ["Réccupéré", "Non réccupéré"];
     const PRELVES_PAR = ["LGC", "Client"];
     const RECEPETION_TYPES = ["interne", "externe"];
@@ -24,13 +24,12 @@ export default function ReceptionDetails({ route, navigation }) {
     const [image, setImage] = useState(null);
     const [receptionState, setReceptionState] = useState(reception);
     const [intervention_id, setIntervention_id] = useState(route.params.id ?? null);
-
     const fetchReception = async (intervention_id, token) => {
-        if (!intervention_id) {
+        if (intervention_id == null) {
             return;
         }
         setLoading(true);
-        const API_URL = 'http://10.0.2.2/LGC_backend/?page=Reception';
+        const API_URL = 'http://192.168.43.88/LGC_backend/?page=Reception';
         try {
             const response = await fetch(API_URL, {
                 method: 'POST',
@@ -40,7 +39,6 @@ export default function ReceptionDetails({ route, navigation }) {
                 },
                 body: JSON.stringify({ "intervention_id": intervention_id }),
             });
-            console.log(JSON.stringify({ "intervention_id": intervention_id }))
 
 
             if (!response.ok) {
@@ -54,7 +52,6 @@ export default function ReceptionDetails({ route, navigation }) {
                 data = await response.json();
             } else {
                 const text = await response.text();
-                console.log("TEXT : ", text);
                 try {
                     if (text[0] == "[" || text[0] == "{") {
                         data = JSON.parse(text);
@@ -68,7 +65,11 @@ export default function ReceptionDetails({ route, navigation }) {
                     return;
                 }
             }
-
+            if (data.error && data.error == "Expired token") {
+                navigation.navigate("Déconnexion");
+                console.log("Log Out");
+                return;
+            }
             // check if data is Object
             if (typeof data === 'object' && data !== null) {
                 setReceptionState(data);
@@ -90,15 +91,20 @@ export default function ReceptionDetails({ route, navigation }) {
         if (intervention_id) {
             console.log("fetch Reception of intervention_id", intervention_id);
             fetchReception(intervention_id, TOKEN);
+            navigation.setParams({ id: null });
         }
     }, [intervention_id]);
+    useEffect(() => {
+        setIntervention_id(route.params.id);
+    }, [route.params.id]);
+
     const closeImageModal = () => {
         setImageModalVisible(null);
     };
 
-
     return (
-        <ScrollView>
+        <ScrollView
+        >
             <View style={styles.container}>
                 {/* check if receptionState is not null and not empty Object */}
                 {receptionState && Object.keys(receptionState).length > 0 ?

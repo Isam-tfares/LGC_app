@@ -13,7 +13,6 @@ import Conge from './src/screens/Conge';
 import Login from './src/screens/Login';
 import ProgrammeStack from './src/technicien/ProgrammeStack';
 import InterventionsStack from './src/chef/Interventions';
-import Programmes from './src/chef/Programmes';
 import Deconnexion from './src/components/Deconnexion';
 import InterventionsStackRec from './src/reception/InterventionsRec';
 import PVReceptions from './src/reception/PVReceptions';

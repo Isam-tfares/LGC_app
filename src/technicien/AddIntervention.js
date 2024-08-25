@@ -25,7 +25,7 @@ export default function AddIntervention({ modalVisible, setModalVisible }) {
 
     useEffect(() => {
         if (!clients || !projects || !prestations) {
-            const API_URL = 'http://10.0.2.2/LGC_backend/?page=addInterventionInterface';
+            const API_URL = 'http://192.168.43.88/LGC_backend/?page=addInterventionInterface';
             fetchData(API_URL, TOKEN);
         }
     }, []);
@@ -67,6 +67,11 @@ export default function AddIntervention({ modalVisible, setModalVisible }) {
                     data = [];
                 }
             }
+            if (data.error && data.error == "Expired token") {
+                navigation.navigate("Déconnexion");
+                console.log("Log Out");
+                return;
+            }
             if (Object.keys(data)) {
                 setClients(data.clients);
                 setProjects(data.projects);
@@ -103,6 +108,12 @@ export default function AddIntervention({ modalVisible, setModalVisible }) {
             } else {
                 const text = await response.text();
                 data = JSON.parse(text);
+            }
+            if (data.error && data.error == "Expired token") {
+                Alert.alert("Un problème est survenu lors de l'ajout de l'intervention");
+                navigation.navigate("Déconnexion");
+                console.log("Log Out");
+                return;
             }
             if (data != null) {
                 if (data) {
@@ -143,7 +154,7 @@ export default function AddIntervention({ modalVisible, setModalVisible }) {
         if (!selectedClient || !selectedProject || !selectedPrestation || !selectedDate || !selectedDate2) {
             return Alert.alert('Erreur', 'Veuillez remplir tous les champs');
         }
-        API_URL = "http://10.0.2.2/LGC_backend/?page=addInterventionAction";
+        API_URL = "http://192.168.43.88/LGC_backend/?page=addInterventionAction";
         date = parseInt(moment(selectedDate).format('YYYYMMDD'));
         insertIntervention(API_URL, TOKEN, date);
         setSelectedClient('');

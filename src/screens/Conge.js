@@ -43,7 +43,7 @@ export default function Conge({ navigation }) {
     const fetchData = async () => {
         try {
             setRefreshing(true);
-            const API_URL = 'http://10.0.2.2/LGC_backend/?page=CongesInterface';
+            const API_URL = 'http://192.168.43.88/LGC_backend/?page=CongesInterface';
             const response = await fetch(API_URL, {
                 method: 'POST',
                 headers: {
@@ -77,7 +77,11 @@ export default function Conge({ navigation }) {
                     return;
                 }
             }
-
+            if (data.error && data.error == "Expired token") {
+                navigation.navigate("Déconnexion");
+                console.log("Log Out");
+                return;
+            }
             if (data) {
                 setConges(data.conges);
                 setMotifsConges(data.motifs);
@@ -95,7 +99,7 @@ export default function Conge({ navigation }) {
 
     // confirme intervention function
     const addDemandeConge = async () => {
-        let API_URL = 'http://10.0.2.2/LGC_backend/?page=AddDemandeConge';
+        let API_URL = 'http://192.168.43.88/LGC_backend/?page=AddDemandeConge';
         setRefreshing(true);
         try {
             const response = await fetch(API_URL, {
@@ -121,6 +125,12 @@ export default function Conge({ navigation }) {
             } else {
                 const text = await response.text();
                 data = JSON.parse(text);
+            }
+            if (data.error && data.error == "Expired token") {
+                Alert.alert("Un problème est survenu lors de l'ajout de la demande");
+                navigation.navigate("Déconnexion");
+                console.log("Log Out");
+                return;
             }
             if (data != null) {
                 if (data) {

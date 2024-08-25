@@ -1,9 +1,7 @@
->>in route intervention => prereception or reception details
-  the navigation is done if intervention_id is changed
-
 >> double check in add intervention data 
 >> Add intervention chef 2 Dates also for DB backend
 >> matriaux,natures,tableau
 >> some inputs in new reception are not inserted ( beton datas ( cymlidre,jrs,...))
 
+>> X,Y Projet
 >> TOKEN validity

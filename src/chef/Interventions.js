@@ -26,7 +26,7 @@ function Interventions({ navigation }) {
     const [interventions, setInterventions] = useState([]);
 
     const onRefresh = useCallback(() => {
-        const API_URL = 'http://10.0.2.2/LGC_backend/?page=interventionsChef';
+        const API_URL = 'http://192.168.43.88/LGC_backend/?page=interventionsChef';
         fetchData(API_URL, TOKEN);
     }, []);
 
@@ -41,7 +41,7 @@ function Interventions({ navigation }) {
         setToDate(secondDate);
     }, []);
     useEffect(() => {
-        const API_URL = 'http://10.0.2.2/LGC_backend/?page=interventionsChef';
+        const API_URL = 'http://192.168.43.88/LGC_backend/?page=interventionsChef';
 
         fetchData(API_URL, TOKEN);
     }, [fromDateAPI, toDateAPI]);
@@ -84,9 +84,12 @@ function Interventions({ navigation }) {
                     return;
                 }
             }
-
+            if (data.error && data.error == "Expired token") {
+                navigation.navigate("Déconnexion");
+                console.log("Log Out");
+                return;
+            }
             if (data) {
-                console.log(data);
                 setInterventions(data);
             }
         } catch (error) {

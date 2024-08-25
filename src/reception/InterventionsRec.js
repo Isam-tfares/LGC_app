@@ -34,12 +34,12 @@ function InterventionsRec({ navigation }) {
         setToDate(secondDate);
     }, []);
     useEffect(() => {
-        const API_URL = 'http://10.0.2.2/LGC_backend/?page=interventionsRec';
+        const API_URL = 'http://192.168.43.88/LGC_backend/?page=interventionsRec';
 
         fetchData(API_URL, TOKEN);
     }, [fromDateAPI, toDateAPI]);
     const onRefresh = useCallback(() => {
-        const API_URL = 'http://10.0.2.2/LGC_backend/?page=interventionsRec';
+        const API_URL = 'http://192.168.43.88/LGC_backend/?page=interventionsRec';
         fetchData(API_URL, TOKEN);
     }, [fromDateAPI, toDateAPI]);
 
@@ -81,7 +81,11 @@ function InterventionsRec({ navigation }) {
                     return;
                 }
             }
-
+            if (data.error && data.error == "Expired token") {
+                navigation.navigate("Déconnexion");
+                console.log("Log Out");
+                return;
+            }
             // check if data is Object
             if (typeof data === 'object' && data !== null) {
                 setInterventions(data);

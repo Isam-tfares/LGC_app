@@ -24,7 +24,7 @@ function Receptions({ route, navigation }) {
     const [receptions, setReceptions] = useState([]);
 
     const onRefresh = useCallback(() => {
-        const API_URL = 'http://10.0.2.2/LGC_backend/?page=Receptions';
+        const API_URL = 'http://192.168.43.88/LGC_backend/?page=Receptions';
         fetchData(API_URL, TOKEN);
     }, [fromDateAPI, toDateAPI]);
     useEffect(() => {
@@ -38,7 +38,7 @@ function Receptions({ route, navigation }) {
         setToDate(secondDate);
     }, []);
     useEffect(() => {
-        const API_URL = 'http://10.0.2.2/LGC_backend/?page=Receptions';
+        const API_URL = 'http://192.168.43.88/LGC_backend/?page=Receptions';
 
         fetchData(API_URL, TOKEN);
     }, [fromDateAPI, toDateAPI]);
@@ -80,7 +80,11 @@ function Receptions({ route, navigation }) {
                     return;
                 }
             }
-
+            if (data.error && data.error == "Expired token") {
+                navigation.navigate("Déconnexion");
+                console.log("Log Out");
+                return;
+            }
             // check if data is Object
             if (typeof data === 'object' && data !== null) {
                 setReceptions(data);
@@ -233,16 +237,14 @@ function Receptions({ route, navigation }) {
     );
 }
 export default function ReceptionsStack({ route, navigation }) {
-    console.log("route params ", route.params);
-    let { id: intervention_id } = route.params || {}; // Destructure and set default empty object
-    console.log("intervention_id ", intervention_id);
+    let { id: intervention_id } = route.params || {};
     useEffect(() => {
         if (intervention_id) {
             let tmp = intervention_id;
             intervention_id = {};
             navigation.navigate('Détails Réception', { id: tmp });
         }
-    }, [intervention_id]);
+    }, [route.params]);
 
     return (
         <Stack.Navigator initialRouteName="Listes Receptions">

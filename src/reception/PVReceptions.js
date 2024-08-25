@@ -9,7 +9,7 @@ import { useSelector } from 'react-redux';
 
 export default function PVReceptions({ navigation }) {
     const TOKEN = useSelector(state => state.user.token); // Move this line inside the component
-    const IMAGES_URL = "http://10.0.2.2/LGC_backend/pvs/";
+    const IMAGES_URL = "http://192.168.43.88/LGC_backend/pvs/";
 
     const [refreshing, setRefreshing] = useState(false);
     const [selectedImage, setSelectedImage] = useState(null);
@@ -33,12 +33,12 @@ export default function PVReceptions({ navigation }) {
         setToDate(secondDate);
     }, []);
     useEffect(() => {
-        const API_URL = 'http://10.0.2.2/LGC_backend/?page=PVs';
+        const API_URL = 'http://192.168.43.88/LGC_backend/?page=PVs';
 
         fetchData(API_URL, TOKEN);
     }, [fromDateAPI, toDateAPI]);
     const onRefresh = useCallback(() => {
-        const API_URL = 'http://10.0.2.2/LGC_backend/?page=PVs';
+        const API_URL = 'http://192.168.43.88/LGC_backend/?page=PVs';
         fetchData(API_URL, TOKEN);
     }, [fromDateAPI, toDateAPI]);
     const fetchData = async (url, token) => {
@@ -78,7 +78,11 @@ export default function PVReceptions({ navigation }) {
                     return;
                 }
             }
-
+            if (data.error && data.error == "Expired token") {
+                navigation.navigate("Déconnexion");
+                console.log("Log Out");
+                return;
+            }
             // check if data is Object
             if (typeof data === 'object' && data !== null) {
                 setPvs(data);

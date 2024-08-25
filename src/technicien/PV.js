@@ -1,15 +1,17 @@
-import React, { useState, useEffect } from 'react';
-import { View, Text, TouchableOpacity, StyleSheet, Image, Alert, ActivityIndicator } from 'react-native';
+import React, { useState, useEffect, useCallback } from 'react';
+import { View, Text, TouchableOpacity, StyleSheet, Image, Alert, ActivityIndicator, RefreshControl } from 'react-native';
 import { Picker } from '@react-native-picker/picker';
 // import DateTimePickerModal from 'react-native-modal-datetime-picker';
 import moment from 'moment';
 import * as ImagePicker from 'expo-image-picker';
 import { Ionicons } from '@expo/vector-icons';
 import { useSelector } from 'react-redux';
+import { ScrollView } from 'react-native-gesture-handler';
 
 export default function PV({ navigation, route }) {
     const TOKEN = useSelector(state => state.user.token);
 
+    const [refreshing, setRefreshing] = useState(false);
     const [selectedIntervention, setSelectedIntervention] = useState(route.params ? Number.parseInt(route.params.id) : "");
     const [image, setImage] = useState(null);
     const [selectedDate, setSelectedDate] = useState(new Date());
@@ -19,6 +21,9 @@ export default function PV({ navigation, route }) {
     useEffect(() => {
         fetchInterventions();
     }, [])
+    const onRefresh = useCallback(() => {
+        fetchInterventions();
+    }, [refreshing]);
     useEffect(() => {
         if (Number.isInteger(selectedIntervention)) {
             setSelectedIntervention(selectedIntervention);
@@ -26,8 +31,8 @@ export default function PV({ navigation, route }) {
     }, [selectedIntervention]);
 
     const fetchInterventions = async () => {
-        let url = "http://10.0.2.2/LGC_backend/?page=interventionsWithoutPV";
-        setLoading(true);
+        let url = "http://192.168.43.88/LGC_backend/?page=interventionsWithoutPV";
+        setRefreshing(true);
         try {
             const response = await fetch(url, {
                 method: 'GET',
@@ -50,6 +55,11 @@ export default function PV({ navigation, route }) {
                 const text = await response.text();
                 data = JSON.parse(text);
             }
+            if (data.error && data.error == "Expired token") {
+                navigation.navigate("Déconnexion");
+                console.log("Log Out");
+                return;
+            }
             if (Object.keys(data)) {
                 setInterventions(data);
             }
@@ -57,7 +67,7 @@ export default function PV({ navigation, route }) {
             console.error('Error fetching data:', error);
         }
         finally {
-            setLoading(false);
+            setRefreshing(false);
         }
     };
 
@@ -116,12 +126,17 @@ export default function PV({ navigation, route }) {
                 console.log("TEXT", text)
                 data = JSON.parse(text);
             }
-
+            if (data.error && data.error == "Expired token") {
+                Alert.alert("Un problème est survenu lors de l'ajout du PV");
+                navigation.navigate("Déconnexion");
+                console.log("Log Out");
+                return;
+            }
             if (data) {
                 Alert.alert("Réception ajoutée avec succès ");
                 fetchInterventions();
             } else {
-                Alert.alert("Un problème est survenu lors de l'ajout de la réception");
+                Alert.alert("Un problème est survenu lors de l'ajout du PV");
             }
         } catch (error) {
             console.error('Error fetching data:', error);
@@ -139,53 +154,61 @@ export default function PV({ navigation, route }) {
             Alert.alert('Erreur', 'Veuillez charger une image. ');
             return;
         }
-        insertPV('http://10.0.2.2/LGC_backend/?page=newPV', TOKEN);
+        insertPV('http://192.168.43.88/LGC_backend/?page=newPV', TOKEN);
         setSelectedIntervention('');
         setImage(null);
         setSelectedDate(new Date());
     };
 
     return (
-        <View style={styles.container}>
-            <Text style={styles.title}>Ajouter PV</Text>
-            <View style={styles.card}>
-                <Text style={styles.label}>Intervention</Text>
-                <Picker
-                    selectedValue={selectedIntervention}
-                    onValueChange={(itemValue, itemIndex) => setSelectedIntervention(itemValue)}
-                    style={styles.picker}
-                >
-                    <Picker.Item label="N° Intervention " value="" />
-                    {interventions.map((intervention, index) => (
-                        <Picker.Item key={index} label={intervention.intervention_id} value={intervention.intervention_id} />
-                    ))}
-                </Picker>
+        <ScrollView
+            refreshControl={
+                <RefreshControl
+                    refreshing={refreshing}
+                    onRefresh={onRefresh}
+                />}
+        >
+            <View style={styles.container}>
+                <Text style={styles.title}>Ajouter PV</Text>
+                <View style={styles.card}>
+                    <Text style={styles.label}>Intervention</Text>
+                    <Picker
+                        selectedValue={selectedIntervention}
+                        onValueChange={(itemValue, itemIndex) => setSelectedIntervention(itemValue)}
+                        style={styles.picker}
+                    >
+                        <Picker.Item label="N° Intervention " value="" />
+                        {interventions && interventions.map((intervention, index) => (
+                            <Picker.Item key={index} label={intervention.intervention_id} value={intervention.intervention_id} />
+                        ))}
+                    </Picker>
 
-                {/* Loading */}
-                {loading ? <View style={styles.loading}><ActivityIndicator size="large" color="#4b6aff" /></View> : null}
+                    {/* Loading */}
+                    {loading ? <View style={styles.loading}><ActivityIndicator size="large" color="#4b6aff" /></View> : null}
 
-                <TouchableOpacity style={styles.uploadArea} onPress={pickImage}>
-                    {image ? (
-                        <>
-                            <Image source={{ uri: image }} style={styles.image} />
-                            <TouchableOpacity style={styles.removeButton} onPress={removeImage}>
-                                <Ionicons name="close-circle" size={24} color="red" />
-                            </TouchableOpacity>
-                        </>
-                    ) : (
-                        <>
-                            <Ionicons name="cloud-upload" size={50} color="black" />
-                            <Text style={styles.text}>Charger PV</Text>
-                        </>
-                    )}
-                </TouchableOpacity>
+                    <TouchableOpacity style={styles.uploadArea} onPress={pickImage}>
+                        {image ? (
+                            <>
+                                <Image source={{ uri: image }} style={styles.image} />
+                                <TouchableOpacity style={styles.removeButton} onPress={removeImage}>
+                                    <Ionicons name="close-circle" size={24} color="red" />
+                                </TouchableOpacity>
+                            </>
+                        ) : (
+                            <>
+                                <Ionicons name="cloud-upload" size={50} color="black" />
+                                <Text style={styles.text}>Charger PV</Text>
+                            </>
+                        )}
+                    </TouchableOpacity>
 
-                <TouchableOpacity style={styles.button2} onPress={handlePrepareData}>
-                    <Text style={styles.buttonText2}>Ajouter</Text>
-                </TouchableOpacity>
+                    <TouchableOpacity style={styles.button2} onPress={handlePrepareData}>
+                        <Text style={styles.buttonText2}>Ajouter</Text>
+                    </TouchableOpacity>
+                </View>
+
             </View>
-
-        </View>
+        </ScrollView>
     );
 }
 

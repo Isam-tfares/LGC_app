@@ -26,7 +26,7 @@ export default function DemandeCongeDetails({ navigation, route }) {
 
     // confirme intervention function
     const confirmeDemande = async () => {
-        let API_URL = 'http://10.0.2.2/LGC_backend/?page=AcceptDemandeConge';
+        let API_URL = 'http://192.168.43.88/LGC_backend/?page=AcceptDemandeConge';
         try {
             const response = await fetch(API_URL, {
                 method: 'POST',
@@ -52,6 +52,12 @@ export default function DemandeCongeDetails({ navigation, route }) {
                 const text = await response.text();
                 data = JSON.parse(text);
             }
+            if (data.error && data.error == "Expired token") {
+                Alert.alert("Un problème est survenu lors de l'acceptation de la demande");
+                navigation.navigate("Déconnexion");
+                console.log("Log Out");
+                return;
+            }
             if (data != null) {
                 if (data) {
                     Alert.alert("Demande acceptée avec succès");
@@ -65,7 +71,7 @@ export default function DemandeCongeDetails({ navigation, route }) {
     };
     // refuser demande intervention function
     const annulateDemande = async () => {
-        let API_URL = 'http://10.0.2.2/LGC_backend/?page=RejectDemandeConge';
+        let API_URL = 'http://192.168.43.88/LGC_backend/?page=RejectDemandeConge';
         try {
             const response = await fetch(API_URL, {
                 method: 'POST',
@@ -90,6 +96,12 @@ export default function DemandeCongeDetails({ navigation, route }) {
             } else {
                 const text = await response.text();
                 data = JSON.parse(text);
+            }
+            if (data.error && data.error == "Expired token") {
+                Alert.alert("Un problème est survenu lors du refus de la demande");
+                navigation.navigate("Déconnexion");
+                console.log("Log Out");
+                return;
             }
             if (data != null) {
                 if (data) {

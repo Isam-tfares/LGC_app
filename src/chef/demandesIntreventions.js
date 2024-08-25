@@ -46,7 +46,7 @@ export default function DemandesInterventions({ navigation }) {
     const fetchData = async () => {
         try {
             setRefreshing(true);
-            const API_URL = 'http://10.0.2.2/LGC_backend/?page=DemandesInterventions';
+            const API_URL = 'http://192.168.43.88/LGC_backend/?page=DemandesInterventions';
             const fromDateAPI = parseInt(moment(fromDate, "DD/MM/YYYY").format('YYYYMMDD'));
             const toDateAPI = parseInt(moment(toDate, "DD/MM/YYYY").format('YYYYMMDD'));
             const response = await fetch(API_URL, {
@@ -82,7 +82,11 @@ export default function DemandesInterventions({ navigation }) {
                     return;
                 }
             }
-
+            if (data.error && data.error == "Expired token") {
+                navigation.navigate("Déconnexion");
+                console.log("Log Out");
+                return;
+            }
             if (data) {
                 // console.log(data);
                 setInterventions(data);
@@ -97,7 +101,7 @@ export default function DemandesInterventions({ navigation }) {
 
     // confirme intervention function
     const confirmeIntervention = async () => {
-        let API_URL = 'http://10.0.2.2/LGC_backend/?page=ValidateDemandeIntervention';
+        let API_URL = 'http://192.168.43.88/LGC_backend/?page=ValidateDemandeIntervention';
         let date = parseInt(moment(selectedDate).format('YYYYMMDD'));
         setRefreshing(true);
         try {
@@ -125,6 +129,12 @@ export default function DemandesInterventions({ navigation }) {
                 const text = await response.text();
                 data = JSON.parse(text);
             }
+            if (data.error && data.error == "Expired token") {
+                Alert.alert("Un problème est survenu lors de la confirmation de l'intervention");
+                navigation.navigate("Déconnexion");
+                console.log("Log Out");
+                return;
+            }
             if (data != null) {
                 if (data) {
                     Alert.alert("Intervention  confirmée avec succès");
@@ -142,7 +152,7 @@ export default function DemandesInterventions({ navigation }) {
     };
     // refuser demande intervention function
     const annulateIntervention = async () => {
-        let API_URL = 'http://10.0.2.2/LGC_backend/?page=RejectDemandeIntervention';
+        let API_URL = 'http://192.168.43.88/LGC_backend/?page=RejectDemandeIntervention';
         setRefreshing(true);
         try {
             const response = await fetch(API_URL, {
@@ -168,6 +178,12 @@ export default function DemandesInterventions({ navigation }) {
             } else {
                 const text = await response.text();
                 data = JSON.parse(text);
+            }
+            if (data.error && data.error == "Expired token") {
+                Alert.alert("Un problème est survenu lors du refus de l'intervention");
+                navigation.navigate("Déconnexion");
+                console.log("Log Out");
+                return;
             }
             if (data != null) {
                 if (data) {

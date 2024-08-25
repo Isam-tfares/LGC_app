@@ -35,7 +35,7 @@ export default function NoteFrais({ navigation }) {
     const fetchData = async () => {
         try {
             setRefreshing(true);
-            const API_URL = 'http://10.0.2.2/LGC_backend/?page=NoteFraisInterface';
+            const API_URL = 'http://192.168.43.88/LGC_backend/?page=NoteFraisInterface';
             const response = await fetch(API_URL, {
                 method: 'GET',
                 headers: {
@@ -68,7 +68,11 @@ export default function NoteFrais({ navigation }) {
                     return;
                 }
             }
-
+            if (data.error && data.error == "Expired token") {
+                navigation.navigate("Déconnexion");
+                console.log("Log Out");
+                return;
+            }
             if (data) {
                 setDemandes(data.demandes);
                 setTypes_charge(data.types_charges);
@@ -82,7 +86,7 @@ export default function NoteFrais({ navigation }) {
     };
 
     const addNoteFrais = async () => {
-        let API_URL = 'http://10.0.2.2/LGC_backend/?page=addNoteFrais';
+        let API_URL = 'http://192.168.43.88/LGC_backend/?page=addNoteFrais';
         setRefreshing(true);
         try {
             const response = await fetch(API_URL, {
@@ -106,6 +110,12 @@ export default function NoteFrais({ navigation }) {
             } else {
                 const text = await response.text();
                 data = JSON.parse(text);
+            }
+            if (data.error && data.error == "Expired token") {
+                Alert.alert("Un problème est survenu lors de l'ajout de la demande");
+                navigation.navigate("Déconnexion");
+                console.log("Log Out");
+                return;
             }
             if (data != null) {
                 if (data["success"]) {
@@ -183,24 +193,6 @@ export default function NoteFrais({ navigation }) {
                 />}
             contentContainerStyle={styles.container}
         >
-            {/* <View style={styles.historiqueContainer}>
-                <View style={styles.flexConatiner}>
-                    <Text style={styles.title}>Vos Demandes</Text>
-                    <TouchableOpacity onPress={() => { setShowenSection(!showenSection) }}>
-                        {showenSection ? <Entypo name="chevron-thin-up" size={20} color="black" /> : <Entypo name="chevron-thin-down" size={24} color="black" />}
-                    </TouchableOpacity>
-                </View>
-                {showenSection ?
-                    (<>
-                        {demandes?.map((item, index) => {
-                            return (
-                                <View style={styles.conge} key={item.IDNote}>
-
-                                </View>
-                            );
-                        })}
-                    </>) : null}
-            </View> */}
             <View style={styles.historiqueContainer}>
                 <View style={styles.flexContainer}>
                     <Text style={styles.title}>Vos Demandes</Text>
@@ -209,7 +201,7 @@ export default function NoteFrais({ navigation }) {
                     </TouchableOpacity>
                 </View>
                 {showenSection &&
-                    demandes.map(item => {
+                    demandes?.map(item => {
                         return (
                             <View key={item.IDNote} style={styles.demandeContainer}>
                                 <View style={styles.demandeHeader}>
@@ -217,7 +209,7 @@ export default function NoteFrais({ navigation }) {
                                     <Text style={styles.demandeStatus}>Statut: {item.statut === "2" ? 'Approuvé' : item.statut === "1" ? 'En attente' : 'Refusée'}</Text>
                                 </View>
                                 <Text style={styles.demandeMontant}>Montant Total: {item.montant_total} DH</Text>
-                                {item.articles.map(article => {
+                                {item.articles?.map(article => {
                                     return (
                                         <View key={article.IDArticle} style={styles.articleContainer}>
                                             <Text style={styles.articleLabel}>Type: {article.libelle}</Text>
@@ -243,7 +235,7 @@ export default function NoteFrais({ navigation }) {
                     style={styles.input}
                 >
                     <Picker.Item label="Type de charge" value="" />
-                    {types_charge.map((type, index) => (
+                    {types_charge?.map((type, index) => (
                         <Picker.Item key={index} label={type.libelle} value={type.IDType} />
                     ))}
                 </Picker>
@@ -288,7 +280,7 @@ export default function NoteFrais({ navigation }) {
                             <Text style={styles.tableHeaderText}>Montant</Text>
                             <Text style={styles.tableHeaderText}>Observation</Text>
                         </View>
-                        {allNotes.map((note, index) => (
+                        {allNotes?.map((note, index) => (
                             <View style={styles.tableRow} key={index}>
                                 <Text style={styles.tableCell}>{note.typecharge}</Text>
                                 <Text style={styles.tableCell}>{note.date}</Text>
