@@ -12,6 +12,7 @@ export default function Intervention({ route, navigation, reload, setReload }) {
         }
     };
 
+
     return (
         <View style={styles.container}>
             <View style={styles.card}>
@@ -30,6 +31,10 @@ export default function Intervention({ route, navigation, reload, setReload }) {
                 <View style={styles.row}>
                     <Text style={styles.title}>Objet : </Text>
                     <Text style={styles.text}>{intervention.Objet_Projet}</Text>
+                </View>
+                <View style={styles.row}>
+                    <Text style={styles.title}>Technicien : </Text>
+                    <Text style={styles.text}>{intervention.Nom_personnel}</Text>
                 </View>
                 <View style={styles.row}>
                     <Text style={styles.title}>Prestation : </Text>

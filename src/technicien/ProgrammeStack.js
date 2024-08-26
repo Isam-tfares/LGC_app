@@ -32,7 +32,6 @@ function Programme({ navigation }) {
     const [yearSelected, setYearSelected] = useState(moment().format('YYYY'));
     const [interventions, setInterventions] = useState([]);
     const daysOfMonth = generateDaysOfMonth(monthSelected, yearSelected);
-    console.log(interventions);
     useEffect(() => {
         fetchData();
     }, [currentDay]);

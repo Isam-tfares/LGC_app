@@ -86,8 +86,12 @@ export default function Conge({ navigation }) {
                 setConges(data.conges);
                 setMotifsConges(data.motifs);
                 setAvailableDays(data.days);
-                setYears(data.years);
                 setDemandesConges(data.demandesConges);
+                if (data.years.length == 0) {
+                    setYears([{ "annee": moment().year() }]);
+                } else {
+                    setYears(data.years);
+                }
             }
         } catch (error) {
             console.error(' Error fetching data:', error);
@@ -198,9 +202,9 @@ export default function Conge({ navigation }) {
         if (!Number.isInteger(nbr_days)) {
             return Alert.alert('Erreur', 'Le nombre de jours doit être un entier');
         }
-        if (nbr_days > availableDays) {
-            return Alert.alert('Erreur', 'Vous avez dépassé le nombre de jours restants');
-        }
+        // if (nbr_days > availableDays) {
+        //     return Alert.alert('Erreur', 'Vous avez dépassé le nombre de jours restants');
+        // }
         addDemandeConge();
         // Réinitialisation des champs
         setFromDate('');

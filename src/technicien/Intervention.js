@@ -1,5 +1,5 @@
-import React, { useState, useCallback } from 'react';
-import { View, Text, StyleSheet, Alert, RefreshControl, TouchableOpacity, Modal, TextInput, ScrollView } from 'react-native';
+import React, { useState } from 'react';
+import { View, Text, StyleSheet, Alert, TouchableOpacity, Modal, TextInput } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useSelector } from 'react-redux';
 import moment from 'moment';
@@ -13,9 +13,8 @@ export default function Intervention({ route, navigation }) {
     const [comment, setComment] = useState('');
     const [X, setX] = useState(null);
     const [Y, setY] = useState(null);
+    const [isXYExisted, setXYExisted] = useState(intervention.X != 0 && intervention.Y != 0);
 
-    const onRefresh = useCallback(() => {
-    }, []);
 
     const annulateIntervention = async () => {
         setRefreshing(true);
@@ -133,6 +132,7 @@ export default function Intervention({ route, navigation }) {
             if (data != null) {
                 if (data) {
                     Alert.alert("Coordonnées ajoutées avec succès");
+                    setXYExisted(true);
                 } else {
                     Alert.alert("Un problème est survenu lors de l'ajout des coordonnées");
                 }
@@ -147,116 +147,110 @@ export default function Intervention({ route, navigation }) {
     };
 
     return (
-        <ScrollView
-            refreshControl={
-                <RefreshControl
-                    refreshing={refreshing}
-                    onRefresh={onRefresh}
-                />}>
-            <View style={styles.container}>
-                <View style={styles.card}>
-                    <View style={styles.row}>
-                        <Text style={styles.title}>N° Intervention :</Text>
-                        <Text style={styles.text}>{intervention.intervention_id}</Text>
-                    </View>
-                    <View style={styles.row}>
-                        <Text style={styles.title}>Client:</Text>
-                        <Text style={styles.text}>{intervention.abr_client}</Text>
-                    </View>
-                    <View style={styles.row}>
-                        <Text style={styles.title}>Projet : </Text>
-                        <Text style={styles.text}>{intervention.abr_projet}</Text>
-                    </View>
-                    <View style={styles.row}>
-                        <Text style={styles.title}>Objet : </Text>
-                        <Text style={styles.text}>{intervention.Objet_Projet}</Text>
-                    </View>
-                    <View style={styles.row}>
-                        <Text style={styles.title}>Prestation : </Text>
-                        <Text style={styles.text}>{intervention.libelle}</Text>
-                    </View>
-                    <View style={styles.row}>
-                        <Text style={styles.title}>Lieu de prélévement : </Text>
-                        <Text style={styles.text}>{intervention.adresse ?? ""}</Text>
-                    </View>
 
-                    <View style={styles.row}>
-                        <Text style={styles.title}>Date d'intervention : </Text>
-                        <Text style={styles.text}>{intervention.date_intervention ? moment(intervention.date_intervention, "YYYYMMDD").format("DD/MM/YYYY") || 'N/A' : null}</Text>
-                    </View>
-                    {intervention.status == 0 ? (
-                        <View style={styles.row}>
-                            <Text style={styles.title}>Observation : </Text>
-                            <Text style={styles.obs}>{intervention.obs}</Text>
-                        </View>
-                    ) : <></>}
-                    <View style={styles.row}>
-                        <Text style={styles.title}>Etat d'intervention : </Text>
-                        <Text style={[styles.text, intervention.status == 2 ? styles.valide : (intervention.status == 0 ? styles.annule : styles.enCours)]}
-
-                        >{intervention.status == 0 ? "Annulée" : intervention.status == 1 ? "En cours" : "Faite"}</Text>
-                    </View>
-                    {(intervention.status == 2) ?
-                        <View style={styles.row}>
-                            <Text style={styles.title}>Etat de réception : </Text>
-                            <Text style={[styles.text, intervention.etat_reception == 1 ? styles.valide : styles.enCours]}
-
-                            >{intervention.etat_reception == 1 ? "Faite" : "En cours"}</Text>
-                        </View>
-                        : ""
-                    }
-
-                    {intervention.X == 0 || intervention.Y == 0 ?
-                        <View style={styles.buttonContainer}>
-                            <TouchableOpacity onPress={addLocation} style={[styles.button, styles.confirmButton]}>
-                                <Text style={styles.buttonText}>Ajouter Géolocalisation </Text>
-                            </TouchableOpacity>
-                        </View>
-                        : <></>}
-                    {intervention.status == 1 ? (
-                        <View style={styles.buttonContainer}>
-                            <TouchableOpacity style={[styles.button, styles.confirmButton]} onPress={() => { validateIntervention(intervention.intervention_id) }}>
-                                <Text style={styles.buttonText}>Valider</Text>
-                            </TouchableOpacity>
-                            <TouchableOpacity style={[styles.button, styles.cancelButton]} onPress={() => { setModalVisible(true) }}>
-                                <Text style={styles.buttonText}>Annuler</Text>
-                            </TouchableOpacity>
-                        </View>) : (<></>
-                    )}
+        <View style={styles.container}>
+            <View style={styles.card}>
+                <View style={styles.row}>
+                    <Text style={styles.title}>N° Intervention :</Text>
+                    <Text style={styles.text}>{intervention.intervention_id}</Text>
+                </View>
+                <View style={styles.row}>
+                    <Text style={styles.title}>Client:</Text>
+                    <Text style={styles.text}>{intervention.abr_client}</Text>
+                </View>
+                <View style={styles.row}>
+                    <Text style={styles.title}>Projet : </Text>
+                    <Text style={styles.text}>{intervention.abr_projet}</Text>
+                </View>
+                <View style={styles.row}>
+                    <Text style={styles.title}>Objet : </Text>
+                    <Text style={styles.text}>{intervention.Objet_Projet}</Text>
+                </View>
+                <View style={styles.row}>
+                    <Text style={styles.title}>Prestation : </Text>
+                    <Text style={styles.text}>{intervention.libelle}</Text>
+                </View>
+                <View style={styles.row}>
+                    <Text style={styles.title}>Lieu de prélévement : </Text>
+                    <Text style={styles.text}>{intervention.adresse ?? ""}</Text>
                 </View>
 
-                {/* Annulation modal */}
-                <Modal
-                    animationType="slide"
-                    transparent={true}
-                    visible={modalVisible}
-                    onRequestClose={() => {
-                        setModalVisible(!modalVisible);
-                    }}
-                >
-                    <View style={styles.modalOverlay}>
-                        <View style={styles.modalView}>
-                            <TouchableOpacity style={styles.close}
-                                onPress={() => setModalVisible(false)}
-                            >
-                                <Ionicons name="close-circle-sharp" size={40} color="red" />
-                            </TouchableOpacity>
-                            <Text style={styles.modalTitle}>Ajouter un commentaire</Text>
-                            <TextInput
-                                style={styles.input}
-                                placeholder="Comment"
-                                value={comment}
-                                onChangeText={setComment}
-                                placeholderTextColor="#ccc"
-                            />
-                            <TouchableOpacity style={styles.modalButton} onPress={() => { annulerIntervention() }}>
-                                <Text style={styles.modalButtonText}>Valider</Text>
-                            </TouchableOpacity>
-                        </View>
+                <View style={styles.row}>
+                    <Text style={styles.title}>Date d'intervention : </Text>
+                    <Text style={styles.text}>{intervention.date_intervention ? moment(intervention.date_intervention, "YYYYMMDD").format("DD/MM/YYYY") || 'N/A' : null}</Text>
+                </View>
+                {intervention.status == 0 ? (
+                    <View style={styles.row}>
+                        <Text style={styles.title}>Observation : </Text>
+                        <Text style={styles.obs}>{intervention.obs}</Text>
                     </View>
-                </Modal>
+                ) : <></>}
+                <View style={styles.row}>
+                    <Text style={styles.title}>Etat d'intervention : </Text>
+                    <Text style={[styles.text, intervention.status == 2 ? styles.valide : (intervention.status == 0 ? styles.annule : styles.enCours)]}
+
+                    >{intervention.status == 0 ? "Annulée" : intervention.status == 1 ? "En cours" : "Faite"}</Text>
+                </View>
+                {(intervention.status == 2) ?
+                    <View style={styles.row}>
+                        <Text style={styles.title}>Etat de réception : </Text>
+                        <Text style={[styles.text, intervention.etat_reception == 1 ? styles.valide : styles.enCours]}
+
+                        >{intervention.etat_reception == 1 ? "Faite" : "En cours"}</Text>
+                    </View>
+                    : ""
+                }
+
+                {!isXYExisted ?
+                    <View style={styles.buttonContainer}>
+                        <TouchableOpacity onPress={addLocation} style={[styles.button, styles.confirmButton]}>
+                            <Text style={styles.buttonText}>Ajouter Géolocalisation </Text>
+                        </TouchableOpacity>
+                    </View>
+                    : <></>}
+                {intervention.status == 1 ? (
+                    <View style={styles.buttonContainer}>
+                        <TouchableOpacity style={[styles.button, styles.confirmButton]} onPress={() => { validateIntervention(intervention.intervention_id) }}>
+                            <Text style={styles.buttonText}>Valider</Text>
+                        </TouchableOpacity>
+                        <TouchableOpacity style={[styles.button, styles.cancelButton]} onPress={() => { setModalVisible(true) }}>
+                            <Text style={styles.buttonText}>Annuler</Text>
+                        </TouchableOpacity>
+                    </View>) : (<></>
+                )}
             </View>
-        </ScrollView>
+
+            {/* Annulation modal */}
+            <Modal
+                animationType="slide"
+                transparent={true}
+                visible={modalVisible}
+                onRequestClose={() => {
+                    setModalVisible(!modalVisible);
+                }}
+            >
+                <View style={styles.modalOverlay}>
+                    <View style={styles.modalView}>
+                        <TouchableOpacity style={styles.close}
+                            onPress={() => setModalVisible(false)}
+                        >
+                            <Ionicons name="close-circle-sharp" size={40} color="red" />
+                        </TouchableOpacity>
+                        <Text style={styles.modalTitle}>Ajouter un commentaire</Text>
+                        <TextInput
+                            style={styles.input}
+                            placeholder="Comment"
+                            value={comment}
+                            onChangeText={setComment}
+                            placeholderTextColor="#ccc"
+                        />
+                        <TouchableOpacity style={styles.modalButton} onPress={() => { annulerIntervention() }}>
+                            <Text style={styles.modalButtonText}>Valider</Text>
+                        </TouchableOpacity>
+                    </View>
+                </View>
+            </Modal>
+        </View>
     );
 }
 

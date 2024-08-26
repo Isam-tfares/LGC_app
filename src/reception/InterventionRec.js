@@ -31,6 +31,10 @@ export default function InterventionRec({ route, navigation }) {
                     <Text style={styles.text}>{intervention.Objet_Projet}</Text>
                 </View>
                 <View style={styles.row}>
+                    <Text style={styles.title}>Technicien : </Text>
+                    <Text style={styles.text}>{intervention.Nom_personnel}</Text>
+                </View>
+                <View style={styles.row}>
                     <Text style={styles.title}>Prestation : </Text>
                     <Text style={styles.text}>{intervention.libelle ? intervention.libelle : ""}</Text>
                 </View>
