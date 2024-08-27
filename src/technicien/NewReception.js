@@ -7,6 +7,7 @@ import moment from 'moment';
 import Checkbox from 'expo-checkbox';
 import { useDispatch, useSelector } from 'react-redux';
 import { setReceptionData } from '../actions/receptionDataActions';
+import { ConfirmAction } from '../components/utils';
 
 //NewReceptionInterface
 export default function NewReception({ route, navigation }) {
@@ -243,35 +244,39 @@ export default function NewReception({ route, navigation }) {
             Alert.alert('Veuillez remplir tous les champs');
             return;
         }
-        const API_URL = 'http://192.168.43.88/LGC_backend/?page=NewReception';
-        insertReception(API_URL, TOKEN);
-        let intervention_id = selectedIntervention;
-        setSelectedClient("");
-        setSelectedProject("");
-        setSelectedPrestation("");
-        setSelectedMatiere("");
-        setNbr_echatillon(2);
-        setSelectedDate(null);
-        setEtat_recuperation("Réccupéré");
-        setPreleve("LGC");
-        setEssaie("Labo");
-        setBetonSelected("");
-        setSlump("");
-        setCompression(false);
-        setfendage(false);
-        setFlexion(false);
-        setConfectionSelected("mode 1");
-        setFabricationSelected("mode 1");
-        setCentralSelected("");
-        setBL("");
-        setNbr_jrs([]);
-        setJrs("");
-        setLieu_prelevement("");
-        setNature_echantillon("");
-        setObs("");
-        setSelectedIntervention('');
-        Alert.alert('Réception ajoutée avec succès \nVeuillez charger le PV');
-        navigation.navigate('PVs', { "id": intervention_id });
+        ConfirmAction(
+            "Êtes-vous sûr de vouloir ajouter cette réception?",
+            () => {
+                const API_URL = 'http://192.168.43.88/LGC_backend/?page=NewReception';
+                insertReception(API_URL, TOKEN);
+                let intervention_id = selectedIntervention;
+                setSelectedClient("");
+                setSelectedProject("");
+                setSelectedPrestation("");
+                setSelectedMatiere("");
+                setNbr_echatillon(2);
+                setSelectedDate(null);
+                setEtat_recuperation("Réccupéré");
+                setPreleve("LGC");
+                setEssaie("Labo");
+                setBetonSelected("");
+                setSlump("");
+                setCompression(false);
+                setfendage(false);
+                setFlexion(false);
+                setConfectionSelected("mode 1");
+                setFabricationSelected("mode 1");
+                setCentralSelected("");
+                setBL("");
+                setNbr_jrs([]);
+                setJrs("");
+                setLieu_prelevement("");
+                setNature_echantillon("");
+                setObs("");
+                setSelectedIntervention('');
+                Alert.alert('Réception ajoutée avec succès \nVeuillez charger le PV');
+                navigation.navigate('PVs', { "id": intervention_id });
+            });
     };
 
     return (

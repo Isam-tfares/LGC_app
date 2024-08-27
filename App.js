@@ -19,7 +19,6 @@ import PVReceptions from './src/reception/PVReceptions';
 import ReceptionsStack from './src/reception/Receptions';
 import PrereceptionsStack from './src/reception/PreReceptions';
 import NewReception from './src/technicien/NewReception';
-import Conges from './src/chef/Conges';
 import CongesStack from './src/chef/Conges';
 import DemandesInterventions from './src/chef/demandesIntreventions';
 import AddedInterventions from './src/technicien/AddedInterventions';

@@ -7,6 +7,7 @@ import { EvilIcons } from '@expo/vector-icons';
 import Fontisto from '@expo/vector-icons/Fontisto';
 import DateTimePickerModal from 'react-native-modal-datetime-picker';
 import { useSelector } from 'react-redux';
+import { ConfirmAction } from '../components/utils';
 
 export default function DemandesInterventions({ navigation }) {
     const TOKEN = useSelector(state => state.user.token);
@@ -268,27 +269,32 @@ export default function DemandesInterventions({ navigation }) {
     };
 
     const handleAddIntervention = () => {
+        // Check if inputs are correct
         if (selectedClient === "") {
             Alert.alert("Client est obligatoire");
             return;
         } else if (selectedProject === "") {
             Alert.alert("Projet est obligatoire");
             return;
-        }
-        else if (selectedTechnician === "") {
+        } else if (selectedTechnician === "") {
             Alert.alert("Technicien est obligatoire");
             return;
-        }
-        else if (selectedPrestation === "") {
+        } else if (selectedPrestation === "") {
             Alert.alert("Prestation est obligatoire");
             return;
-        }
-        else if (selectedDate === null) {
+        } else if (selectedDate === null) {
             Alert.alert("Date est obligatoire");
             return;
         }
-        confirmeIntervention();
-        setModalVisible(false);
+
+        // Confirm the action
+        ConfirmAction(
+            "Êtes-vous sûr de vouloir ajouter cette intervention?",
+            () => {
+                confirmeIntervention();
+                setModalVisible(false);
+            }
+        );
     };
 
     const handleRemoveIntervention = () => {
@@ -296,12 +302,20 @@ export default function DemandesInterventions({ navigation }) {
             Alert.alert('Veuillez ajouter un commentaire');
             return;
         }
-        annulateIntervention();
-        setComment('');
-        setSelectedIntervention(null);
-        setModalVisible2(false);
-        setModalVisible(false);
-    }
+
+        // Confirm the action
+        ConfirmAction(
+            "Êtes-vous sûr de vouloir annuler cette intervention?",
+            () => {
+                annulateIntervention();
+                setComment('');
+                setSelectedIntervention(null);
+                setModalVisible2(false);
+                setModalVisible(false);
+            }
+        );
+    };
+
 
     return (
         <View style={{ flex: 1, backgroundColor: "white", position: "relative" }}>

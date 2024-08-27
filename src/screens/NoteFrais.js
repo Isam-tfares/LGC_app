@@ -6,6 +6,7 @@ import { Picker } from '@react-native-picker/picker';
 import moment from 'moment';
 import 'moment/locale/fr'; // Import French locale for month names
 import { useSelector } from 'react-redux';
+import { ConfirmAction } from '../components/utils';
 
 export default function NoteFrais({ navigation }) {
     const TOKEN = useSelector(state => state.user.token);
@@ -177,12 +178,19 @@ export default function NoteFrais({ navigation }) {
 
     // Handler for submitting the leave request
     const handleRequest = () => {
-        if (allNotes.length == 0) {
-            Alert.alert('Ajouter des notes');
+        if (allNotes.length === 0) {
+            Alert.alert('Erreur', 'Veuillez ajouter des notes avant de soumettre la demande.');
             return;
         }
-        addNoteFrais();
+
+        ConfirmAction(
+            "Êtes-vous sûr de vouloir soumettre cette demande?",
+            () => {
+                addNoteFrais();
+            }
+        );
     };
+
 
     return (
         <ScrollView

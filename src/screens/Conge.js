@@ -8,6 +8,7 @@ import { Picker } from '@react-native-picker/picker';
 import moment from 'moment';
 import 'moment/locale/fr'; // Import French locale for month names
 import { useSelector } from 'react-redux';
+import { ConfirmAction } from '../components/utils';
 
 export default function Conge({ navigation }) {
     const TOKEN = useSelector(state => state.user.token);
@@ -198,21 +199,28 @@ export default function Conge({ navigation }) {
         if (fromDateObj > toDateObj) {
             return Alert.alert('Erreur', 'La date de début doit être avant la date de fin');
         }
-        // check if nbr_days in integer
+
+        // Vérification si nbr_days est un entier
         if (!Number.isInteger(nbr_days)) {
             return Alert.alert('Erreur', 'Le nombre de jours doit être un entier');
         }
-        // if (nbr_days > availableDays) {
-        //     return Alert.alert('Erreur', 'Vous avez dépassé le nombre de jours restants');
-        // }
-        addDemandeConge();
-        // Réinitialisation des champs
-        setFromDate('');
-        setToDate('');
-        setNbr_days(0);
-        setSelectedMotif('');
-        setReload(!reload);
+
+        // Confirmation de l'action avant d'ajouter la demande
+        ConfirmAction(
+            "Êtes-vous sûr de vouloir soumettre cette demande de congé?",
+            () => {
+                addDemandeConge();
+
+                // Réinitialisation des champs
+                setFromDate('');
+                setToDate('');
+                setNbr_days(0);
+                setSelectedMotif('');
+                setReload(!reload);
+            }
+        );
     };
+
 
 
 

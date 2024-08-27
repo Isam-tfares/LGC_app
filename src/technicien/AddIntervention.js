@@ -6,6 +6,7 @@ import DateTimePickerModal from 'react-native-modal-datetime-picker';
 import moment from 'moment';
 import { useSelector, useDispatch } from 'react-redux';
 import { setData } from '../actions/dataActions';
+import { ConfirmAction } from '../components/utils';
 
 export default function AddIntervention({ modalVisible, setModalVisible }) {
     const technicien_id = useSelector(state => state.user.user.id)
@@ -154,18 +155,25 @@ export default function AddIntervention({ modalVisible, setModalVisible }) {
         if (!selectedClient || !selectedProject || !selectedPrestation || !selectedDate || !selectedDate2) {
             return Alert.alert('Erreur', 'Veuillez remplir tous les champs');
         }
-        API_URL = "http://192.168.43.88/LGC_backend/?page=addInterventionAction";
-        date = parseInt(moment(selectedDate).format('YYYYMMDD'));
-        insertIntervention(API_URL, TOKEN, date);
-        setSelectedClient('');
-        setSelectedProject('');
-        setSelectedPrestation('');
-        setSelectedDate(null);
-        setSelectedDate2(null);
-        setModalVisible(false);
-        setDatePickerVisibility(false);
-        setDatePickerVisibility2(false);
+
+        ConfirmAction(
+            "Êtes-vous sûr de vouloir ajouter cette intervention?",
+            () => {
+                API_URL = "http://192.168.43.88/LGC_backend/?page=addInterventionAction";
+                const date = parseInt(moment(selectedDate).format('YYYYMMDD'));
+                insertIntervention(API_URL, TOKEN, date);
+                setSelectedClient('');
+                setSelectedProject('');
+                setSelectedPrestation('');
+                setSelectedDate(null);
+                setSelectedDate2(null);
+                setModalVisible(false);
+                setDatePickerVisibility(false);
+                setDatePickerVisibility2(false);
+            }
+        );
     };
+
     const closeModal = () => {
         setSelectedClient('');
         setSelectedProject('');

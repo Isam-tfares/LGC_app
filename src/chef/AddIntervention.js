@@ -6,6 +6,7 @@ import DateTimePickerModal from 'react-native-modal-datetime-picker';
 import moment from 'moment';
 import { useSelector, useDispatch } from 'react-redux';
 import { setData } from '../actions/dataActions';
+import { ConfirmAction } from '../components/utils';
 
 export default function AddIntervention({ modalVisible, setModalVisible }) {
     const TOKEN = useSelector(state => state.user.token);
@@ -143,23 +144,31 @@ export default function AddIntervention({ modalVisible, setModalVisible }) {
 
 
     const handleAddIntervention = () => {
-        // check if inputs are correct
-        if (!selectedClient || !selectedProject || !selectedTechnician || !selectedPrestation || !selectedDate) {
-            Alert.alert('Erreur', 'Veuillez remplir tous les champs');
-            return;
-        }
-        API_URL = "http://192.168.43.88/LGC_backend/?page=AddIntervention";
-        date = parseInt(moment(selectedDate).format('YYYYMMDD'));
-        insertIntervention(API_URL, TOKEN, date);
-        // reset the values
-        setSelectedClient('');
-        setSelectedDate(null);
-        setSelectedPrestation('');
-        setSelectedProject('');
-        setSelectedTechnician('');
+        ConfirmAction(
+            "Êtes-vous sûr de vouloir ajouter cette intervention?",
+            () => {
+                // Check if inputs are correct
+                if (!selectedClient || !selectedProject || !selectedTechnician || !selectedPrestation || !selectedDate) {
+                    Alert.alert('Erreur', 'Veuillez remplir tous les champs');
+                    return;
+                }
 
-        setModalVisible(false);
+                const API_URL = "http://192.168.43.88/LGC_backend/?page=AddIntervention";
+                const date = parseInt(moment(selectedDate).format('YYYYMMDD'));
+                insertIntervention(API_URL, TOKEN, date);
+
+                // Reset the values
+                setSelectedClient('');
+                setSelectedDate(null);
+                setSelectedPrestation('');
+                setSelectedProject('');
+                setSelectedTechnician('');
+
+                setModalVisible(false);
+            }
+        );
     };
+
 
     const closeModal = () => {
         setSelectedClient('');

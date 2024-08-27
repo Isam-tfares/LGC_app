@@ -4,6 +4,7 @@ import Ionicons from '@expo/vector-icons/Ionicons';
 import moment from 'moment';
 import 'moment/locale/fr'; // Import French locale for month names
 import { useSelector } from 'react-redux';
+import { ConfirmAction } from '../components/utils';
 
 function formatDate(inputDate) {
     // Parse the date using moment
@@ -115,19 +116,31 @@ export default function DemandeCongeDetails({ navigation, route }) {
         }
     };
     const acceptDemande = () => {
-        confirmeDemande();
-        navigation.goBack();
-    }
+        ConfirmAction(
+            "Êtes-vous sûr de vouloir accepter cette demande?",
+            () => {
+                confirmeDemande();
+                navigation.goBack();
+            }
+        );
+    };
+
     const refuseDemande = () => {
         if (comment === '') {
             Alert.alert('Veuillez ajouter un commentaire');
             return;
         }
-        annulateDemande();
-        setModalVisible(false);
-        setComment('');
-        navigation.goBack();
-    }
+
+        ConfirmAction(
+            "Êtes-vous sûr de vouloir refuser cette demande?",
+            () => {
+                annulateDemande();
+                setModalVisible(false);
+                setComment('');
+                navigation.goBack();
+            }
+        );
+    };
 
     return (
         <View style={styles.container}>

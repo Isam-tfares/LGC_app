@@ -7,6 +7,7 @@ import * as ImagePicker from 'expo-image-picker';
 import { Ionicons } from '@expo/vector-icons';
 import { useSelector } from 'react-redux';
 import { ScrollView } from 'react-native-gesture-handler';
+import { ConfirmAction } from '../components/utils';
 
 export default function PV({ navigation, route }) {
     const TOKEN = useSelector(state => state.user.token);
@@ -151,13 +152,21 @@ export default function PV({ navigation, route }) {
             return;
         }
         if (!image) {
-            Alert.alert('Erreur', 'Veuillez charger une image. ');
+            Alert.alert('Erreur', 'Veuillez charger une image.');
             return;
         }
-        insertPV('http://192.168.43.88/LGC_backend/?page=newPV', TOKEN);
-        setSelectedIntervention('');
-        setImage(null);
-        setSelectedDate(new Date());
+
+        ConfirmAction(
+            "Êtes-vous sûr de vouloir charger ce PV",
+            () => {
+                insertPV('http://192.168.43.88/LGC_backend/?page=newPV', TOKEN);
+
+                // Reset fields after successful operation
+                setSelectedIntervention('');
+                setImage(null);
+                setSelectedDate(new Date());
+            }
+        );
     };
 
     return (

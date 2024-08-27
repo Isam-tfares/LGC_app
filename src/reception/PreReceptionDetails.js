@@ -6,6 +6,7 @@ import { Ionicons } from '@expo/vector-icons';
 import MaterialIcons from '@expo/vector-icons/MaterialIcons';
 import { useSelector } from 'react-redux';
 import moment from 'moment';
+import { ConfirmAction } from '../components/utils';
 
 export default function PreReceptionDetails({ route, navigation }) {
     const TOKEN = useSelector(state => state.user.token);
@@ -109,56 +110,60 @@ export default function PreReceptionDetails({ route, navigation }) {
     };
 
     const validateReception = async () => {
-        let url = 'http://192.168.43.88/LGC_backend/?page=validatePreReception';
-        setLoading(true);
-        try {
-            const response = await fetch(url, {
-                method: 'POST',
-                headers: {
-                    'Authorization': `Bearer ${TOKEN}`,
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({ "IDPre_reception": receptionState.IDPre_reception })
-            });
-            if (!response.ok) {
-                throw new Error(`HTTP error! Status: ${response.status}`);
-            }
-
-            const contentType = response.headers.get('content-type');
-            let data;
-
-            if (contentType && contentType.includes('application/json')) {
-                data = await response.json();
-            } else {
-                const text = await response.text();
-                data = JSON.parse(text);
-            }
-            if (data.error && data.error == "Expired token") {
-                Alert.alert("Un problème est survenu lors de la validation de la réception");
-                navigation.navigate("Déconnexion");
-                console.log("Log Out");
-                return;
-            }
-            if (data != null) {
-                if (data) {
-                    if (data == 1) {
-                        Alert.alert("Réception validée avec succès");
-                        handleGoBack();
+        ConfirmAction(
+            "Êtes-vous sûr de vouloir valider cette réception?",
+            async () => {
+                let url = 'http://192.168.43.88/LGC_backend/?page=validatePreReception';
+                setLoading(true);
+                try {
+                    const response = await fetch(url, {
+                        method: 'POST',
+                        headers: {
+                            'Authorization': `Bearer ${TOKEN}`,
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({ "IDPre_reception": receptionState.IDPre_reception })
+                    });
+                    if (!response.ok) {
+                        throw new Error(`HTTP error! Status: ${response.status}`);
                     }
-                    else {
+
+                    const contentType = response.headers.get('content-type');
+                    let data;
+
+                    if (contentType && contentType.includes('application/json')) {
+                        data = await response.json();
+                    } else {
+                        const text = await response.text();
+                        data = JSON.parse(text);
+                    }
+
+                    if (data.error && data.error == "Expired token") {
+                        Alert.alert("Un problème est survenu lors de la validation de la réception");
+                        navigation.navigate("Déconnexion");
+                        console.log("Log Out");
+                        return;
+                    }
+
+                    if (data != null) {
+                        if (data == 1) {
+                            Alert.alert("Réception validée avec succès");
+                            handleGoBack();
+                        } else {
+                            Alert.alert("Un problème est survenu lors de la validation de la réception");
+                        }
+                    } else {
                         Alert.alert("Un problème est survenu lors de la validation de la réception");
                     }
-                } else {
-                    Alert.alert("Un problème est survenu lors de la validation de la réception");
+                } catch (error) {
+                    console.error('Error fetching data:', error);
+                } finally {
+                    setLoading(false);
                 }
             }
-        } catch (error) {
-            console.error('Error fetching data:', error);
-        }
-        finally {
-            setLoading(false);
-        }
+        );
     };
+
 
     return (
         <ScrollView>

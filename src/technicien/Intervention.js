@@ -4,25 +4,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { useSelector } from 'react-redux';
 import moment from 'moment';
 import * as Location from 'expo-location';
-
-const confirmAction = (message, onConfirm) => {
-    Alert.alert(
-        'Confirmation',
-        message,
-        [
-            {
-                text: 'Non',
-                onPress: () => console.log('Action annulée'),
-                style: 'cancel',
-            },
-            {
-                text: 'Oui',
-                onPress: onConfirm,
-            },
-        ],
-        { cancelable: false }
-    );
-};
+import { ConfirmAction } from '../components/utils';
 
 export default function Intervention({ route, navigation }) {
     const TOKEN = useSelector(state => state.user.token)
@@ -89,7 +71,7 @@ export default function Intervention({ route, navigation }) {
             Alert.alert('Veuillez ajouter un commentaire');
             return;
         }
-        confirmAction(
+        ConfirmAction(
             'Êtes-vous sûr de vouloir annuler cette intervention ?',
             () => {
                 annulateIntervention();
@@ -101,7 +83,7 @@ export default function Intervention({ route, navigation }) {
 
 
     const validateIntervention = (intervention_id) => {
-        confirmAction(
+        ConfirmAction(
             'Êtes-vous sûr de vouloir valider cette intervention ?',
             () => {
                 navigation.navigate('Nouvelle réception', { "id": intervention_id });
@@ -110,7 +92,7 @@ export default function Intervention({ route, navigation }) {
     };
 
     const addLocation = async () => {
-        confirmAction(
+        ConfirmAction(
             'Êtes-vous sûr de vouloir ajouter votre position actuelle ?',
             async () => {
                 setRefreshing(true);
