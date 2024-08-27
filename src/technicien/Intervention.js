@@ -5,6 +5,25 @@ import { useSelector } from 'react-redux';
 import moment from 'moment';
 import * as Location from 'expo-location';
 
+const confirmAction = (message, onConfirm) => {
+    Alert.alert(
+        'Confirmation',
+        message,
+        [
+            {
+                text: 'Non',
+                onPress: () => console.log('Action annulée'),
+                style: 'cancel',
+            },
+            {
+                text: 'Oui',
+                onPress: onConfirm,
+            },
+        ],
+        { cancelable: false }
+    );
+};
+
 export default function Intervention({ route, navigation }) {
     const TOKEN = useSelector(state => state.user.token)
     const { intervention } = route.params;
@@ -70,80 +89,93 @@ export default function Intervention({ route, navigation }) {
             Alert.alert('Veuillez ajouter un commentaire');
             return;
         }
-        annulateIntervention();
-        setModalVisible(false);
-        navigation.goBack();
+        confirmAction(
+            'Êtes-vous sûr de vouloir annuler cette intervention ?',
+            () => {
+                annulateIntervention();
+                setModalVisible(false);
+                navigation.goBack();
+            }
+        );
     };
 
+
     const validateIntervention = (intervention_id) => {
-        navigation.navigate('Nouvelle réception', { "id": intervention_id });
+        confirmAction(
+            'Êtes-vous sûr de vouloir valider cette intervention ?',
+            () => {
+                navigation.navigate('Nouvelle réception', { "id": intervention_id });
+            }
+        );
     };
 
     const addLocation = async () => {
-        setRefreshing(true);
-        try {
-            let { status } = await Location.requestForegroundPermissionsAsync();
-            if (status !== 'granted') {
-                Alert.alert('Permission to access location was denied');
-                return;
-            }
+        confirmAction(
+            'Êtes-vous sûr de vouloir ajouter votre position actuelle ?',
+            async () => {
+                setRefreshing(true);
+                try {
+                    let { status } = await Location.requestForegroundPermissionsAsync();
+                    if (status !== 'granted') {
+                        Alert.alert('Permission de localisation refusée');
+                        return;
+                    }
 
-            let location = await Location.getCurrentPositionAsync({});
-            const { latitude, longitude } = location.coords;
+                    let location = await Location.getCurrentPositionAsync({});
+                    const { latitude, longitude } = location.coords;
 
-            setX(longitude);
-            setY(latitude);
+                    setX(longitude);
+                    setY(latitude);
 
-            console.log("X and Y: Longitude:", longitude, "Latitude:", latitude);
+                    console.log("X et Y: Longitude:", longitude, "Latitude:", latitude);
 
-            // Here you can call an API to save the location or do any other logic you need
-            // Example API call to save the location
-            let API_URL = 'http://192.168.43.88/LGC_backend/?page=addLocation';
-            const response = await fetch(API_URL, {
-                method: 'POST',
-                headers: {
-                    'Authorization': `Bearer ${TOKEN}`,
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify(
-                    { "X": longitude, "Y": latitude, "IDProjet": intervention.IDProjet }
-                )
-            });
-            if (!response.ok) {
-                throw new Error(`HTTP error! Status: ${response.status}`);
-            }
+                    // Appel API pour enregistrer la localisation
+                    let API_URL = 'http://192.168.43.88/LGC_backend/?page=addLocation';
+                    const response = await fetch(API_URL, {
+                        method: 'POST',
+                        headers: {
+                            'Authorization': `Bearer ${TOKEN}`,
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify(
+                            { "X": longitude, "Y": latitude, "IDProjet": intervention.IDProjet }
+                        )
+                    });
+                    if (!response.ok) {
+                        throw new Error(`Erreur HTTP ! Statut : ${response.status}`);
+                    }
 
-            const contentType = response.headers.get('content-type');
-            let data;
+                    const contentType = response.headers.get('content-type');
+                    let data;
 
-            if (contentType && contentType.includes('application/json')) {
-                data = await response.json();
-            } else {
-                const text = await response.text();
-                console.log("TEXt", text);
-                data = JSON.parse(text);
-            }
-            if (data.error && data.error == "Expired token") {
-                Alert.alert("Un problème est survenu lors de l'ajout des coordonnées");
-                navigation.navigate("Déconnexion");
-                console.log("Log Out");
-                return;
-            }
-            if (data != null) {
-                if (data) {
-                    Alert.alert("Coordonnées ajoutées avec succès");
-                    setXYExisted(true);
-                } else {
-                    Alert.alert("Un problème est survenu lors de l'ajout des coordonnées");
+                    if (contentType && contentType.includes('application/json')) {
+                        data = await response.json();
+                    } else {
+                        const text = await response.text();
+                        console.log("TEXt", text);
+                        data = JSON.parse(text);
+                    }
+                    if (data.error && data.error === "Expired token") {
+                        Alert.alert("Un problème est survenu lors de l'ajout des coordonnées");
+                        navigation.navigate("Déconnexion");
+                        console.log("Déconnexion");
+                        return;
+                    }
+                    if (data) {
+                        Alert.alert("Coordonnées ajoutées avec succès");
+                        setXYExisted(true);
+                    } else {
+                        Alert.alert("Un problème est survenu lors de l'ajout des coordonnées");
+                    }
+
+                } catch (error) {
+                    console.error('Erreur lors de la récupération de la localisation:', error);
+                }
+                finally {
+                    setRefreshing(false);
                 }
             }
-
-        } catch (error) {
-            console.error('Error fetching location:', error);
-        }
-        finally {
-            setRefreshing(false);
-        }
+        );
     };
 
     return (

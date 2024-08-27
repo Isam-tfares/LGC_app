@@ -1,12 +1,14 @@
 import React, { useState, useRef, useEffect, useCallback } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, FlatList, ActivityIndicator, RefreshControl } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, FlatList, ActivityIndicator, RefreshControl, Alert } from 'react-native';
 import moment from 'moment';
 import 'moment/locale/fr'; // Import French locale
 import AntDesign from '@expo/vector-icons/AntDesign';
+import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
 import { createStackNavigator } from '@react-navigation/stack';
 import Intervention from './Intervention';
 import AddIntervention from './AddIntervention';
 import { useSelector } from 'react-redux';
+import InterventionsNotDone from './InterventionsNotDone';
 
 const generateDaysOfMonth = (month, year) => {
     const startOfMonth = moment(`${month} ${year}`, 'MMMM YYYY').startOf('month');
@@ -24,7 +26,6 @@ function Programme({ navigation }) {
     const TOKEN = useSelector(state => state.user.token);
 
     moment.locale('fr');
-    const technicien = 10;
     const [refreshing, setRefreshing] = useState(false);
     const [currentDay, setCurrentDay] = useState(moment());
     const [modalVisible, setModalVisible] = useState(false);
@@ -133,6 +134,35 @@ function Programme({ navigation }) {
             list.current?.scrollToIndex({ index: info.index, animated: true });
         });
     };
+    const renderDay = ({ item }) => (
+        <TouchableOpacity
+            style={item.isSame(currentDay, 'day') ? styles.currentDay : styles.dayContainer}
+            onPress={() => setCurrentDay(item)}
+        >
+            <Text style={item.isSame(currentDay, 'day') ? styles.day2 : styles.day}>{item.format('D')}</Text>
+            <Text style={item.isSame(currentDay, 'day') ? styles.dayName2 : styles.dayName}>{item.format('ddd')}</Text>
+        </TouchableOpacity>
+    );
+    const renderIntervention = ({ item }) => (
+        <TouchableOpacity
+            style={styles.intervention}
+            onPress={() => interventionClick(item)}
+        >
+            <View style={styles.idView}><Text style={styles.id}>N° Intervention : {item.intervention_id}</Text></View>
+            <Text style={styles.Project}>{item.abr_projet}</Text>
+            <Text style={styles.client}>Objet : {item.Objet_Projet}</Text>
+            <Text style={styles.client}>Client : {item.abr_client}</Text>
+            <Text style={styles.technicien}>Technicien: {item.Nom_personnel}</Text>
+            <View style={{ flexDirection: "row", alignItems: "center", marginTop: 10 }}>
+                <Text style={styles.status}>État : </Text>
+                <Text style={item.status == 2 ? styles.valide : (item.status == 0 ? styles.annule : styles.enCours)}>{item.status == 1 ? "En cours" : item.status == 2 ? "Faite" : "Annulée"}</Text>
+            </View>
+            <View style={styles.dateView}>
+                <Text style={styles.dateText}>{moment(item.date_intervention, "YYYYMMDD").format("DD/MM/YYYY") || 'N/A'}</Text>
+            </View>
+
+        </TouchableOpacity>
+    );
 
     return (
         <View style={{ flex: 1, backgroundColor: "white" }}>
@@ -154,15 +184,7 @@ function Programme({ navigation }) {
                     showsHorizontalScrollIndicator={false}
                     contentContainerStyle={styles.daysList}
                     keyExtractor={(item, index) => index.toString()}
-                    renderItem={({ item }) => (
-                        <TouchableOpacity
-                            style={item.isSame(currentDay, 'day') ? styles.currentDay : styles.dayContainer}
-                            onPress={() => setCurrentDay(item)}
-                        >
-                            <Text style={item.isSame(currentDay, 'day') ? styles.day2 : styles.day}>{item.format('D')}</Text>
-                            <Text style={item.isSame(currentDay, 'day') ? styles.dayName2 : styles.dayName}>{item.format('ddd')}</Text>
-                        </TouchableOpacity>
-                    )}
+                    renderItem={renderDay}
                     onScrollToIndexFailed={onScrollToIndexFailed}
                 />
             </View>
@@ -176,6 +198,11 @@ function Programme({ navigation }) {
                     setModalVisible={setModalVisible} />
                 {/* end add intervention */}
 
+                {/* all interventions not done */}
+                <TouchableOpacity onPress={() => { navigation.navigate('Interventions non faites', { "fetchData": true }); }} style={styles.notDone} >
+                    <MaterialCommunityIcons name="playlist-remove" size={40} color="red" />
+                </TouchableOpacity>
+
                 {
                     refreshing ?
                         (<ActivityIndicator color={"#0853a1"} />)
@@ -188,26 +215,7 @@ function Programme({ navigation }) {
                                 />}
                             data={interventions}
                             keyExtractor={(item) => item.intervention_id.toString()}
-                            renderItem={({ item }) => (
-                                <TouchableOpacity
-                                    style={styles.intervention}
-                                    onPress={() => interventionClick(item)}
-                                >
-                                    <View style={styles.idView}><Text style={styles.id}>N° Intervention : {item.intervention_id}</Text></View>
-                                    <Text style={styles.Project}>{item.abr_projet}</Text>
-                                    <Text style={styles.client}>Objet : {item.Objet_Projet}</Text>
-                                    <Text style={styles.client}>Client : {item.abr_client}</Text>
-                                    <Text style={styles.technicien}>Technicien: {item.Nom_personnel}</Text>
-                                    <View style={{ flexDirection: "row", alignItems: "center", marginTop: 10 }}>
-                                        <Text style={styles.status}>État : </Text>
-                                        <Text style={item.status == 2 ? styles.valide : (item.status == 0 ? styles.annule : styles.enCours)}>{item.status == 1 ? "En cours" : item.status == 2 ? "Faite" : "Annulée"}</Text>
-                                    </View>
-                                    <View style={styles.dateView}>
-                                        <Text style={styles.dateText}>{moment(item.date_intervention, "YYYYMMDD").format("DD/MM/YYYY") || 'N/A'}</Text>
-                                    </View>
-
-                                </TouchableOpacity>
-                            )}
+                            renderItem={renderIntervention}
                             ItemSeparatorComponent={() => <View style={styles.itemSeparator} />}
                             contentContainerStyle={styles.pgm}
                         />)}
@@ -229,6 +237,10 @@ export default function ProgrammeStack() {
             <Stack.Screen
                 name="Intervention"
                 children={(props) => <Intervention {...props} />}
+            />
+            <Stack.Screen
+                name="Interventions non faites"
+                component={InterventionsNotDone}
             />
         </Stack.Navigator>
     );
@@ -376,5 +388,13 @@ const styles = StyleSheet.create({
         bottom: "25%",
         right: "5%",
         zIndex: 20,
+    },
+    notDone: {
+        position: "absolute",
+        bottom: "35%",
+        right: "5%",
+        zIndex: 20,
+        flexDirection: "row",
+        alignItems: "center"
     },
 });
