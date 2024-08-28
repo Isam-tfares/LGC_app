@@ -1,8 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { View, Text, TouchableOpacity, StyleSheet, Image, Alert, ActivityIndicator, RefreshControl } from 'react-native';
 import { Picker } from '@react-native-picker/picker';
-// import DateTimePickerModal from 'react-native-modal-datetime-picker';
-import moment from 'moment';
 import * as ImagePicker from 'expo-image-picker';
 import { Ionicons } from '@expo/vector-icons';
 import { useSelector } from 'react-redux';
@@ -15,7 +13,6 @@ export default function PV({ navigation, route }) {
     const [refreshing, setRefreshing] = useState(false);
     const [selectedIntervention, setSelectedIntervention] = useState(route.params ? Number.parseInt(route.params.id) : "");
     const [image, setImage] = useState(null);
-    const [selectedDate, setSelectedDate] = useState(new Date());
     const [interventions, setInterventions] = useState([]);
     const [loading, setLoading] = useState(false);
 
@@ -164,7 +161,6 @@ export default function PV({ navigation, route }) {
                 // Reset fields after successful operation
                 setSelectedIntervention('');
                 setImage(null);
-                setSelectedDate(new Date());
             }
         );
     };

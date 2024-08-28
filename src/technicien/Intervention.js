@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, Text, StyleSheet, Alert, TouchableOpacity, Modal, TextInput } from 'react-native';
+import { View, Text, StyleSheet, Alert, TouchableOpacity, Modal, TextInput, ActivityIndicator } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useSelector } from 'react-redux';
 import moment from 'moment';
@@ -164,6 +164,9 @@ export default function Intervention({ route, navigation }) {
 
         <View style={styles.container}>
             <View style={styles.card}>
+
+                {refreshing ? <ActivityIndicator style={styles.refreshing} color={"#0853a1"} size={"large"} /> : <></>}
+
                 <View style={styles.row}>
                     <Text style={styles.title}>N° Intervention :</Text>
                     <Text style={styles.text}>{intervention.intervention_id}</Text>
@@ -186,7 +189,7 @@ export default function Intervention({ route, navigation }) {
                 </View>
                 <View style={styles.row}>
                     <Text style={styles.title}>Lieu de prélévement : </Text>
-                    <Text style={styles.text}>{intervention.adresse ?? ""}</Text>
+                    <Text style={styles.text}>{intervention.Lieux_ouvrage}</Text>
                 </View>
 
                 <View style={styles.row}>
@@ -286,6 +289,7 @@ const styles = StyleSheet.create({
         shadowRadius: 2,
         elevation: 5,
         width: '100%',
+        position: "relative",
     },
     row: {
         flexDirection: 'row',
@@ -391,4 +395,9 @@ const styles = StyleSheet.create({
         color: "#4bacc0",
         fontSize: 17,
     },
+    refreshing: {
+        position: "absolute",
+        top: "50%",
+        right: '50%',
+    }
 });

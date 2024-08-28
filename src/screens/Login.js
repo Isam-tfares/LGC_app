@@ -68,7 +68,6 @@ const Login = ({ isLogined, setLogined }) => {
             }
 
             const data = await response.json();
-            console.log(data.error);
 
             if (data.message === 'Login successful.') {
                 const token = data.jwt;

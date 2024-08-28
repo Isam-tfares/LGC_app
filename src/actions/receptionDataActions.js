@@ -6,4 +6,7 @@ export const setReceptionData = (clients, projects, phases, materiaux, types_bet
 export const clearReceptionData = () => ({
     type: 'CLEAR_RECEPTION_DATA',
 });
+export const clearInterventionData = () => ({
+    type: "CLEAR_INTERVENTIONS",
+})
 

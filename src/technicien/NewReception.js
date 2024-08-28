@@ -1,20 +1,21 @@
-import React, { useEffect, useState } from 'react';
-import { View, Text, TouchableOpacity, StyleSheet, Alert, TextInput, ScrollView, ActivityIndicator } from "react-native";
+import React, { useEffect, useState, useCallback } from 'react';
+import { View, Text, TouchableOpacity, StyleSheet, Alert, TextInput, ScrollView, ActivityIndicator, RefreshControl } from "react-native";
 import { Picker } from '@react-native-picker/picker';
 import { AntDesign } from '@expo/vector-icons';
 import DateTimePickerModal from 'react-native-modal-datetime-picker';
 import moment from 'moment';
 import Checkbox from 'expo-checkbox';
 import { useDispatch, useSelector } from 'react-redux';
-import { setReceptionData } from '../actions/receptionDataActions';
+import { setReceptionData, clearInterventionData } from '../actions/receptionDataActions';
 import { ConfirmAction } from '../components/utils';
 
 //NewReceptionInterface
 export default function NewReception({ route, navigation }) {
     const TOKEN = useSelector(state => state.user.token);
     const BetonPhases = ["1", "2", "4", "35", "44", "45", "46", "47"];
-
     const dispatch = useDispatch();
+
+    const [refreshing, setRefreshing] = useState(false);
     const [interventions, setInterventions] = useState(useSelector(state => state.data.interventions));
     const [selectedIntervention, setSelectedIntervention] = useState(route.params ? Number.parseInt(route.params.id) : "");
     const [intervention, setInterevntion] = useState(selectedIntervention ? interventions ? interventions.find(item => item.id === selectedIntervention) : null : null);
@@ -50,8 +51,8 @@ export default function NewReception({ route, navigation }) {
     const [compression, setCompression] = useState(false);
     const [fendage, setfendage] = useState(false);
     const [flexion, setFlexion] = useState(false);
-    const [confectionSelected, setConfectionSelected] = useState("mode 1");
-    const [fabricationSelected, setFabricationSelected] = useState("mode 1");
+    const [confectionSelected, setConfectionSelected] = useState("Vibration");
+    const [fabricationSelected, setFabricationSelected] = useState("Manuel");
     const [centralSelected, setCentralSelected] = useState("");
     const [BL, setBL] = useState("");
     const [nbr_jrs, setNbr_jrs] = useState([7, 28]);
@@ -62,18 +63,27 @@ export default function NewReception({ route, navigation }) {
     const [isDatePickerVisible, setDatePickerVisibility] = useState(false);
     const [isDatePickerVisible2, setDatePickerVisibility2] = useState(false);
     const [isBetonSectionVisible, setBetonSectionVisibility] = useState(true);
-    const [loading, setLoading] = useState(false);
+
     useEffect(() => {
+        getData();
+    }, []);
+    const onRefresh = useCallback(() => {
         getData();
     }, []);
     useEffect(() => {
         if (selectedIntervention && interventions) {
             // set client and project and prestation of this intervention
-            const selected = interventions ? interventions.find(item => item.intervention_id === selectedIntervention) : null;
-            setSelectedProject(selected ? selected.projet_id : "");
-            let client_id = projects.find(project => project.IDProjet === selected.projet_id).IDClient;
-            setSelectedClient(client_id);
-            setSelectedPrestation(selected ? selected.IDPhase : "");
+            const selected = interventions ? interventions.find(item => item.intervention_id == selectedIntervention) : null;
+            if (selected) {
+                setSelectedProject(selected ? selected.IDProjet : "");
+                let client_id = projects.find(project => project.IDProjet === selected.IDProjet).IDClient;
+                setSelectedClient(client_id);
+                setSelectedPrestation(selected ? selected.IDPhase : "");
+                setLieu_prelevement(selected ? selected.Lieux_ouvrage : "");
+            }
+            else {
+                console.log("None")
+            }
         }
     }, [selectedIntervention]);
     // filter projects that part of clientSelected
@@ -103,7 +113,7 @@ export default function NewReception({ route, navigation }) {
     }
 
     const fetchData = async (url, token) => {
-        setLoading(true);
+        setRefreshing(true);
         try {
             const response = await fetch(url, {
                 method: 'GET',
@@ -146,11 +156,11 @@ export default function NewReception({ route, navigation }) {
             console.error('Error fetching data:', error);
         }
         finally {
-            setLoading(false);
+            setRefreshing(false);
         }
     };
     const insertReception = async (url, token) => {
-        setLoading(true);
+        setRefreshing(true);
         // return;
         try {
             const response = await fetch(url, {
@@ -199,7 +209,7 @@ export default function NewReception({ route, navigation }) {
             console.error('Error fetching data:', error);
         }
         finally {
-            setLoading(false);
+            setRefreshing(false);
         }
     };
 
@@ -249,6 +259,7 @@ export default function NewReception({ route, navigation }) {
             () => {
                 const API_URL = 'http://192.168.43.88/LGC_backend/?page=NewReception';
                 insertReception(API_URL, TOKEN);
+                dispatch(clearInterventionData());
                 let intervention_id = selectedIntervention;
                 setSelectedClient("");
                 setSelectedProject("");
@@ -264,8 +275,8 @@ export default function NewReception({ route, navigation }) {
                 setCompression(false);
                 setfendage(false);
                 setFlexion(false);
-                setConfectionSelected("mode 1");
-                setFabricationSelected("mode 1");
+                setConfectionSelected("Vibration");
+                setFabricationSelected("Manuel");
                 setCentralSelected("");
                 setBL("");
                 setNbr_jrs([]);
@@ -282,11 +293,22 @@ export default function NewReception({ route, navigation }) {
     return (
         <View >
             <View style={styles.modalView}>
-                <ScrollView contentContainerStyle={styles.scrollViewContent}>
+
+                {/* refreshing */}
+                {/* {refreshing ? <View style={styles.refreshing}><ActivityIndicator size="large" color="#4b6aff" /></View> : null} */}
+
+                <ScrollView contentContainerStyle={styles.scrollViewContent}
+                    refreshControl={
+                        <RefreshControl
+                            refreshing={refreshing}
+                            onRefresh={onRefresh}
+                        />}
+                >
+
                     <View style={styles.intervention}>
                         <Text style={styles.label}>N° Intervention</Text>
                         <Picker
-                            selectedValue={selectedIntervention}
+                            selectedValue={selectedIntervention.toString()}
                             onValueChange={(itemValue, itemIndex) => setSelectedIntervention(itemValue)}
                             style={styles.picker}
                         >
@@ -332,8 +354,6 @@ export default function NewReception({ route, navigation }) {
                         </Picker>
                     </View>
 
-                    {/* Loading */}
-                    {loading ? <View style={styles.loading}><ActivityIndicator size="large" color="#4b6aff" /></View> : null}
 
                     <View style={styles.section_ttl}>
                         <Text style={styles.section_title}>Informations Prestation</Text>
@@ -797,7 +817,7 @@ const styles = StyleSheet.create({
         textAlign: 'center',
         width: '100%',
     },
-    loading: {
+    refreshing: {
         position: "absolute",
         top: "50%",
         left: "50%",

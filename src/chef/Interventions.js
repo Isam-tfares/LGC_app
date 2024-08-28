@@ -28,7 +28,7 @@ function Interventions({ navigation }) {
     const onRefresh = useCallback(() => {
         const API_URL = 'http://192.168.43.88/LGC_backend/?page=interventionsChef';
         fetchData(API_URL, TOKEN);
-    }, []);
+    }, [fromDateAPI, toDateAPI]);
 
     useEffect(() => {
         // Initialize dates

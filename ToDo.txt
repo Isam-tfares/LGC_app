@@ -2,3 +2,5 @@
 >> Add intervention chef 2 Dates also for DB backend
 >> matriaux,natures,tableau
 >> some inputs in new reception are not inserted ( beton datas ( cymlidre,jrs,...))
+>> cylindres
+>> preReception possibility update before validates

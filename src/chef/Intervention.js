@@ -42,7 +42,7 @@ export default function Intervention({ route, navigation, reload, setReload }) {
                 </View>
                 <View style={styles.row}>
                     <Text style={styles.title}>Lieu de prélévement : </Text>
-                    <Text style={styles.text}>{intervention.adresse}</Text>
+                    <Text style={styles.text}>{intervention.Lieux_ouvrage}</Text>
                 </View>
 
                 <View style={styles.row}>

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { View, Modal, Text, TouchableOpacity, StyleSheet, Alert } from "react-native";
+import { View, Modal, Text, TouchableOpacity, StyleSheet, Alert, TextInput } from "react-native";
 import { Picker } from '@react-native-picker/picker';
 import { Ionicons } from '@expo/vector-icons';
 import DateTimePickerModal from 'react-native-modal-datetime-picker';
@@ -21,6 +21,7 @@ export default function AddIntervention({ modalVisible, setModalVisible }) {
     const [selectedPrestation, setSelectedPrestation] = useState('');
     const [selectedDate, setSelectedDate] = useState(null);
     const [selectedDate2, setSelectedDate2] = useState(null);
+    const [lieu_prelevemnt, setLieuPrelevement] = useState("");
     const [isDatePickerVisible, setDatePickerVisibility] = useState(false);
     const [isDatePickerVisible2, setDatePickerVisibility2] = useState(false);
 
@@ -94,7 +95,10 @@ export default function AddIntervention({ modalVisible, setModalVisible }) {
                     'Content-Type': 'application/json'
                 },
                 body: JSON.stringify(
-                    { "technicien_id": technicien_id, "projet_id": selectedProject, "date_intervention": date, "IDPhase": selectedPrestation }
+                    {
+                        "technicien_id": technicien_id, "projet_id": selectedProject, "date_intervention": date,
+                        "IDPhase": selectedPrestation, "Lieux_ouvrage": lieu_prelevemnt
+                    }
                 )
             });
 
@@ -256,6 +260,12 @@ export default function AddIntervention({ modalVisible, setModalVisible }) {
                             <Picker.Item key={index} label={prestation.libelle} value={prestation.IDPhase} />
                         ))}
                     </Picker>
+                    <Text style={styles.label}>Lieu de prélévement </Text>
+                    <TextInput
+                        value={lieu_prelevemnt}
+                        onChangeText={setLieuPrelevement}
+                        style={styles.prelevement}
+                    />
 
                     <Text style={styles.label}>Date prélevée</Text>
                     <TouchableOpacity style={styles.dateButton} onPress={showDatePicker}>
@@ -357,5 +367,13 @@ const styles = StyleSheet.create({
         color: '#fff',
         fontWeight: 'bold',
         fontSize: 16,
+    },
+    prelevement: {
+        width: '100%',
+        height: 40,
+        marginBottom: 20,
+        backgroundColor: "#f0f0f0",
+        // borderWidth: 1,
+        borderRadius: 5,
     },
 });

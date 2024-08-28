@@ -19,13 +19,14 @@ export default function DemandesInterventions({ navigation }) {
     const [toDate, setToDate] = useState(moment().add(7, 'day').format("DD/MM/YYYY"));
     const [selectedClient, setSelectedClient] = useState('');
     const [selectedProject, setSelectedProject] = useState('');
-    const [adresse, setAdresse] = useState('');
+    const [lieu_prelevement, setLieuPrelevement] = useState('');
     const [selectedTechnician, setSelectedTechnician] = useState('');
     const [selectedPrestation, setSelectedPrestation] = useState('');
     const [selectedDate, setSelectedDate] = useState(null);
     const [modalVisible, setModalVisible] = useState(false);
     const [modalVisible2, setModalVisible2] = useState(false);
     const [isDatePickerVisible, setDatePickerVisibility] = useState(false);
+    const [isDatePickerVisible2, setDatePickerVisibility2] = useState(false);
     const [comment, setComment] = useState('');
     const [selectedIntervention, setSelectedIntervention] = useState(null);
     const [interventions, setInterventions] = useState([]);
@@ -113,7 +114,10 @@ export default function DemandesInterventions({ navigation }) {
                     'Content-Type': 'application/json'
                 },
                 body: JSON.stringify(
-                    { "technicien_id": selectedTechnician, "projet_id": selectedProject, "date_intervention": date, "IDPhase": selectedPrestation, "intervention_id": selectedIntervention.intervention_id }
+                    {
+                        "technicien_id": selectedTechnician, "projet_id": selectedProject, "date_intervention": date,
+                        "IDPhase": selectedPrestation, "intervention_id": selectedIntervention.intervention_id, "Lieux_ouvrage": lieu_prelevement
+                    }
                 )
             });
 
@@ -212,6 +216,14 @@ export default function DemandesInterventions({ navigation }) {
     const hideDatePicker = () => {
         setDatePickerVisibility(false);
     };
+
+    const showDatePicker2 = () => {
+        setDatePickerVisibility2(true);
+    };
+
+    const hideDatePicker2 = () => {
+        setDatePickerVisibility2(false);
+    };
     const validateDateRange = (nextDate) => {
         if (fromDate) {
             const fromDateObj = moment(fromDate, "DD/MM/YYYY");
@@ -239,6 +251,13 @@ export default function DemandesInterventions({ navigation }) {
         hideDatePicker();
     };
 
+    const handleConfirm2 = (date) => {
+        const formattedDate = `${date.getDate()}/${date.getMonth() + 1}/${date.getFullYear()}`;
+        console.log(formattedDate)
+        setSelectedDate(moment(formattedDate, "DD/MM/YYYY"));
+        hideDatePicker2();
+    };
+
     const filterInterventions = () => {
         let filteredInterventions = interventions;
         // Convert intervention dates to Date objects
@@ -263,7 +282,7 @@ export default function DemandesInterventions({ navigation }) {
         setSelectedProject(intervention.projet_id);
         setSelectedTechnician(intervention.technicien_id);
         setSelectedPrestation(intervention.IDPhase);
-        setAdresse("");
+        setLieuPrelevement(intervention.Lieux_ouvrage);
         setSelectedDate(moment(intervention.date_intervention, "YYYYMMDD"));
         setModalVisible(true);
     };
@@ -458,22 +477,22 @@ export default function DemandesInterventions({ navigation }) {
 
                         <Text style={styles.label}>Lieu de prélévement</Text>
                         <TextInput
-                            value={adresse}
-                            onChangeText={setAdresse}
+                            value={lieu_prelevement}
+                            onChangeText={setLieuPrelevement}
                             style={[styles.input]}
                         />
 
                         <Text style={styles.label}>Date</Text>
-                        <TouchableOpacity style={styles.dateButton} onPress={showDatePicker}>
+                        <TouchableOpacity style={styles.dateButton} onPress={showDatePicker2}>
                             <Text style={styles.dateButtonText}>
                                 {selectedDate ? moment(selectedDate).format('MM/DD/YYYY') : 'Séléctionner Date'}
                             </Text>
                         </TouchableOpacity>
                         <DateTimePickerModal
-                            isVisible={isDatePickerVisible}
+                            isVisible={isDatePickerVisible2}
                             mode="date"
-                            onConfirm={handleConfirm}
-                            onCancel={hideDatePicker}
+                            onConfirm={handleConfirm2}
+                            onCancel={hideDatePicker2}
                         />
                         <View style={styles.btns}>
                             <TouchableOpacity style={styles.modalButton} onPress={handleAddIntervention}>

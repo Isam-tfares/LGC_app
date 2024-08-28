@@ -33,6 +33,11 @@ const receptionDataReducer = (state = initialState, action) => {
                 natures_echantillon: null,
                 interventions: null,
             };
+        case 'CLEAR_INTERVENTIONS':
+            return {
+                ...state,
+                interventions: null,
+            };
         default:
             return state;
     }

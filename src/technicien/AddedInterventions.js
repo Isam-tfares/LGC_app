@@ -13,21 +13,17 @@ function Programme({ navigation }) {
     moment.locale('fr');
     const [refreshing, setRefreshing] = useState(false);
     const [search, setSearch] = useState("");
-    const [currentDay, setCurrentDay] = useState(moment());
     const [interventions, setInterventions] = useState([]);
     useEffect(() => {
         fetchData();
-    }, [currentDay]);
+    }, []);
     const onRefresh = useCallback(() => {
         fetchData();
-    }, [currentDay]);
+    }, []);
 
     const fetchData = async () => {
         try {
             setRefreshing(true);
-
-            // Format the date as YYYYMMDD
-            const dateAPI = parseInt(moment(currentDay).format('YYYYMMDD'));
 
             const API_URL = 'http://192.168.43.88/LGC_backend/?page=demandesInterventionsTec';
             const response = await fetch(API_URL, {
@@ -36,7 +32,6 @@ function Programme({ navigation }) {
                     'Authorization': `Bearer ${TOKEN}`,
                     'Content-Type': 'application/json'
                 },
-                body: JSON.stringify({ "date": dateAPI }),
             });
 
             if (!response.ok) {
