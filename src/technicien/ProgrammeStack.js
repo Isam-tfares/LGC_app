@@ -194,8 +194,10 @@ function Programme({ navigation }) {
                 <TouchableOpacity onPress={() => { setModalVisible(true) }} style={styles.plus} >
                     <AntDesign name="pluscircle" size={40} color="#0853a1" />
                 </TouchableOpacity>
-                <AddIntervention modalVisible={modalVisible}
-                    setModalVisible={setModalVisible} />
+                {modalVisible ?
+                    <AddIntervention modalVisible={modalVisible}
+                        setModalVisible={setModalVisible} />
+                    : <></>}
                 {/* end add intervention */}
 
                 {/* all interventions not done */}

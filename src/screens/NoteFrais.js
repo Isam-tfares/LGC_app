@@ -3,6 +3,7 @@ import { View, Text, StyleSheet, TouchableOpacity, TextInput, Alert, ScrollView,
 import DateTimePickerModal from "react-native-modal-datetime-picker";
 import Entypo from '@expo/vector-icons/Entypo';
 import { Picker } from '@react-native-picker/picker';
+import FontAwesome from '@expo/vector-icons/FontAwesome';
 import moment from 'moment';
 import 'moment/locale/fr'; // Import French locale for month names
 import { useSelector } from 'react-redux';
@@ -191,6 +192,18 @@ export default function NoteFrais({ navigation }) {
         );
     };
 
+    const getLibelleByIDType = (targetIDType) => {
+        if (types_charge.length == 0) {
+            return "";
+        }
+        const item = types_charge.find(charge => charge.IDType === targetIDType);
+        return item ? item.libelle : '';
+    };
+
+    const removeItem = (index) => {
+        const updatedNotes = allNotes.filter((_, i) => i !== index);
+        setAllNotes(updatedNotes);
+    }
 
     return (
         <ScrollView
@@ -286,14 +299,17 @@ export default function NoteFrais({ navigation }) {
                             <Text style={styles.tableHeaderText}>Type</Text>
                             <Text style={styles.tableHeaderText}>Date</Text>
                             <Text style={styles.tableHeaderText}>Montant</Text>
-                            <Text style={styles.tableHeaderText}>Observation</Text>
+                            <Text style={styles.tableHeaderText}>Obs</Text>
                         </View>
                         {allNotes?.map((note, index) => (
                             <View style={styles.tableRow} key={index}>
-                                <Text style={styles.tableCell}>{note.typecharge}</Text>
-                                <Text style={styles.tableCell}>{note.date}</Text>
+                                <Text style={styles.tableCell}>{getLibelleByIDType(note.typecharge)}</Text>
+                                <Text style={styles.tableCell}>{moment(note.date, "YYYYMMDD").format("DD/MM/YYYY")}</Text>
                                 <Text style={styles.tableCell}>{note.montant}</Text>
                                 <Text style={styles.tableCell}>{note.observation}</Text>
+                                <TouchableOpacity onPress={() => { removeItem(index) }} style={styles.delete}>
+                                    <FontAwesome name="remove" size={16} color="red" />
+                                </TouchableOpacity>
                             </View>
                         ))}
                     </View>
@@ -380,6 +396,7 @@ const styles = StyleSheet.create({
         flexDirection: 'row',
         borderBottomWidth: 1,
         borderBottomColor: '#ccc',
+        position: "relative"
     },
     tableHeaderText: {
         flex: 1,
@@ -390,7 +407,14 @@ const styles = StyleSheet.create({
     tableCell: {
         flex: 1,
         padding: 5,
+        paddingRight: 10,
         textAlign: 'center',
+        fontSize: 12
+    },
+    delete: {
+        position: "absolute",
+        top: "-10%",
+        right: "-2%",
     },
     historiqueContainer: {
         marginBottom: 20,

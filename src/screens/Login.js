@@ -60,10 +60,15 @@ const Login = ({ isLogined, setLogined }) => {
             });
 
             if (!response.ok) {
-                throw new Error(`API request failed with status ${response.status}`);
+                const data = await response.json();
+                if (data.error == "Invalid username or password.") {
+                    Alert.alert("Nom d'utilisateur ou mot de passe incorrect");
+                }
+                return;
             }
 
             const data = await response.json();
+            console.log(data.error);
 
             if (data.message === 'Login successful.') {
                 const token = data.jwt;

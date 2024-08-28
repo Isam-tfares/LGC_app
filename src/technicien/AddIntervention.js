@@ -42,6 +42,7 @@ export default function AddIntervention({ modalVisible, setModalVisible }) {
 
     const fetchData = async (url, token) => {
         try {
+            console.log("fetch Data Add intervention");
             const response = await fetch(url, {
                 method: 'GET',
                 headers: {
