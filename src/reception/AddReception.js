@@ -47,7 +47,7 @@ export default function AddReception({ modalVisible, setModalVisible, interventi
     const [BL, setBL] = useState("");
     const [nbr_jrs, setNbr_jrs] = useState([]);
     const [jrs, setJrs] = useState("");
-    const [lieu_prelevement, setLieu_prelevement] = useState(intervention.adresse);
+    const [lieu_prelevement, setLieu_prelevement] = useState(intervention.Lieux_ouvrage);
     const [nature_echantillon, setNature_echantillon] = useState("");
     const [obs, setObs] = useState("");
     const [isDatePickerVisible, setDatePickerVisibility] = useState(false);

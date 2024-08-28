@@ -10,15 +10,14 @@ import { setReceptionData, clearInterventionData } from '../actions/receptionDat
 import { ConfirmAction } from '../components/utils';
 
 //NewReceptionInterface
-export default function NewReception({ route, navigation }) {
+export default function EditPreReception({ route, navigation }) {
     const TOKEN = useSelector(state => state.user.token);
     const BetonPhases = ["1", "2", "4", "35", "44", "45", "46", "47"];
     const dispatch = useDispatch();
 
     const [refreshing, setRefreshing] = useState(false);
-    const [interventions, setInterventions] = useState(useSelector(state => state.data.interventions));
-    const [selectedIntervention, setSelectedIntervention] = useState(route.params ? Number.parseInt(route.params.id) : "");
-    const [intervention, setInterevntion] = useState(selectedIntervention ? interventions ? interventions.find(item => item.id === selectedIntervention) : null : null);
+    const [selectedReception, setSelectedReception] = useState(route.params.receptionState ?? null);
+    const [intervention, setInterevntion] = useState("");
     const [clients, setClients] = useState(useSelector(state => state.data.clients));
     const [projects, setProjects] = useState(useSelector(state => state.data.projects));
     const [projectsPicker, setProjectsPicker] = useState([]);
@@ -34,10 +33,10 @@ export default function NewReception({ route, navigation }) {
     const modes_fabrication = ["Manuel", "Bétorrière", "central"];
     const cylindres = [241, 242, 243, 244];
     const [showenSections, setShowenSections] = useState(["client", "Materiaux", "Béton", "Details"]);
-    const [selectedClient, setSelectedClient] = useState(intervention ? intervention.abr_client : "");
-    const [selectedProject, setSelectedProject] = useState(intervention ? intervention.abr_projet : "");
-    const [selectedPrestation, setSelectedPrestation] = useState(intervention ? intervention.libelle : "");
-    const [selectedMatiere, setSelectedMatiere] = useState(intervention ? intervention.labelle : "");
+    const [selectedClient, setSelectedClient] = useState("");
+    const [selectedProject, setSelectedProject] = useState("");
+    const [selectedPrestation, setSelectedPrestation] = useState("");
+    const [selectedMatiere, setSelectedMatiere] = useState("");
     const [selectedDate, setSelectedDate] = useState(null);
     const [selectedDate2, setSelectedDate2] = useState(null);
     const [selectedCylindre, setSelectedCylindre] = useState(cylindres[0]);
@@ -60,6 +59,8 @@ export default function NewReception({ route, navigation }) {
     const [lieu_prelevement, setLieu_prelevement] = useState(intervention ? intervention.Lieux_ouvrage : "");
     const [nature_echantillon, setNature_echantillon] = useState("");
     const [obs, setObs] = useState("");
+    const [Numero, setNumero] = useState("");
+    const [saisiele, setSaisieLe] = useState("");
     const [isDatePickerVisible, setDatePickerVisibility] = useState(false);
     const [isDatePickerVisible2, setDatePickerVisibility2] = useState(false);
     const [isBetonSectionVisible, setBetonSectionVisibility] = useState(true);
@@ -71,21 +72,25 @@ export default function NewReception({ route, navigation }) {
         getData();
     }, []);
     useEffect(() => {
-        if (selectedIntervention && interventions) {
-            // set client and project and prestation of this intervention
-            const selected = interventions ? interventions.find(item => item.intervention_id == selectedIntervention) : null;
-            if (selected) {
-                setSelectedProject(selected ? selected.IDProjet : "");
-                let client_id = projects.find(project => project.IDProjet === selected.IDProjet).IDClient;
-                setSelectedClient(client_id);
-                setSelectedPrestation(selected ? selected.IDPhase : "");
-                setLieu_prelevement(selected ? selected.Lieux_ouvrage : "");
-            }
-            else {
-                console.log("None")
-            }
+        if (selectedReception) {
+            setCompression(selectedReception.Compression == "1" ? true : false);
+            setSelectedMatiere(selectedReception.IDMateriaux);
+            setSelectedPrestation(selectedReception.IDPhase);
+            setSelectedProject(selectedReception.IDProjet);
+            setSelectedClient(selectedReception.IDClient);
+            setBetonSelected(selectedReception.IDType_beton);
+            setLieu_prelevement(selectedReception.Lieux_ouvrage);
+            setNumero(selectedReception.Numero);
+            setObs(selectedReception.Observation);
+            setFlexion(selectedReception.Traction == "1" ? true : false);
+            setfendage(selectedReception.Traction_fend == "1" ? true : false);
+            setSelectedDate(selectedReception.date_prevus);
+            setNbr_echatillon(selectedReception.nombre);
+            setPreleve(preleves[parseInt(selectedReception.prelevement_par)]);
+            setSaisieLe(selectedReception.saisiele);
+            setInterevntion(selectedReception.intervention_id);
         }
-    }, [selectedIntervention]);
+    }, [selectedReception]);
     // filter projects that part of clientSelected
     useEffect(() => {
         if (selectedClient && projects) {
@@ -148,8 +153,7 @@ export default function NewReception({ route, navigation }) {
                 setMateriaux(data.materiaux);
                 setTypes_beton(data.types_beton);
                 setNatures_echantillon(data.natures_echantillon);
-                setInterventions(data.interventions);
-                dispatch(setReceptionData(data.clients, data.projects, data.phases, data.materiaux, data.types_beton, data.natures_echantillon, data.interventions));
+                dispatch(setReceptionData(data.clients, data.projects, data.phases, data.materiaux, data.types_beton, data.natures_echantillon, null));
 
             }
         } catch (error) {
@@ -161,7 +165,7 @@ export default function NewReception({ route, navigation }) {
     };
     const insertReception = async (url, token) => {
         setRefreshing(true);
-        // return;
+
         try {
             const response = await fetch(url, {
                 method: 'POST',
@@ -169,17 +173,18 @@ export default function NewReception({ route, navigation }) {
                     'Authorization': `Bearer ${token}`,
                     'Content-Type': 'application/json'
                 },
-                // intervention_id,IDPhase, IDProjet, nombre, IDType_beton, IDMateriaux, observation, date_prevus, prelevement_par, Compression, Traction, Lieux_ouvrage, Traction_fend
                 body: JSON.stringify({
-                    "intervention_id": selectedIntervention, "IDPhase": selectedPrestation, "IDProjet": selectedProject,
+                    "IDPre_reception": selectedReception.IDPre_reception, "IDPhase": selectedPrestation, "IDProjet": selectedProject,
                     "nombre": nbr_echatillon, "IDType_beton": betonSelected, "IDMateriaux": selectedMatiere, "observation": obs,
-                    "date_prevus": parseInt(moment(selectedDate, "DD/MM/YYYY").format("YYYYMMDD")), "prelevement_par": preleves.indexOf(preleve), "Compression": compression ? 1 : 0, "Traction": flexion ? 1 : 0,
-                    "Lieux_ouvrage": lieu_prelevement, "Traction_fend": fendage ? 1 : 0
+                    "prelevement_par": preleves.indexOf(preleve), "Compression": compression ? 1 : 0, "Traction": flexion ? 1 : 0,
+                    "Lieux_ouvrage": lieu_prelevement, "Traction_fend": fendage ? 1 : 0, "IDPersonnel": selectedReception.IDPersonnel
                 })
+
             });
 
             if (!response.ok) {
                 throw new Error(`HTTP error! Status: ${response.status}`);
+                return;
             }
 
             const contentType = response.headers.get('content-type');
@@ -192,6 +197,7 @@ export default function NewReception({ route, navigation }) {
                 console.log(text);
                 data = JSON.parse(text);
             }
+
             if (data.error && data.error == "Expired token") {
                 Alert.alert("Un problème est survenu lors de l'ajout de la réception");
                 navigation.navigate("Déconnexion");
@@ -199,14 +205,16 @@ export default function NewReception({ route, navigation }) {
                 return;
             }
             if (data != null) {
-                if (data) {
-                    Alert.alert("Réception ajoutée avec succès");
+                if (data == 1) {
+                    Alert.alert("Réception validée avec succès");
                 } else {
                     Alert.alert("Un problème est survenu lors de l'ajout de la réception");
+                    return;
                 }
             }
         } catch (error) {
             console.error('Error fetching data:', error);
+            return;
         }
         finally {
             setRefreshing(false);
@@ -250,17 +258,15 @@ export default function NewReception({ route, navigation }) {
 
     const handleAddIntervention = () => {
         // check intervention_id,IDPhase, IDProjet, nombre, IDType_beton, IDMateriaux, observation, date_prevus, prelevement_par, Compression, Traction, Lieux_ouvrage, Traction_fend
-        if (!selectedIntervention || !selectedPrestation || !selectedProject || !selectedMatiere || !nbr_echatillon || !selectedDate || !preleve || !lieu_prelevement || !obs) {
+        if (!selectedPrestation || !selectedProject || !selectedMatiere || !nbr_echatillon || !selectedDate || !preleve || !lieu_prelevement || !obs) {
             Alert.alert('Veuillez remplir tous les champs');
             return;
         }
         ConfirmAction(
             "Êtes-vous sûr de vouloir ajouter cette réception?",
             () => {
-                const API_URL = 'http://192.168.43.88/LGC_backend/?page=NewReception';
+                const API_URL = 'http://192.168.43.88/LGC_backend/?page=UpdatePreReception';
                 insertReception(API_URL, TOKEN);
-                dispatch(clearInterventionData());
-                let intervention_id = selectedIntervention;
                 setSelectedClient("");
                 setSelectedProject("");
                 setSelectedPrestation("");
@@ -284,40 +290,32 @@ export default function NewReception({ route, navigation }) {
                 setLieu_prelevement("");
                 setNature_echantillon("");
                 setObs("");
-                setSelectedIntervention('');
-                Alert.alert('Réception ajoutée avec succès \nVeuillez charger le PV');
-                navigation.navigate('PVs', { "id": intervention_id });
+                navigation.navigate("Listes Pré-réceptions");
             });
     };
+
 
     return (
         <View >
             <View style={styles.modalView}>
 
                 {/* refreshing */}
-                {/* {refreshing ? <View style={styles.refreshing}><ActivityIndicator size="large" color="#4b6aff" /></View> : null} */}
+                {refreshing ? <View style={styles.refreshing}><ActivityIndicator size="large" color="#4b6aff" /></View> : null}
 
                 <ScrollView contentContainerStyle={styles.scrollViewContent}
-                    refreshControl={
-                        <RefreshControl
-                            refreshing={refreshing}
-                            onRefresh={onRefresh}
-                        />}
                 >
 
-                    <View style={styles.intervention}>
-                        <Text style={styles.label}>N° Intervention</Text>
-                        <Picker
-                            selectedValue={selectedIntervention.toString()}
-                            onValueChange={(itemValue, itemIndex) => setSelectedIntervention(itemValue)}
-                            style={styles.picker}
-                        >
-                            <Picker.Item label="N° Intervention " value="" />
-                            {interventions ?
-                                interventions.map((intervention, index) => (
-                                    <Picker.Item key={index} label={intervention.intervention_id} value={intervention.intervention_id} />
-                                )) : null}
-                        </Picker>
+                    <View style={styles.row}>
+                        <Text style={styles.title}>N° Réception</Text>
+                        <Text style={styles.text}>{Numero}</Text>
+                    </View>
+                    <View style={styles.row}>
+                        <Text style={styles.title}>N° Intervention </Text>
+                        <Text style={styles.text}>{intervention}</Text>
+                    </View>
+                    <View style={styles.row}>
+                        <Text style={styles.title}>Code bar</Text>
+                        <Text style={styles.text}>{obs}</Text>
                     </View>
                     <View style={styles.section_ttl}>
                         <Text style={styles.section_title}>Informations Projet</Text>
@@ -631,7 +629,7 @@ export default function NewReception({ route, navigation }) {
                 </ScrollView>
                 <View style={{ position: "absolute", bottom: 0, width: "100%", left: 10 }}>
                     <TouchableOpacity style={styles.modalButton} onPress={handleAddIntervention}>
-                        <Text style={styles.modalButtonText}>Ajouter</Text>
+                        <Text style={styles.modalButtonText}>Valider</Text>
                     </TouchableOpacity>
                 </View>
             </View>
@@ -822,5 +820,20 @@ const styles = StyleSheet.create({
         top: "50%",
         left: "50%",
         zIndex: 111
+    },
+    row: {
+        flexDirection: 'row',
+        marginBottom: 20,
+        paddingEnd: 5,
+        justifyContent: 'space-between',
+    },
+    title: {
+        fontSize: 16,
+        paddingEnd: 10,
+    },
+    text: {
+        fontSize: 16,
+        fontWeight: 'bold',
+        width: '60%',
     },
 });

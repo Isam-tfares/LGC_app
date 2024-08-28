@@ -7,6 +7,7 @@ import moment from 'moment';
 import PreReceptionDetails from './PreReceptionDetails';
 import { createStackNavigator } from '@react-navigation/stack';
 import { useSelector } from 'react-redux';
+import EditPreReception from './EditPreReception';
 
 const Stack = createStackNavigator();
 
@@ -263,6 +264,10 @@ export default function PrereceptionsStack({ route, navigation }) {
             <Stack.Screen
                 name="Détails Pré-réception"
                 component={PreReceptionDetails}
+            />
+            <Stack.Screen
+                name="Modifier Pré-réception"
+                component={EditPreReception}
             />
         </Stack.Navigator>
     );

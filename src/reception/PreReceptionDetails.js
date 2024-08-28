@@ -164,6 +164,9 @@ export default function PreReceptionDetails({ route, navigation }) {
         );
     };
 
+    const editReception = () => {
+        navigation.navigate("Modifier Pré-réception", { receptionState });
+    }
 
     return (
         <ScrollView>
@@ -304,9 +307,16 @@ export default function PreReceptionDetails({ route, navigation }) {
                             <Button title="Voir PV" color="blue" onPress={() => { setImageModalVisible(true) }} />
                         </View>
                         {receptionState.etat_confirmation == 0 ?
-                            <View style={{ marginTop: 10 }}>
-                                <Button title="Confirmer Réception" color="blue" onPress={() => { validateReception() }} />
-                            </View> : <></>}
+                            <View style={styles.btns}>
+                                <TouchableOpacity style={styles.modalButton} onPress={() => { validateReception() }}>
+                                    <Text style={styles.modalButtonText}>Valider</Text>
+                                </TouchableOpacity>
+                                <TouchableOpacity style={styles.modalButtonRefuse} onPress={() => { editReception() }}>
+                                    <Text style={styles.modalButtonText}>Modifier</Text>
+                                </TouchableOpacity>
+                            </View>
+
+                            : <></>}
                     </View>) : null}
             </View>
 
@@ -408,5 +418,33 @@ const styles = StyleSheet.create({
         top: "25%",
         left: "50%",
         zIndex: 111
+    },
+    btns: {
+        width: '100%',
+        alignItems: 'center',
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        marginTop: 10,
+    },
+    modalButton: {
+        backgroundColor: 'green',
+        borderRadius: 5,
+        padding: 10,
+        alignItems: 'center',
+        width: '48%',
+        marginBottom: 10,
+    },
+    modalButtonRefuse: {
+        backgroundColor: '#4bacc0',
+        borderRadius: 5,
+        padding: 10,
+        alignItems: 'center',
+        width: '48%',
+        marginBottom: 10,
+    },
+    modalButtonText: {
+        color: '#fff',
+        fontWeight: 'bold',
+        fontSize: 16,
     },
 });
