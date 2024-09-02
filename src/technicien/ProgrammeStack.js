@@ -9,6 +9,7 @@ import Intervention from './Intervention';
 import AddIntervention from './AddIntervention';
 import { useSelector } from 'react-redux';
 import InterventionsNotDone from './InterventionsNotDone';
+import { BASE_URL } from '../components/utils';
 
 const generateDaysOfMonth = (month, year) => {
     const startOfMonth = moment(`${month} ${year}`, 'MMMM YYYY').startOf('month');
@@ -47,7 +48,7 @@ function Programme({ navigation }) {
             // Format the date as YYYYMMDD
             const dateAPI = parseInt(moment(currentDay).format('YYYYMMDD'));
 
-            const API_URL = 'http://192.168.43.88/LGC_backend/?page=Programme';
+            const API_URL = `${BASE_URL}/?page=Programme`;
             const response = await fetch(API_URL, {
                 method: 'POST',
                 headers: {

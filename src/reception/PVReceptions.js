@@ -6,10 +6,11 @@ import { EvilIcons } from '@expo/vector-icons';
 import Fontisto from '@expo/vector-icons/Fontisto';
 import { Ionicons } from '@expo/vector-icons';
 import { useSelector } from 'react-redux';
+import { BASE_URL, BASE_PVS_URL } from '../components/utils';
 
 export default function PVReceptions({ navigation }) {
     const TOKEN = useSelector(state => state.user.token); // Move this line inside the component
-    const IMAGES_URL = "http://192.168.43.88/LGC_backend/pvs/";
+    const IMAGES_URL = BASE_PVS_URL;
 
     const [refreshing, setRefreshing] = useState(false);
     const [selectedImage, setSelectedImage] = useState(null);
@@ -33,12 +34,12 @@ export default function PVReceptions({ navigation }) {
         setToDate(secondDate);
     }, []);
     useEffect(() => {
-        const API_URL = 'http://192.168.43.88/LGC_backend/?page=PVs';
+        const API_URL = `${BASE_URL}/?page=PVs`;
 
         fetchData(API_URL, TOKEN);
     }, [fromDateAPI, toDateAPI]);
     const onRefresh = useCallback(() => {
-        const API_URL = 'http://192.168.43.88/LGC_backend/?page=PVs';
+        const API_URL = `${BASE_URL}/?page=PVs`;
         fetchData(API_URL, TOKEN);
     }, [fromDateAPI, toDateAPI]);
     const fetchData = async (url, token) => {

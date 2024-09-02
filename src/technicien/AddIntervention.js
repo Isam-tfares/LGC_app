@@ -7,6 +7,7 @@ import moment from 'moment';
 import { useSelector, useDispatch } from 'react-redux';
 import { setData } from '../actions/dataActions';
 import { ConfirmAction } from '../components/utils';
+import { BASE_URL } from '../components/utils';
 
 export default function AddIntervention({ modalVisible, setModalVisible }) {
     const technicien_id = useSelector(state => state.user.user.id)
@@ -27,7 +28,7 @@ export default function AddIntervention({ modalVisible, setModalVisible }) {
 
     useEffect(() => {
         if (!clients || !projects || !prestations) {
-            const API_URL = 'http://192.168.43.88/LGC_backend/?page=addInterventionInterface';
+            const API_URL = `${BASE_URL}/?page=addInterventionInterface`;
             fetchData(API_URL, TOKEN);
         }
     }, []);
@@ -164,7 +165,7 @@ export default function AddIntervention({ modalVisible, setModalVisible }) {
         ConfirmAction(
             "Êtes-vous sûr de vouloir ajouter cette intervention?",
             () => {
-                API_URL = "http://192.168.43.88/LGC_backend/?page=addInterventionAction";
+                API_URL = `${BASE_URL}/?page=addInterventionAction`;
                 const date = parseInt(moment(selectedDate).format('YYYYMMDD'));
                 insertIntervention(API_URL, TOKEN, date);
                 setSelectedClient('');

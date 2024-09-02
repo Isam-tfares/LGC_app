@@ -1,10 +1,11 @@
 import React, { useState } from 'react';
-import { View, Text, StyleSheet, Alert, TouchableOpacity, Modal, TextInput, ActivityIndicator } from 'react-native';
+import { View, Text, StyleSheet, Alert, TouchableOpacity, Modal, TextInput, ActivityIndicator, ScrollView } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useSelector } from 'react-redux';
 import moment from 'moment';
 import * as Location from 'expo-location';
 import { ConfirmAction } from '../components/utils';
+import { BASE_URL } from '../components/utils';
 
 export default function Intervention({ route, navigation }) {
     const TOKEN = useSelector(state => state.user.token)
@@ -15,11 +16,11 @@ export default function Intervention({ route, navigation }) {
     const [X, setX] = useState(null);
     const [Y, setY] = useState(null);
     const [isXYExisted, setXYExisted] = useState(intervention.X != 0 && intervention.Y != 0);
-
+    console.log("X", intervention.X)
 
     const annulateIntervention = async () => {
         setRefreshing(true);
-        let API_URL = 'http://192.168.43.88/LGC_backend/?page=annulerIntervention';
+        let API_URL = `${BASE_URL}/?page=annulerIntervention`;
         try {
             const response = await fetch(API_URL, {
                 method: 'POST',
@@ -112,7 +113,7 @@ export default function Intervention({ route, navigation }) {
                     console.log("X et Y: Longitude:", longitude, "Latitude:", latitude);
 
                     // Appel API pour enregistrer la localisation
-                    let API_URL = 'http://192.168.43.88/LGC_backend/?page=addLocation';
+                    let API_URL = `${BASE_URL}/?page=addLocation`;
                     const response = await fetch(API_URL, {
                         method: 'POST',
                         headers: {
@@ -162,7 +163,7 @@ export default function Intervention({ route, navigation }) {
 
     return (
 
-        <View style={styles.container}>
+        <ScrollView contentContainerStyle={styles.container}>
             <View style={styles.card}>
 
                 {refreshing ? <ActivityIndicator style={styles.refreshing} color={"#0853a1"} size={"large"} /> : <></>}
@@ -267,13 +268,13 @@ export default function Intervention({ route, navigation }) {
                     </View>
                 </View>
             </Modal>
-        </View>
+        </ScrollView>
     );
 }
 
 const styles = StyleSheet.create({
     container: {
-        flex: 1,
+        flexGrow: 1,
         backgroundColor: '#f5f5f5',
         alignItems: 'center',
         justifyContent: 'center',

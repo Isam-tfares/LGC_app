@@ -6,6 +6,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { useSelector } from 'react-redux';
 import { ScrollView } from 'react-native-gesture-handler';
 import { ConfirmAction } from '../components/utils';
+import { BASE_URL } from '../components/utils';
 
 export default function PV({ navigation, route }) {
     const TOKEN = useSelector(state => state.user.token);
@@ -29,7 +30,7 @@ export default function PV({ navigation, route }) {
     }, [selectedIntervention]);
 
     const fetchInterventions = async () => {
-        let url = "http://192.168.43.88/LGC_backend/?page=interventionsWithoutPV";
+        let url = `${BASE_URL}/?page=interventionsWithoutPV`;
         setRefreshing(true);
         try {
             const response = await fetch(url, {
@@ -156,7 +157,7 @@ export default function PV({ navigation, route }) {
         ConfirmAction(
             "Êtes-vous sûr de vouloir charger ce PV",
             () => {
-                insertPV('http://192.168.43.88/LGC_backend/?page=newPV', TOKEN);
+                insertPV(`${BASE_URL}/?page=newPV`, TOKEN);
 
                 // Reset fields after successful operation
                 setSelectedIntervention('');

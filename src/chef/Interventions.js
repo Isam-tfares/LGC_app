@@ -9,6 +9,7 @@ import DateTimePickerModal from 'react-native-modal-datetime-picker';
 import Intervention from './Intervention';
 import AddIntervention from './AddIntervention';
 import { useSelector } from 'react-redux';
+import { BASE_URL } from '../components/utils';
 
 function Interventions({ navigation }) {
     const TOKEN = useSelector(state => state.user.token); // Move this line inside the component
@@ -26,7 +27,7 @@ function Interventions({ navigation }) {
     const [interventions, setInterventions] = useState([]);
 
     const onRefresh = useCallback(() => {
-        const API_URL = 'http://192.168.43.88/LGC_backend/?page=interventionsChef';
+        const API_URL = `${BASE_URL}/?page=interventionsChef`;
         fetchData(API_URL, TOKEN);
     }, [fromDateAPI, toDateAPI]);
 
@@ -41,8 +42,7 @@ function Interventions({ navigation }) {
         setToDate(secondDate);
     }, []);
     useEffect(() => {
-        const API_URL = 'http://192.168.43.88/LGC_backend/?page=interventionsChef';
-
+        const API_URL = `${BASE_URL}/?page=interventionsChef`;
         fetchData(API_URL, TOKEN);
     }, [fromDateAPI, toDateAPI]);
     const navbar = ["Tous", "Faites", "En cours", "Annulées"];

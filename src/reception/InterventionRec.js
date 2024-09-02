@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, ScrollView } from 'react-native';
 
 export default function InterventionRec({ route, navigation }) {
     const { intervention } = route.params;
@@ -12,7 +12,7 @@ export default function InterventionRec({ route, navigation }) {
         }
     };
     return (
-        <View style={styles.container}>
+        <ScrollView contentContainerStyle={styles.container}>
             <View style={styles.card}>
                 <View style={styles.row}>
                     <Text style={styles.title}>N° Intervention :</Text>
@@ -88,13 +88,13 @@ export default function InterventionRec({ route, navigation }) {
                 }
 
             </View>
-        </View>
+        </ScrollView>
     );
 }
 
 const styles = StyleSheet.create({
     container: {
-        flex: 1,
+        flexGrow: 1,
         backgroundColor: '#f5f5f5',
         alignItems: 'center',
         justifyContent: 'center',

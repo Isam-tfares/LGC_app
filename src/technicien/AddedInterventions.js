@@ -6,6 +6,7 @@ import { EvilIcons } from '@expo/vector-icons';
 import { createStackNavigator } from '@react-navigation/stack';
 import { useSelector } from 'react-redux';
 import DemandeIntervention from './DemandeIntervention';
+import { BASE_URL } from '../components/utils';
 
 function Programme({ navigation }) {
     const TOKEN = useSelector(state => state.user.token);
@@ -25,7 +26,7 @@ function Programme({ navigation }) {
         try {
             setRefreshing(true);
 
-            const API_URL = 'http://192.168.43.88/LGC_backend/?page=demandesInterventionsTec';
+            const API_URL = `${BASE_URL}/?page=demandesInterventionsTec`;
             const response = await fetch(API_URL, {
                 method: 'POST',
                 headers: {

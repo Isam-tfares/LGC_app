@@ -7,6 +7,7 @@ import moment from 'moment';
 import ReceptionDetails from './ReceptionDetails';
 import { createStackNavigator } from '@react-navigation/stack';
 import { useSelector } from 'react-redux';
+import { BASE_URL } from '../components/utils';
 
 const Stack = createStackNavigator();
 
@@ -24,13 +25,13 @@ function Receptions({ route, navigation }) {
     const [receptions, setReceptions] = useState([]);
 
     const onRefresh = useCallback(() => {
-        const API_URL = 'http://192.168.43.88/LGC_backend/?page=Receptions';
+        const API_URL = `${BASE_URL}/?page=Receptions`;
         fetchData(API_URL, TOKEN);
     }, [fromDateAPI, toDateAPI]);
     useEffect(() => {
         // Initialize dates
-        const secondDate = moment().add(7, 'day').format("DD/MM/YYYY");
-        const firstDate = moment().subtract(7, 'day').format("DD/MM/YYYY");
+        const secondDate = moment().format("DD/MM/YYYY");
+        const firstDate = moment().subtract(15, 'day').format("DD/MM/YYYY");
 
         setFromDateAPI(parseInt(moment(firstDate, "DD/MM/YYYY").format("YYYYMMDD")));
         setToDateAPI(parseInt(moment(secondDate, "DD/MM/YYYY").format("YYYYMMDD")));
@@ -38,7 +39,7 @@ function Receptions({ route, navigation }) {
         setToDate(secondDate);
     }, []);
     useEffect(() => {
-        const API_URL = 'http://192.168.43.88/LGC_backend/?page=Receptions';
+        const API_URL = `${BASE_URL}/?page=Receptions`;
 
         fetchData(API_URL, TOKEN);
     }, [fromDateAPI, toDateAPI]);

@@ -8,6 +8,7 @@ import PreReceptionDetails from './PreReceptionDetails';
 import { createStackNavigator } from '@react-navigation/stack';
 import { useSelector } from 'react-redux';
 import EditPreReception from './EditPreReception';
+import { BASE_URL } from '../components/utils';
 
 const Stack = createStackNavigator();
 
@@ -26,8 +27,8 @@ function Prereceptions({ route, navigation }) {
 
     useEffect(() => {
         // Initialize dates
-        const secondDate = moment().add(7, 'day').format("DD/MM/YYYY");
-        const firstDate = moment().subtract(7, 'day').format("DD/MM/YYYY");
+        const secondDate = moment().format("DD/MM/YYYY");
+        const firstDate = moment().subtract(15, 'day').format("DD/MM/YYYY");
 
         setFromDateAPI(parseInt(moment(firstDate, "DD/MM/YYYY").format("YYYYMMDD")));
         setToDateAPI(parseInt(moment(secondDate, "DD/MM/YYYY").format("YYYYMMDD")));
@@ -35,17 +36,17 @@ function Prereceptions({ route, navigation }) {
         setToDate(secondDate);
     }, []);
     const onRefresh = useCallback(() => {
-        const API_URL = 'http://192.168.43.88/LGC_backend/?page=Prereceptions';
+        const API_URL = `${BASE_URL}/?page=Prereceptions`;
         fetchData(API_URL, TOKEN);
     }, [fromDateAPI, toDateAPI]);
     useEffect(() => {
-        const API_URL = 'http://192.168.43.88/LGC_backend/?page=Prereceptions';
+        const API_URL = `${BASE_URL}/?page=Prereceptions`;
         fetchData(API_URL, TOKEN);
     }, [fromDateAPI, toDateAPI]);
 
     useEffect(() => {
         if (route.params?.reload) {
-            const API_URL = 'http://192.168.43.88/LGC_backend/?page=Prereceptions';
+            const API_URL = `${BASE_URL}/?page=Prereceptions`;
             fetchData(API_URL, TOKEN);
         }
     }, [route.params?.reload]);

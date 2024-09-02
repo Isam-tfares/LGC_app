@@ -7,6 +7,7 @@ import { createStackNavigator } from '@react-navigation/stack';
 import DateTimePickerModal from 'react-native-modal-datetime-picker';
 import InterventionRec from './InterventionRec';
 import { useSelector } from 'react-redux';
+import { BASE_URL } from '../components/utils';
 
 function InterventionsRec({ navigation }) {
     const TOKEN = useSelector(state => state.user.token); // Move this line inside the component
@@ -34,12 +35,12 @@ function InterventionsRec({ navigation }) {
         setToDate(secondDate);
     }, []);
     useEffect(() => {
-        const API_URL = 'http://192.168.43.88/LGC_backend/?page=interventionsRec';
+        const API_URL = `${BASE_URL}/?page=interventionsRec`;
 
         fetchData(API_URL, TOKEN);
     }, [fromDateAPI, toDateAPI]);
     const onRefresh = useCallback(() => {
-        const API_URL = 'http://192.168.43.88/LGC_backend/?page=interventionsRec';
+        const API_URL = `${BASE_URL}/?page=interventionsRec`;
         fetchData(API_URL, TOKEN);
     }, [fromDateAPI, toDateAPI]);
 

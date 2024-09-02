@@ -5,6 +5,7 @@ import moment from 'moment';
 import 'moment/locale/fr'; // Import French locale for month names
 import { useSelector } from 'react-redux';
 import { ConfirmAction } from '../components/utils';
+import { BASE_URL } from '../components/utils';
 
 function formatDate(inputDate) {
     // Parse the date using moment
@@ -27,7 +28,7 @@ export default function DemandeCongeDetails({ navigation, route }) {
 
     // confirme intervention function
     const confirmeDemande = async () => {
-        let API_URL = 'http://192.168.43.88/LGC_backend/?page=AcceptDemandeConge';
+        let API_URL = `${BASE_URL}/?page=AcceptDemandeConge`;
         try {
             const response = await fetch(API_URL, {
                 method: 'POST',
@@ -72,7 +73,7 @@ export default function DemandeCongeDetails({ navigation, route }) {
     };
     // refuser demande intervention function
     const annulateDemande = async () => {
-        let API_URL = 'http://192.168.43.88/LGC_backend/?page=RejectDemandeConge';
+        let API_URL = `${BASE_URL}/?page=RejectDemandeConge`;
         try {
             const response = await fetch(API_URL, {
                 method: 'POST',

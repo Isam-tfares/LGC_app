@@ -7,6 +7,7 @@ import moment from 'moment';
 import { useSelector, useDispatch } from 'react-redux';
 import { setData } from '../actions/dataActions';
 import { ConfirmAction } from '../components/utils';
+import { BASE_URL } from '../components/utils';
 
 export default function AddIntervention({ modalVisible, setModalVisible }) {
     const TOKEN = useSelector(state => state.user.token);
@@ -40,7 +41,7 @@ export default function AddIntervention({ modalVisible, setModalVisible }) {
 
     const getData = () => {
         if (!clients || !projects || !prestations || !techniciens) {
-            const API_URL = 'http://192.168.43.88/LGC_backend/?page=addInterventionInterface';
+            const API_URL = `${BASE_URL}/?page=addInterventionInterface`;
             fetchData(API_URL, TOKEN);
         }
     }
@@ -156,8 +157,7 @@ export default function AddIntervention({ modalVisible, setModalVisible }) {
                     Alert.alert('Erreur', 'Veuillez remplir tous les champs');
                     return;
                 }
-
-                const API_URL = "http://192.168.43.88/LGC_backend/?page=AddIntervention";
+                const API_URL = `${BASE_URL}/?page=AddIntervention`;
                 const date = parseInt(moment(selectedDate).format('YYYYMMDD'));
                 insertIntervention(API_URL, TOKEN, date);
 
@@ -182,6 +182,7 @@ export default function AddIntervention({ modalVisible, setModalVisible }) {
         setModalVisible(false);
         setDatePickerVisibility(false);
         setSelectedTechnician('');
+        setLieuPrelevement('');
     }
 
     return (

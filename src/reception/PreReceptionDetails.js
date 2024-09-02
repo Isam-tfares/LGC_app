@@ -7,10 +7,11 @@ import MaterialIcons from '@expo/vector-icons/MaterialIcons';
 import { useSelector } from 'react-redux';
 import moment from 'moment';
 import { ConfirmAction } from '../components/utils';
+import { BASE_URL, BASE_PVS_URL } from '../components/utils';
 
 export default function PreReceptionDetails({ route, navigation }) {
     const TOKEN = useSelector(state => state.user.token);
-    const IMAGES_URL = "http://192.168.43.88/LGC_backend/pvs/";
+    const IMAGES_URL = BASE_PVS_URL;
     const ETATS_RECUPERATION = ["Réccupéré", "Non réccupéré"];
     const PRELVES_PAR = ["LGC", "Client"];
     const RECEPETION_TYPES = ["interne", "externe"];
@@ -58,6 +59,7 @@ export default function PreReceptionDetails({ route, navigation }) {
                 data = await response.json();
             } else {
                 const text = await response.text();
+                console.log("TEXT", text);
                 try {
                     if (text[0] == "[" || text[0] == "{") {
                         data = JSON.parse(text);
@@ -96,7 +98,7 @@ export default function PreReceptionDetails({ route, navigation }) {
     useEffect(() => {
         if (intervention_id) {
             console.log("fetch Prereception of intervention_id ", intervention_id);
-            const API_URL = 'http://192.168.43.88/LGC_backend/?page=PreReception';
+            const API_URL = `${BASE_URL}/?page=PreReception`;
             fetchPreReception(API_URL, intervention_id, TOKEN);
             navigation.setParams({ id: null });
         }
@@ -113,7 +115,7 @@ export default function PreReceptionDetails({ route, navigation }) {
         ConfirmAction(
             "Êtes-vous sûr de vouloir valider cette réception?",
             async () => {
-                let url = 'http://192.168.43.88/LGC_backend/?page=validatePreReception';
+                let url = `${BASE_URL}/?page=validatePreReception`;
                 setLoading(true);
                 try {
                     const response = await fetch(url, {

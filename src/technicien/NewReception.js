@@ -8,6 +8,7 @@ import Checkbox from 'expo-checkbox';
 import { useDispatch, useSelector } from 'react-redux';
 import { setReceptionData, clearInterventionData } from '../actions/receptionDataActions';
 import { ConfirmAction } from '../components/utils';
+import { BASE_URL } from '../components/utils';
 
 //NewReceptionInterface
 export default function NewReception({ route, navigation }) {
@@ -65,6 +66,11 @@ export default function NewReception({ route, navigation }) {
     const [isBetonSectionVisible, setBetonSectionVisibility] = useState(true);
 
     useEffect(() => {
+        if (route.params) {
+            setSelectedIntervention(Number.parseInt(route.params.id));
+        }
+    }, [route.params])
+    useEffect(() => {
         getData();
     }, []);
     const onRefresh = useCallback(() => {
@@ -107,7 +113,7 @@ export default function NewReception({ route, navigation }) {
 
     const getData = () => {
         if (!clients || !projects || !prestations || !materiaux || !types_beton || !nature_echantillons) {
-            const API_URL = 'http://192.168.43.88/LGC_backend/?page=NewReceptionInterface';
+            const API_URL = `${BASE_URL}/?page=NewReceptionInterface`;
             fetchData(API_URL, TOKEN);
         }
     }
@@ -257,7 +263,7 @@ export default function NewReception({ route, navigation }) {
         ConfirmAction(
             "Êtes-vous sûr de vouloir ajouter cette réception?",
             () => {
-                const API_URL = 'http://192.168.43.88/LGC_backend/?page=NewReception';
+                const API_URL = `${BASE_URL}/?page=NewReception`;
                 insertReception(API_URL, TOKEN);
                 dispatch(clearInterventionData());
                 let intervention_id = selectedIntervention;

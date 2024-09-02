@@ -6,10 +6,11 @@ import { Ionicons } from '@expo/vector-icons';
 import MaterialIcons from '@expo/vector-icons/MaterialIcons';
 import { useSelector } from 'react-redux';
 import moment from 'moment';
+import { BASE_URL, BASE_PVS_URL } from '../components/utils';
 
 export default function ReceptionDetails({ route, navigation }) {
     const TOKEN = useSelector(state => state.user.token);
-    const IMAGES_URL = "http://192.168.43.88/LGC_backend/pvs/";
+    const IMAGES_URL = BASE_PVS_URL;
     const ETATS_RECUPERATION = ["Réccupéré", "Non réccupéré"];
     const PRELVES_PAR = ["LGC", "Client"];
     const RECEPETION_TYPES = ["interne", "externe"];
@@ -29,7 +30,7 @@ export default function ReceptionDetails({ route, navigation }) {
             return;
         }
         setLoading(true);
-        const API_URL = 'http://192.168.43.88/LGC_backend/?page=Reception';
+        const API_URL = `${BASE_URL}/?page=Reception`;
         try {
             const response = await fetch(API_URL, {
                 method: 'POST',

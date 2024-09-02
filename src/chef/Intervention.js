@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { ScrollView } from 'react-native';
 import { Button, View, Text, StyleSheet, Alert, TouchableOpacity, Modal, TextInput } from 'react-native';
 
 export default function Intervention({ route, navigation, reload, setReload }) {
@@ -14,7 +15,7 @@ export default function Intervention({ route, navigation, reload, setReload }) {
 
 
     return (
-        <View style={styles.container}>
+        <ScrollView contentContainerStyle={styles.container}>
             <View style={styles.card}>
                 <View style={styles.row}>
                     <Text style={styles.title}>N° Intervention :</Text>
@@ -89,13 +90,13 @@ export default function Intervention({ route, navigation, reload, setReload }) {
                 }
 
             </View>
-        </View>
+        </ScrollView>
     );
 }
 
 const styles = StyleSheet.create({
     container: {
-        flex: 1,
+        flexGrow: 1,
         backgroundColor: '#f5f5f5',
         alignItems: 'center',
         justifyContent: 'center',

@@ -7,6 +7,7 @@ import Fontisto from '@expo/vector-icons/Fontisto';
 import DateTimePickerModal from 'react-native-modal-datetime-picker';
 import AddIntervention from './AddIntervention';
 import { useSelector } from 'react-redux';
+import { BASE_URL } from '../components/utils';
 
 export default function InterventionsNotDone({ navigation, route }) {
     const TOKEN = useSelector(state => state.user.token); // Move this line inside the component
@@ -26,10 +27,10 @@ export default function InterventionsNotDone({ navigation, route }) {
 
     const onRefresh = useCallback(() => {
         if (isFetchData) {
-            const API_URL = 'http://192.168.43.88/LGC_backend/?page=interventionsNotDone';
+            const API_URL = `${BASE_URL}/?page=interventionsNotDone`;
             fetchData(API_URL, TOKEN);
         }
-    }, [isFetchData]);
+    }, [fromDateAPI, toDateAPI, isFetchData]);
 
     useEffect(() => {
         // Initialize dates
@@ -43,7 +44,7 @@ export default function InterventionsNotDone({ navigation, route }) {
     }, []);
     useEffect(() => {
         if (isFetchData) {
-            const API_URL = 'http://192.168.43.88/LGC_backend/?page=interventionsNotDone';
+            const API_URL = `${BASE_URL}/?page=interventionsNotDone`;
             fetchData(API_URL, TOKEN);
         }
     }, [fromDateAPI, toDateAPI, isFetchData]);

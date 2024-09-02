@@ -4,3 +4,4 @@
 >> some inputs in new reception are not inserted ( beton datas ( cymlidre,jrs,...))
 >> cylindres
 >> preReception possibility update before validates
+>> downlaod PV in phone

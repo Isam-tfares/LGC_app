@@ -8,6 +8,7 @@ import Fontisto from '@expo/vector-icons/Fontisto';
 import DateTimePickerModal from 'react-native-modal-datetime-picker';
 import { useSelector } from 'react-redux';
 import { ConfirmAction } from '../components/utils';
+import { BASE_URL } from '../components/utils';
 
 export default function DemandesInterventions({ navigation }) {
     const TOKEN = useSelector(state => state.user.token);
@@ -48,7 +49,7 @@ export default function DemandesInterventions({ navigation }) {
     const fetchData = async () => {
         try {
             setRefreshing(true);
-            const API_URL = 'http://192.168.43.88/LGC_backend/?page=DemandesInterventions';
+            const API_URL = `${BASE_URL}/?page=DemandesInterventions`;
             const fromDateAPI = parseInt(moment(fromDate, "DD/MM/YYYY").format('YYYYMMDD'));
             const toDateAPI = parseInt(moment(toDate, "DD/MM/YYYY").format('YYYYMMDD'));
             const response = await fetch(API_URL, {
@@ -103,7 +104,7 @@ export default function DemandesInterventions({ navigation }) {
 
     // confirme intervention function
     const confirmeIntervention = async () => {
-        let API_URL = 'http://192.168.43.88/LGC_backend/?page=ValidateDemandeIntervention';
+        let API_URL = `${BASE_URL}/?page=ValidateDemandeIntervention`;
         let date = parseInt(moment(selectedDate).format('YYYYMMDD'));
         setRefreshing(true);
         try {
@@ -157,7 +158,7 @@ export default function DemandesInterventions({ navigation }) {
     };
     // refuser demande intervention function
     const annulateIntervention = async () => {
-        let API_URL = 'http://192.168.43.88/LGC_backend/?page=RejectDemandeIntervention';
+        let API_URL = `${BASE_URL}/?page=RejectDemandeIntervention`;
         setRefreshing(true);
         try {
             const response = await fetch(API_URL, {

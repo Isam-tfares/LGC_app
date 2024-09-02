@@ -4,6 +4,7 @@ import { View, TextInput, Alert, StyleSheet, TouchableOpacity, Text, Image, Keyb
 import { useDispatch, useSelector } from 'react-redux';
 import Ionicons from '@expo/vector-icons/Ionicons';
 import { setUser } from '../actions/userActions'; // Update path as needed
+import { BASE_URL } from '../components/utils';
 
 const Login = ({ isLogined, setLogined }) => {
     const dispatch = useDispatch();
@@ -47,7 +48,7 @@ const Login = ({ isLogined, setLogined }) => {
             return;
         }
 
-        const API_URL = 'http://192.168.43.88/LGC_backend/?page=login';
+        const API_URL = `${BASE_URL}/?page=login`;
         setLoading(true);
         try {
             const response = await fetch(API_URL, {

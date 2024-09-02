@@ -9,6 +9,7 @@ import moment from 'moment';
 import 'moment/locale/fr'; // Import French locale for month names
 import { useSelector } from 'react-redux';
 import { ConfirmAction } from '../components/utils';
+import { BASE_URL } from '../components/utils';
 
 export default function Conge({ navigation }) {
     const TOKEN = useSelector(state => state.user.token);
@@ -44,7 +45,7 @@ export default function Conge({ navigation }) {
     const fetchData = async () => {
         try {
             setRefreshing(true);
-            const API_URL = 'http://192.168.43.88/LGC_backend/?page=CongesInterface';
+            const API_URL = `${BASE_URL}/?page=CongesInterface`;
             const response = await fetch(API_URL, {
                 method: 'POST',
                 headers: {
@@ -104,7 +105,7 @@ export default function Conge({ navigation }) {
 
     // confirme intervention function
     const addDemandeConge = async () => {
-        let API_URL = 'http://192.168.43.88/LGC_backend/?page=AddDemandeConge';
+        let API_URL = `${BASE_URL}/?page=AddDemandeConge`;
         setRefreshing(true);
         try {
             const response = await fetch(API_URL, {
