@@ -21,10 +21,8 @@ export default function AddIntervention({ modalVisible, setModalVisible }) {
     const [selectedProject, setSelectedProject] = useState('');
     const [selectedPrestation, setSelectedPrestation] = useState('');
     const [selectedDate, setSelectedDate] = useState(null);
-    const [selectedDate2, setSelectedDate2] = useState(null);
     const [lieu_prelevemnt, setLieuPrelevement] = useState("");
     const [isDatePickerVisible, setDatePickerVisibility] = useState(false);
-    const [isDatePickerVisible2, setDatePickerVisibility2] = useState(false);
 
     useEffect(() => {
         if (!clients || !projects || !prestations) {
@@ -137,28 +135,18 @@ export default function AddIntervention({ modalVisible, setModalVisible }) {
     const showDatePicker = () => {
         setDatePickerVisibility(true);
     };
-    const showDatePicker2 = () => {
-        setDatePickerVisibility2(true);
-    };
 
     const hideDatePicker = () => {
         setDatePickerVisibility(false);
     };
-    const hideDatePicker2 = () => {
-        setDatePickerVisibility2(false);
-    };
-
     const handleConfirm = (date) => {
         setSelectedDate(date);
         hideDatePicker();
     };
-    const handleConfirm2 = (date) => {
-        setSelectedDate2(date);
-        hideDatePicker();
-    };
+
 
     const handleAddIntervention = () => {
-        if (!selectedClient || !selectedProject || !selectedPrestation || !selectedDate || !selectedDate2) {
+        if (!selectedClient || !selectedProject || !selectedPrestation || !selectedDate) {
             return Alert.alert('Erreur', 'Veuillez remplir tous les champs');
         }
 
@@ -172,10 +160,8 @@ export default function AddIntervention({ modalVisible, setModalVisible }) {
                 setSelectedProject('');
                 setSelectedPrestation('');
                 setSelectedDate(null);
-                setSelectedDate2(null);
                 setModalVisible(false);
                 setDatePickerVisibility(false);
-                setDatePickerVisibility2(false);
             }
         );
     };
@@ -185,10 +171,8 @@ export default function AddIntervention({ modalVisible, setModalVisible }) {
         setSelectedProject('');
         setSelectedPrestation('');
         setSelectedDate(null);
-        setSelectedDate2(null);
         setModalVisible(false);
         setDatePickerVisibility(false);
-        setDatePickerVisibility2(false);
     }
 
     return (
@@ -268,7 +252,7 @@ export default function AddIntervention({ modalVisible, setModalVisible }) {
                         style={styles.prelevement}
                     />
 
-                    <Text style={styles.label}>Date prélevée</Text>
+                    <Text style={styles.label}>Date prévus</Text>
                     <TouchableOpacity style={styles.dateButton} onPress={showDatePicker}>
                         <Text style={styles.dateButtonText}>
                             {selectedDate ? moment(selectedDate).format('DD/MM/YYYY') : 'Séléctionner Date'}
@@ -279,18 +263,6 @@ export default function AddIntervention({ modalVisible, setModalVisible }) {
                         mode="date"
                         onConfirm={handleConfirm}
                         onCancel={hideDatePicker}
-                    />
-                    <Text style={styles.label}>Deuxième Date</Text>
-                    <TouchableOpacity style={styles.dateButton} onPress={showDatePicker2}>
-                        <Text style={styles.dateButtonText}>
-                            {selectedDate2 ? moment(selectedDate2).format('DD/MM/YYYY') : 'Séléctionner Date'}
-                        </Text>
-                    </TouchableOpacity>
-                    <DateTimePickerModal
-                        isVisible={isDatePickerVisible2}
-                        mode="date"
-                        onConfirm={handleConfirm2}
-                        onCancel={hideDatePicker2}
                     />
 
                     <TouchableOpacity style={styles.modalButton} onPress={handleAddIntervention}>

@@ -16,7 +16,7 @@ export default function DemandesInterventions({ navigation }) {
     const [refreshing, setRefreshing] = useState(false);
     const [search, setSearch] = useState("");
     const [dateType, setDateType] = useState('');
-    const [fromDate, setFromDate] = useState(moment().subtract(7, 'day').format("DD/MM/YYYY"));
+    const [fromDate, setFromDate] = useState(moment().subtract(1, 'month').format("DD/MM/YYYY"));
     const [toDate, setToDate] = useState(moment().add(7, 'day').format("DD/MM/YYYY"));
     const [selectedClient, setSelectedClient] = useState('');
     const [selectedProject, setSelectedProject] = useState('');

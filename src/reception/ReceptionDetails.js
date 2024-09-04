@@ -102,6 +102,7 @@ export default function ReceptionDetails({ route, navigation }) {
     const closeImageModal = () => {
         setImageModalVisible(null);
     };
+    console.log("RECEPT", receptionState);
 
     return (
         <ScrollView
@@ -234,7 +235,9 @@ export default function ReceptionDetails({ route, navigation }) {
                         </View>
 
                     </View>)
-                    : null}
+                    : (<View>
+                        <Text>Réception non trouvée</Text>
+                    </View>)}
             </View>
 
             {/* Loading */}

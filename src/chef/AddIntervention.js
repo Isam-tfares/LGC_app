@@ -275,7 +275,7 @@ export default function AddIntervention({ modalVisible, setModalVisible }) {
                         style={styles.prelevement}
                     />
 
-                    <Text style={styles.label}>Date</Text>
+                    <Text style={styles.label}>Date prévus</Text>
                     <TouchableOpacity style={styles.dateButton} onPress={showDatePicker}>
                         <Text style={styles.dateButtonText}>
                             {selectedDate ? moment(selectedDate).format('MM/DD/YYYY') : 'Séléctionner Date'}

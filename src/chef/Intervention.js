@@ -46,10 +46,12 @@ export default function Intervention({ route, navigation, reload, setReload }) {
                     <Text style={styles.text}>{intervention.Lieux_ouvrage}</Text>
                 </View>
 
-                <View style={styles.row}>
-                    <Text style={styles.title}>Observation : </Text>
-                    <Text style={styles.text}>{intervention.obs ? intervention.obs : ""}</Text>
-                </View>
+                {intervention.status == 0 ?
+                    (<View style={styles.row}>
+                        <Text style={styles.title}>Observation : </Text>
+                        <Text style={styles.text}>{intervention.obs ? intervention.obs : ""}</Text>
+                    </View>)
+                    : <></>}
                 <View style={styles.row}>
                     <Text style={styles.title}>Etat d'intervention : </Text>
                     <Text style={[styles.text, intervention.status == 2 ? styles.valide : (intervention.status == 0 ? styles.annule : styles.enCours)]}>
@@ -61,7 +63,7 @@ export default function Intervention({ route, navigation, reload, setReload }) {
                             <Text style={styles.title}>Etat de réception : </Text>
                             <Text style={[styles.text, intervention.etat_reception == 1 ? styles.valide : (intervention.status == 0 ? styles.annule : styles.enCours)]}
 
-                            >{intervention.etat_reception}</Text>
+                            >Faite</Text>
 
                         </View>
                             <View style={styles.buttonView}>
@@ -76,7 +78,7 @@ export default function Intervention({ route, navigation, reload, setReload }) {
                                 <Text style={styles.title}>Etat de réception : </Text>
                                 <Text style={[styles.text, intervention.etat_reception == 1 ? styles.valide : (intervention.status == 0 ? styles.annule : styles.enCours)]}
 
-                                >{intervention.reception}</Text>
+                                >En cours</Text>
                             </View>
                             <View style={styles.buttonContainer}>
                                 <TouchableOpacity style={[styles.button, styles.confirmButton]} onPress={() => { validateIntervention(intervention.intervention_id, "pre") }}>

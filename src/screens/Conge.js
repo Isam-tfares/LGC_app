@@ -34,7 +34,6 @@ export default function Conge({ navigation }) {
     const [motifs_conges, setMotifsConges] = useState([]);
     const [reload, setReload] = useState(false);
 
-
     useEffect(() => {
         fetchData();
     }, [year, reload]);
@@ -296,7 +295,10 @@ export default function Conge({ navigation }) {
                         {demandesConges?.map((item, index) => {
                             return (
                                 <View style={styles.conge} key={item.conge_id}>
-                                    <Text style={styles.year}>{moment(item.start_date, "YYYYMMDD").format("DD/MM/YYYY") || 'N/A'} -> {moment(item.end_date, "YYYYMMDD").format("DD/MM/YYYY") || 'N/A'}</Text>
+                                    <View style={styles.flexS}>
+                                        <Text style={styles.year}>{moment(item.start_date, "YYYYMMDD").format("DD/MM/YYYY") || 'N/A'} -> {moment(item.end_date, "YYYYMMDD").format("DD/MM/YYYY") || 'N/A'}</Text>
+                                        <Text style={styles.labelle}>{item.labelle}</Text>
+                                    </View>
                                     <Text style={styles.days}>{item.jours_pris} Jours</Text>
                                 </View>
                             );
@@ -487,6 +489,14 @@ const styles = StyleSheet.create({
         top: "50%",
         left: "50%",
         zIndex: 111
+    },
+    flexS: {
+        flexDirection: "row",
+        justifyContent: "space-between",
+        alignItems: "center"
+    },
+    labelle: {
+        fontSize: 14
     }
 });
 
