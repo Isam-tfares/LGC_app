@@ -307,10 +307,6 @@ export default function EditPreReception({ route, navigation }) {
                 >
 
                     <View style={styles.row}>
-                        <Text style={styles.title}>N° Réception</Text>
-                        <Text style={styles.text}>{Numero}</Text>
-                    </View>
-                    <View style={styles.row}>
                         <Text style={styles.title}>N° Intervention </Text>
                         <Text style={styles.text}>{intervention}</Text>
                     </View>

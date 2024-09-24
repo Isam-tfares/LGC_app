@@ -167,6 +167,7 @@ export default function AddIntervention({ modalVisible, setModalVisible }) {
                 setSelectedPrestation('');
                 setSelectedProject('');
                 setSelectedTechnician('');
+                setLieuPrelevement('');
 
                 setModalVisible(false);
             }

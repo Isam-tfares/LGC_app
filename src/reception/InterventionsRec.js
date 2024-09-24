@@ -14,7 +14,7 @@ function InterventionsRec({ navigation }) {
 
     const [refreshing, setRefreshing] = useState(false);
     const [search, setSearch] = useState("");
-    const [clicked, setClicked] = useState(0);
+    const [clicked, setClicked] = useState(2);
     const [isDatePickerVisible, setDatePickerVisibility] = useState(false);
     const [dateType, setDateType] = useState('');
     const [fromDate, setFromDate] = useState(null);

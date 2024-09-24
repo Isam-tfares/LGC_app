@@ -201,6 +201,7 @@ export default function Conge({ navigation }) {
         }
 
         // Vérification si nbr_days est un entier
+        setNbr_days(parseInt(nbr_days, 10));
         if (!Number.isInteger(nbr_days)) {
             return Alert.alert('Erreur', 'Le nombre de jours doit être un entier');
         }
@@ -344,7 +345,7 @@ export default function Conge({ navigation }) {
                     style={styles.input}
                     placeholder="Nombre des jours"
                     value={nbr_days.toString()}
-                    onChangeText={(text) => { setNbr_days(parseInt(text)) }}
+                    onChangeText={(text) => { setNbr_days(text) }}
                     keyboardType="numeric"
                 />
 

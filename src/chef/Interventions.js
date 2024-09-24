@@ -17,7 +17,7 @@ function Interventions({ navigation }) {
     const [refreshing, setRefreshing] = useState(false);
     const [search, setSearch] = useState("");
     const [dateType, setDateType] = useState('');
-    const [clicked, setClicked] = useState(0);
+    const [clicked, setClicked] = useState(2);
     const [fromDate, setFromDate] = useState(null);
     const [toDate, setToDate] = useState(null);
     const [fromDateAPI, setFromDateAPI] = useState(null);

@@ -180,7 +180,7 @@ function Prereceptions({ route, navigation }) {
                 </Text>
             </View>
             <View style={styles.itemBody}>
-                <Text style={[styles.itemText, { fontWeight: "bold" }]}>N° réception: {item.IDPre_reception}</Text>
+                <Text style={[styles.itemText, { fontWeight: "bold" }]}>N° Pré-réception: {item.IDPre_reception}</Text>
                 <Text style={styles.itemText}>Client: {item.abr_client}</Text>
                 <Text style={styles.itemText}>Technician: {item.PersonnelNom}</Text>
                 <Text style={styles.itemText}>Prestation: {item.PhaseLibelle}</Text>
