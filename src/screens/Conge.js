@@ -27,6 +27,7 @@ export default function Conge({ navigation }) {
     const [fromDateAPI, setFromDateAPI] = useState('');
     const [toDateAPI, setToDateAPI] = useState('');
     const [nbr_days, setNbr_days] = useState(0);
+    const [obs, setObs] = useState("");
     const [isDatePickerVisible, setDatePickerVisibility] = useState(false);
     const [dateType, setDateType] = useState('');
     const [conges, setConges] = useState([]);
@@ -114,7 +115,7 @@ export default function Conge({ navigation }) {
                     'Content-Type': 'application/json'
                 },
                 body: JSON.stringify(
-                    { "fromDate": fromDateAPI, "toDate": toDateAPI, "year": moment().year(), "nbr_days": nbr_days, "motifsconge_id": selectedMotif }
+                    { "fromDate": fromDateAPI, "toDate": toDateAPI, "year": moment().year(), "nbr_days": nbr_days, "motifsconge_id": selectedMotif, "obs": obs }
                 )
             });
 
@@ -276,9 +277,9 @@ export default function Conge({ navigation }) {
                     (<>
                         {conges?.map((item, index) => {
                             return (
-                                <View style={styles.conge} key={item.conge_id}>
-                                    <Text style={styles.year}>{moment(item.start_date, "YYYYMMDD").format("DD/MM/YYYY") || 'N/A'} -> {moment(item.end_date, "YYYYMMDD").format("DD/MM/YYYY") || 'N/A'}</Text>
-                                    <Text style={styles.days}>{item.jours_pris} Jours</Text>
+                                <View style={styles.conge} key={item.IDConge_personnel}>
+                                    <Text style={styles.year}>{moment(item.date_debut, "YYYYMMDD").format("DD/MM/YYYY") || 'N/A'} -> {moment(item.date_fin, "YYYYMMDD").format("DD/MM/YYYY") || 'N/A'}</Text>
+                                    <Text style={styles.days}>{item.Nbj_ouvrable} Jours</Text>
                                 </View>
                             );
                         })}
@@ -295,12 +296,12 @@ export default function Conge({ navigation }) {
                     (<>
                         {demandesConges?.map((item, index) => {
                             return (
-                                <View style={styles.conge} key={item.conge_id}>
+                                <View style={styles.conge} key={item.IDConge_personnel}>
                                     <View style={styles.flexS}>
-                                        <Text style={styles.year}>{moment(item.start_date, "YYYYMMDD").format("DD/MM/YYYY") || 'N/A'} -> {moment(item.end_date, "YYYYMMDD").format("DD/MM/YYYY") || 'N/A'}</Text>
-                                        <Text style={styles.labelle}>{item.labelle}</Text>
+                                        <Text style={styles.year}>{moment(item.date_debut, "YYYYMMDD").format("DD/MM/YYYY") || 'N/A'} -> {moment(item.date_fin, "YYYYMMDD").format("DD/MM/YYYY") || 'N/A'}</Text>
+                                        <Text style={styles.labelle}>{item.Nat_conge}</Text>
                                     </View>
-                                    <Text style={styles.days}>{item.jours_pris} Jours</Text>
+                                    <Text style={styles.days}>{item.Nbj_ouvrable} Jours</Text>
                                 </View>
                             );
                         })}
@@ -316,7 +317,7 @@ export default function Conge({ navigation }) {
                 >
                     <Picker.Item label="Motif de congé" value="" />
                     {motifs_conges?.map((motif, index) => (
-                        <Picker.Item key={index} label={motif.labelle} value={motif.motifsconge_id} />
+                        <Picker.Item key={index} label={motif.Nat_conge} value={motif.IDNature_conge} />
                     ))}
                 </Picker>
 
@@ -347,6 +348,13 @@ export default function Conge({ navigation }) {
                     value={nbr_days.toString()}
                     onChangeText={(text) => { setNbr_days(text) }}
                     keyboardType="numeric"
+                />
+                <Text style={styles.label}>Observation</Text>
+                <TextInput
+                    style={styles.input}
+                    placeholder="Observation"
+                    value={obs}
+                    onChangeText={setObs}
                 />
 
                 <TouchableOpacity style={styles.button} onPress={handleRequest}>

@@ -71,6 +71,7 @@ function Interventions({ navigation }) {
                 data = await response.json();
             } else {
                 const text = await response.text();
+                console.log("TEXT", text);
                 try {
                     if (text[0] == "[" || text[0] == "{") {
                         data = JSON.parse(text);

@@ -37,7 +37,7 @@ export default function DemandeCongeDetails({ navigation, route }) {
                     'Content-Type': 'application/json'
                 },
                 body: JSON.stringify(
-                    { "conge_id": demande.conge_id }
+                    { "conge_id": demande.IDConge_personnel }
                 )
             });
 
@@ -82,7 +82,7 @@ export default function DemandeCongeDetails({ navigation, route }) {
                     'Content-Type': 'application/json'
                 },
                 body: JSON.stringify(
-                    { "obs": comment, "conge_id": demande.conge_id }
+                    { "obs": comment, "conge_id": demande.IDConge_personnel }
                 )
             });
 
@@ -153,7 +153,7 @@ export default function DemandeCongeDetails({ navigation, route }) {
                 }
                 <View>
                     <Text style={styles.fullname}>{demande.Nom_personnel}</Text>
-                    <Text style={styles.user_type}>{demande.user_type ?? ""}</Text>
+                    <Text style={styles.user_type}>{demande.lib_fonction_person ?? ""}</Text>
                 </View>
 
             </View>
@@ -163,14 +163,14 @@ export default function DemandeCongeDetails({ navigation, route }) {
                 </View>
                 <View style={styles.dateContainer}>
                     <View style={styles.dateView}>
-                        <Text style={styles.date}>{formatDate(demande.start_date).day} {formatDate(demande.start_date).month}</Text>
+                        <Text style={styles.date}>{formatDate(demande.date_debut).day} {formatDate(demande.date_debut).month}</Text>
                         <View style={{ paddingHorizontal: 5 }}>
                             <Ionicons name="arrow-forward" size={20} color="black" />
                         </View>
-                        <Text style={styles.date}>{formatDate(demande.end_date).day} {formatDate(demande.end_date).month}</Text>
+                        <Text style={styles.date}>{formatDate(demande.date_fin).day} {formatDate(demande.date_fin).month}</Text>
                     </View>
                     <View style={styles.labelleView}>
-                        <Text style={styles.labelle}>{demande.labelle}</Text>
+                        <Text style={styles.labelle}>{demande.Nat_conge}</Text>
                     </View>
                 </View>
             </View>
@@ -180,35 +180,35 @@ export default function DemandeCongeDetails({ navigation, route }) {
                     <Text style={styles.title}>Nombre des jours</Text>
                 </View>
                 <View style={{ paddingVertical: 5 }}>
-                    <Text style={styles.label}>{demande.jours_pris} jours</Text>
+                    <Text style={styles.label}>{demande.Nbj_ouvrable} jours</Text>
                 </View>
             </View>
 
             <View style={styles.box2}>
                 <Text style={styles.title2}>Etat général</Text>
                 <View style={styles.statusView}>
-                    <View style={demande.etat_demande == 1 ? styles.waiting : demande.etat_demande == 2 ? styles.accpeted : styles.rejected}></View>
-                    <Text style={styles.status}>{demande.etat_demande == 1 ? "En attente" : demande.etat_demande == 2 ? "Acceptée" : "Refusée"}</Text>
+                    <View style={demande.valide == 0 && demande.Non_accorde == 0 ? styles.waiting : demande.valide == 1 ? styles.accpeted : styles.rejected}></View>
+                    <Text style={styles.status}>{demande.valide == 0 && demande.Non_accorde == 0 ? "En attente" : demande.valide == 1 ? "Acceptée" : "Refusée"}</Text>
                 </View>
             </View>
 
-            {demande.etat_demande == 0 && (
+            {demande.Non_accorde == 1 && (
                 <View style={styles.box2}>
                     <Text style={styles.title2}>Raison du refus</Text>
                     <View style={styles.statusView}>
-                        <Text style={styles.status}>{demande.obs}</Text>
+                        <Text style={styles.status}>{demande.Motif}</Text>
                     </View>
                 </View>
             )}
 
-            <View style={styles.box2}>
+            {/* <View style={styles.box2}>
                 <Text style={styles.title2}>Date du demande</Text>
                 <View style={styles.statusView}>
                     <Text style={styles.status}>{moment(demande.date_demande, "YYYYMMDD").format("DD/MM/YYYY") || 'N/A'}</Text>
                 </View>
-            </View>
+            </View> */}
 
-            {demande.etat_demande == 1 && (
+            {demande.valide == 0 && demande.Non_accorde == 0 && (
                 <View style={styles.btns}>
                     <TouchableOpacity style={[styles.btn, styles.btn_accept]} onPress={() => { acceptDemande() }}>
                         <Text style={styles.btnText1}>Accepter</Text>

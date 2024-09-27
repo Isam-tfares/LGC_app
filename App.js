@@ -105,11 +105,6 @@ export default function App() {
         {/* </PersistGate> */}
       </Provider>
     )
-  } else if (isLogined === 4) { // labo
-    return (
-      <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
-        <Text>Labo</Text>
-      </View>);
   }
   else {
     return (

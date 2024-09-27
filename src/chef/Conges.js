@@ -141,11 +141,11 @@ function Conges({ navigation, route }) {
     };
     const filterConges = (conges) => {
         if (clicked == 1) {
-            return conges.filter(conge => conge.etat_demande == 1);
+            return conges.filter(conge => conge.valide == 0 && conge.Non_accorde == 0);
         } else if (clicked == 2) {
-            return conges.filter(conge => conge.etat_demande == 2);
+            return conges.filter(conge => conge.valide == 1);
         } else {
-            return conges.filter(conge => conge.etat_demande == 0);
+            return conges.filter(conge => conge.Non_accorde == 1);
         }
     }
     return (
@@ -206,20 +206,20 @@ function Conges({ navigation, route }) {
                                     }
                                     <View style={{ width: "90%" }}>
                                         <Text style={styles.textInfo}>{conge.Nom_personnel}</Text>
-                                        <Text style={styles.labelle}>{conge.labelle}</Text>
+                                        <Text style={styles.labelle}>{conge.Nat_conge}</Text>
                                     </View>
                                 </View>
                                 <View style={[styles.box, { width: "40%" }]}>
                                     <View style={styles.dateView}>
-                                        <Text style={styles.day}>{formatDate(conge.start_date).day}</Text>
-                                        <Text style={styles.monthyear}>{formatDate(conge.start_date).month} {formatDate(conge.start_date).year}</Text>
+                                        <Text style={styles.day}>{formatDate(conge.date_debut).day}</Text>
+                                        <Text style={styles.monthyear}>{formatDate(conge.date_debut).month} {formatDate(conge.date_debut).year}</Text>
                                     </View>
                                     <View style={{ padding: 5 }}>
                                         <Ionicons name="arrow-forward" size={24} color="#888" />
                                     </View>
                                     <View style={styles.dateView}>
-                                        <Text style={styles.day}>{formatDate(conge.end_date).day}</Text>
-                                        <Text style={styles.monthyear}>{formatDate(conge.end_date).month} {formatDate(conge.end_date).year}</Text>
+                                        <Text style={styles.day}>{formatDate(conge.date_fin).day}</Text>
+                                        <Text style={styles.monthyear}>{formatDate(conge.date_fin).month} {formatDate(conge.date_fin).year}</Text>
                                     </View>
                                 </View>
 

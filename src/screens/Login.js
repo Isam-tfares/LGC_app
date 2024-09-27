@@ -8,9 +8,9 @@ import { BASE_URL } from '../components/utils';
 
 const Login = ({ isLogined, setLogined }) => {
     const dispatch = useDispatch();
-    const [username, setUsername] = useState('');
+    const [matricule, setMatricule] = useState('');
     const [password, setPassword] = useState('');
-    const [errorUsername, setErrorUsername] = useState('');
+    const [errorMatricule, setErrorMatricule] = useState('');
     const [errorPassword, setErrorPassword] = useState('');
     const [isVisible, setVisible] = useState(false);
     const [loading, setLoading] = useState(false);
@@ -19,17 +19,18 @@ const Login = ({ isLogined, setLogined }) => {
     useEffect(() => {
         if (user.user) {
             switch (user.user.user_type) {
-                case 'technicien':
-                    setLogined(1);
+                case '3':
+                    if (user.user.user_tache == 2) {
+                        setLogined(1); // technicien interventions
+                    } else {
+                        setLogined(3); // receptions
+                    }
                     break;
-                case 'chef':
-                    setLogined(2);
+                case '1':
+                    setLogined(2); // chef
                     break;
-                case 'receptionneur':
-                    setLogined(3);
-                    break;
-                case 'essayeur':
-                    setLogined(4);
+                case '5':
+                    setLogined(2); // chef
                     break;
                 default:
                     Alert.alert('Accès non autorisé');
@@ -38,13 +39,13 @@ const Login = ({ isLogined, setLogined }) => {
     }, [user, setLogined]);
 
     const handleLogin = async () => {
-        if (username === '') {
-            setErrorUsername('Veuillez entrer un Username valide.');
+        if (matricule === '') {
+            setErrorMatricule('Veuillez entrer un matricule personnel valide.');
             return;
         }
 
-        if (password.length < 3) {
-            setErrorPassword('Le mot de passe doit contenir au moins 3 caractères.');
+        if (password.length < 1) {
+            setErrorPassword("Veuillez entrer un mot de passe valide.");
             return;
         }
 
@@ -57,13 +58,13 @@ const Login = ({ isLogined, setLogined }) => {
                     Accept: 'application/json',
                     'Content-Type': 'application/json',
                 },
-                body: JSON.stringify({ username, password }),
+                body: JSON.stringify({ matricule, password }),
             });
 
             if (!response.ok) {
                 const data = await response.json();
-                if (data.error == "Invalid username or password.") {
-                    Alert.alert("Nom d'utilisateur ou mot de passe incorrect");
+                if (data.error == "Invalid matricule or password.") {
+                    Alert.alert("Matricule personnel ou mot de passe incorrect");
                 }
                 return;
             }
@@ -81,7 +82,7 @@ const Login = ({ isLogined, setLogined }) => {
             console.error(error);
             Alert.alert('Erreur de connexion');
         } finally {
-            setErrorUsername('');
+            setErrorMatricule('');
             setErrorPassword('');
             setLoading(false); // Ensure loading state is turned off after fetch
 
@@ -108,16 +109,15 @@ const Login = ({ isLogined, setLogined }) => {
                         (<ActivityIndicator color={"white"} />)
                         : (<></>)}
                     <TextInput
-                        placeholder="Nom d'utilisateur"
-                        value={username}
-                        onChangeText={setUsername}
-                        keyboardType="email-address"
+                        placeholder="matricule personnel"
+                        value={matricule}
+                        onChangeText={setMatricule}
                         autoCapitalize="none"
                         style={styles.input}
                         placeholderTextColor="#edede9"
                     />
                     <View style={styles.errorC}>
-                        <Text style={styles.error}>{errorUsername}</Text>
+                        <Text style={styles.error}>{errorMatricule}</Text>
                     </View>
                     <View style={{ position: "relative" }}>
 

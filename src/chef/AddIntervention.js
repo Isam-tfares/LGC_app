@@ -253,7 +253,7 @@ export default function AddIntervention({ modalVisible, setModalVisible }) {
                     >
                         <Picker.Item label="Séléctionner Technicien" value="" />
                         {techniciens?.map((technician, index) => (
-                            <Picker.Item key={index} label={technician.Nom_personnel} value={technician.user_id} />
+                            <Picker.Item key={index} label={technician.Nom_personnel} value={technician.IDPersonnel} />
                         ))}
                     </Picker>
 

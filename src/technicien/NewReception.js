@@ -38,7 +38,7 @@ export default function NewReception({ route, navigation }) {
     const [selectedClient, setSelectedClient] = useState(intervention ? intervention.abr_client : "");
     const [selectedProject, setSelectedProject] = useState(intervention ? intervention.abr_projet : "");
     const [selectedPrestation, setSelectedPrestation] = useState(intervention ? intervention.libelle : "");
-    const [selectedMatiere, setSelectedMatiere] = useState(intervention ? intervention.labelle : "");
+    const [selectedMatiere, setSelectedMatiere] = useState("");
     const [selectedDate, setSelectedDate] = useState(null);
     const [selectedDate2, setSelectedDate2] = useState(null);
     const [selectedCylindre, setSelectedCylindre] = useState(cylindres[0]);
@@ -394,7 +394,7 @@ export default function NewReception({ route, navigation }) {
                                     <Picker.Item label="Séléctionner Matériaux" value="" />
                                     {materiaux ?
                                         materiaux.map((matiere, index) => (
-                                            <Picker.Item key={index} label={matiere.labelle} value={matiere.materiaux_id} />
+                                            <Picker.Item key={index} label={matiere.Lib_materiaux} value={matiere.IDMateriaux} />
                                         )) : null}
                                 </Picker>
                             </View>
@@ -412,7 +412,7 @@ export default function NewReception({ route, navigation }) {
                             <Picker.Item label="Séléctionner nature" value="" />
                             {nature_echantillons ?
                                 nature_echantillons.map((nature, index) => (
-                                    <Picker.Item key={index} label={nature.labelle} value={nature.echantillon_nature_id} />
+                                    <Picker.Item key={index} label={nature.Nature_ech} value={nature.IDNature_echantillon} />
                                 )) : null}
                         </Picker>
                         <Text style={styles.label}>Lieu Prélevement</Text>
@@ -537,7 +537,7 @@ export default function NewReception({ route, navigation }) {
                                             <Picker.Item label="Séléctionner béton" value="" />
                                             {types_beton ?
                                                 types_beton.map((beton, index) => (
-                                                    <Picker.Item key={index} label={beton.labelle} value={beton.beton_type_id} />
+                                                    <Picker.Item key={index} label={beton.Lib_type_beton} value={beton.IDType_beton} />
                                                 )) : null}
                                         </Picker>
                                     </View>
