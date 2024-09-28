@@ -6,10 +6,11 @@ import { Ionicons } from '@expo/vector-icons';
 import { useSelector } from 'react-redux';
 import { ScrollView } from 'react-native-gesture-handler';
 import { ConfirmAction } from '../components/utils';
-import { BASE_URL } from '../components/utils';
+
 
 export default function PV({ navigation, route }) {
     const TOKEN = useSelector(state => state.user.token);
+    const BASE_URL = useSelector(state => state.baseURL.baseURL);
 
     const [refreshing, setRefreshing] = useState(false);
     const [selectedIntervention, setSelectedIntervention] = useState(route.params ? Number.parseInt(route.params.id) : "");

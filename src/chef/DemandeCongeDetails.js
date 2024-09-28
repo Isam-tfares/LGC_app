@@ -5,7 +5,7 @@ import moment from 'moment';
 import 'moment/locale/fr'; // Import French locale for month names
 import { useSelector } from 'react-redux';
 import { ConfirmAction } from '../components/utils';
-import { BASE_URL } from '../components/utils';
+
 
 function formatDate(inputDate) {
     // Parse the date using moment
@@ -21,6 +21,7 @@ function formatDate(inputDate) {
 
 export default function DemandeCongeDetails({ navigation, route }) {
     const TOKEN = useSelector(state => state.user.token);
+    const BASE_URL = useSelector(state => state.baseURL.baseURL);
     let { demande } = route.params;
     console.log("demande", demande);
     const [modalVisible, setModalVisible] = useState(false);

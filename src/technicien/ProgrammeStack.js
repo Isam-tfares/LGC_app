@@ -9,7 +9,7 @@ import Intervention from './Intervention';
 import AddIntervention from './AddIntervention';
 import { useSelector } from 'react-redux';
 import InterventionsNotDone from './InterventionsNotDone';
-import { BASE_URL } from '../components/utils';
+
 
 const generateDaysOfMonth = (month, year) => {
     const startOfMonth = moment(`${month} ${year}`, 'MMMM YYYY').startOf('month');
@@ -25,6 +25,7 @@ const generateDaysOfMonth = (month, year) => {
 
 function Programme({ navigation }) {
     const TOKEN = useSelector(state => state.user.token);
+    const BASE_URL = useSelector(state => state.baseURL.baseURL);
 
     moment.locale('fr');
     const [refreshing, setRefreshing] = useState(false);

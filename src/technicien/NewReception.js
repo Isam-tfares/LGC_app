@@ -8,11 +8,12 @@ import Checkbox from 'expo-checkbox';
 import { useDispatch, useSelector } from 'react-redux';
 import { setReceptionData, clearInterventionData } from '../actions/receptionDataActions';
 import { ConfirmAction } from '../components/utils';
-import { BASE_URL } from '../components/utils';
+
 
 //NewReceptionInterface
 export default function NewReception({ route, navigation }) {
     const TOKEN = useSelector(state => state.user.token);
+    const BASE_URL = useSelector(state => state.baseURL.baseURL);
     const BetonPhases = ["1", "2", "4", "35", "44", "45", "46", "47"];
     const dispatch = useDispatch();
 

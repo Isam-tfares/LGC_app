@@ -9,10 +9,12 @@ import DateTimePickerModal from 'react-native-modal-datetime-picker';
 import Intervention from './Intervention';
 import AddIntervention from './AddIntervention';
 import { useSelector } from 'react-redux';
-import { BASE_URL } from '../components/utils';
+
 
 function Interventions({ navigation }) {
-    const TOKEN = useSelector(state => state.user.token); // Move this line inside the component
+    const TOKEN = useSelector(state => state.user.token);
+    const BASE_URL = useSelector(state => state.baseURL.baseURL);
+
 
     const [refreshing, setRefreshing] = useState(false);
     const [search, setSearch] = useState("");
@@ -71,7 +73,6 @@ function Interventions({ navigation }) {
                 data = await response.json();
             } else {
                 const text = await response.text();
-                console.log("TEXT", text);
                 try {
                     if (text[0] == "[" || text[0] == "{") {
                         data = JSON.parse(text);

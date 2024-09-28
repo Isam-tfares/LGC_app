@@ -10,6 +10,7 @@ import { BASE_URL, BASE_PVS_URL } from '../components/utils';
 
 export default function ReceptionDetails({ route, navigation }) {
     const TOKEN = useSelector(state => state.user.token);
+    const BASE_URL = useSelector(state => state.baseURL.baseURL);
     const IMAGES_URL = BASE_PVS_URL;
     const ETATS_RECUPERATION = ["Réccupéré", "Non réccupéré"];
     const PRELVES_PAR = ["LGC", "Client"];

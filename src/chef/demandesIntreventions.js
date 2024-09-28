@@ -8,10 +8,11 @@ import Fontisto from '@expo/vector-icons/Fontisto';
 import DateTimePickerModal from 'react-native-modal-datetime-picker';
 import { useSelector } from 'react-redux';
 import { ConfirmAction } from '../components/utils';
-import { BASE_URL } from '../components/utils';
+
 
 export default function DemandesInterventions({ navigation }) {
     const TOKEN = useSelector(state => state.user.token);
+    const BASE_URL = useSelector(state => state.baseURL.baseURL);
 
     const [refreshing, setRefreshing] = useState(false);
     const [search, setSearch] = useState("");

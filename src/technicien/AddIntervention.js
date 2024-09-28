@@ -7,11 +7,12 @@ import moment from 'moment';
 import { useSelector, useDispatch } from 'react-redux';
 import { setData } from '../actions/dataActions';
 import { ConfirmAction } from '../components/utils';
-import { BASE_URL } from '../components/utils';
+
 
 export default function AddIntervention({ modalVisible, setModalVisible }) {
     const technicien_id = useSelector(state => state.user.user.id)
     const TOKEN = useSelector(state => state.user.token);
+    const BASE_URL = useSelector(state => state.baseURL.baseURL);
     const dispatch = useDispatch();
     const [clients, setClients] = useState(useSelector(state => state.data.clients));
     const [projects, setProjects] = useState(useSelector(state => state.data.projects));

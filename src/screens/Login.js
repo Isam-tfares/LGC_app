@@ -4,7 +4,8 @@ import { View, TextInput, Alert, StyleSheet, TouchableOpacity, Text, Image, Keyb
 import { useDispatch, useSelector } from 'react-redux';
 import Ionicons from '@expo/vector-icons/Ionicons';
 import { setUser } from '../actions/userActions'; // Update path as needed
-import { BASE_URL } from '../components/utils';
+import { setBaseURL } from '../actions/baseURLActions';
+import { initializeAPI, getBaseUrl } from '../components/utils';
 
 const Login = ({ isLogined, setLogined }) => {
     const dispatch = useDispatch();
@@ -14,8 +15,27 @@ const Login = ({ isLogined, setLogined }) => {
     const [errorPassword, setErrorPassword] = useState('');
     const [isVisible, setVisible] = useState(false);
     const [loading, setLoading] = useState(false);
-
+    const [apiUrl, setApiUrl] = useState(useSelector((state) => state.baseURL.baseURL));
     const user = useSelector(state => state.user);
+
+    // Initialize the API and get the apiUrl
+    useEffect(() => {
+        const setupAPI = async () => {
+            await initializeAPI();  // Ensure the API IP is loaded
+            const baseUrl = getBaseUrl();  // Get the apiUrl dynamically
+            if (baseUrl) {
+                setApiUrl(baseUrl);
+                dispatch(setBaseURL(baseUrl));  // Set the apiUrl in the store);
+            } else {
+                console.log('No Base URL available');
+            }
+        };
+
+        if (!apiUrl) {
+            setupAPI();  // Call the function to load the API
+        }
+    }, []);
+
     useEffect(() => {
         if (user.user) {
             switch (user.user.user_type) {
@@ -49,7 +69,7 @@ const Login = ({ isLogined, setLogined }) => {
             return;
         }
 
-        const API_URL = `${BASE_URL}/?page=login`;
+        const API_URL = `${apiUrl}/?page=login`;
         setLoading(true);
         try {
             const response = await fetch(API_URL, {
@@ -145,9 +165,9 @@ const Login = ({ isLogined, setLogined }) => {
                     <View style={styles.errorC}>
                         <Text style={styles.error}>{errorPassword}</Text>
                     </View>
-                    <TouchableOpacity>
+                    {/* <TouchableOpacity>
                         <Text style={styles.password}>Mot de passe oubliée ?</Text>
-                    </TouchableOpacity>
+                    </TouchableOpacity> */}
                     <TouchableOpacity onPress={handleLogin} style={styles.button}>
                         <Text style={styles.btnText}>Se connecter</Text>
                     </TouchableOpacity>

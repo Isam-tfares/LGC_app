@@ -4,6 +4,7 @@ import { createDrawerNavigator } from '@react-navigation/drawer';
 import { NavigationContainer } from '@react-navigation/native';
 import { useState } from 'react';
 import { View, Text } from 'react-native';
+import * as FileSystem from 'expo-file-system';
 
 import store from './src/store';
 import PV from './src/technicien/PV';
@@ -21,12 +22,19 @@ import NewReception from './src/technicien/NewReception';
 import CongesStack from './src/chef/Conges';
 import DemandesInterventions from './src/chef/demandesIntreventions';
 import AddedInterventions from './src/technicien/AddedInterventions';
+import { IsAPIExist } from './src/components/utils';
+import EnterAPI from './src/screens/EnterAPI';
 
 const Drawer = createDrawerNavigator();
 
 export default function App() {
   const [isLogined, setLogined] = useState(false);
-  console.log('logined', isLogined);
+
+  // Check if the file exists when the app loads
+  if (!IsAPIExist()) {
+    console.log('API NOT exist');
+  }
+
   if (!isLogined) {
     return (
       <Provider store={store}>

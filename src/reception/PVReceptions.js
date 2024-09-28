@@ -9,7 +9,8 @@ import { useSelector } from 'react-redux';
 import { BASE_URL, BASE_PVS_URL } from '../components/utils';
 
 export default function PVReceptions({ navigation }) {
-    const TOKEN = useSelector(state => state.user.token); // Move this line inside the component
+    const TOKEN = useSelector(state => state.user.token);
+    const BASE_URL = useSelector(state => state.baseURL.baseURL); // Move this line inside the component
     const IMAGES_URL = BASE_PVS_URL;
 
     const [refreshing, setRefreshing] = useState(false);

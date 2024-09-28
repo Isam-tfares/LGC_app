@@ -8,7 +8,7 @@ import DateTimePickerModal from 'react-native-modal-datetime-picker';
 import DemandeCongeDetails from './DemandeCongeDetails';
 import { createStackNavigator } from '@react-navigation/stack';
 import { useSelector } from 'react-redux';
-import { BASE_URL } from '../components/utils';
+
 
 const Stack = createStackNavigator();
 
@@ -27,6 +27,7 @@ function formatDate(inputDate) {
 console.log(formatDate("10/08/2024").day, formatDate("10/08/2024").month, formatDate("10/08/2024").year);
 function Conges({ navigation, route }) {
     const TOKEN = useSelector(state => state.user.token);
+    const BASE_URL = useSelector(state => state.baseURL.baseURL);
 
     const [refreshing, setRefreshing] = useState(false);
     const [clicked, setClicked] = useState(1);

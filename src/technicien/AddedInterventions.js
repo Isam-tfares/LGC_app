@@ -6,10 +6,11 @@ import { EvilIcons } from '@expo/vector-icons';
 import { createStackNavigator } from '@react-navigation/stack';
 import { useSelector } from 'react-redux';
 import DemandeIntervention from './DemandeIntervention';
-import { BASE_URL } from '../components/utils';
+
 
 function Programme({ navigation }) {
     const TOKEN = useSelector(state => state.user.token);
+    const BASE_URL = useSelector(state => state.baseURL.baseURL);
 
     moment.locale('fr');
     const [refreshing, setRefreshing] = useState(false);

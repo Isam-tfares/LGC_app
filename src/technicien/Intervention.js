@@ -5,7 +5,7 @@ import { useSelector } from 'react-redux';
 import moment from 'moment';
 import * as Location from 'expo-location';
 import { ConfirmAction } from '../components/utils';
-import { BASE_URL } from '../components/utils';
+
 
 export default function Intervention({ route, navigation }) {
     const TOKEN = useSelector(state => state.user.token)
