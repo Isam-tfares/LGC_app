@@ -193,9 +193,18 @@ export default function DemandeCongeDetails({ navigation, route }) {
                         <Text style={styles.status}>{demande.valide_siege == 0 && demande.Non_accorde == 0 ? "En attente" : demande.valide_siege == 1 ? "Acceptée" : "Refusée"}</Text>
                     </View>
                 ) : (
-                    <View style={styles.statusView}>
-                        <View style={demande.valide == 0 && demande.Non_accorde == 0 ? styles.waiting : demande.valide == 1 ? styles.accpeted : styles.rejected}></View>
-                        <Text style={styles.status}>{demande.valide == 0 && demande.Non_accorde == 0 ? "En attente" : demande.valide == 1 ? "Acceptée" : "Refusée"}</Text>
+                    <View style={styles.statusViewParent}>
+                        <View style={styles.statusView2}>
+                            <View style={demande.valide == 1 ? styles.accpeted : demande.valide == 0 && demande.Non_accorde == 0 ? styles.waiting : styles.rejected}></View>
+                            <Text style={styles.status}>{demande.valide == 1 ? "Acceptée par chef" : demande.valide == 0 && demande.Non_accorde == 0 ? "En attente par chef" : "Refusée par chef"}</Text>
+                        </View>
+                        {demande.valide == 1 ?
+                            (<View style={styles.statusView2}>
+                                <View style={demande.valide_siege == 1 ? styles.accpeted : demande.valide_siege == 0 && demande.Non_accorde == 0 ? styles.waiting : styles.rejected}></View>
+                                <Text style={styles.status}>{demande.valide_siege == 1 ? "Acceptée par siège" : demande.valide_siege == 0 && demande.Non_accorde == 0 ? "En attente par siège" : "Refusée par siège"}</Text>
+                            </View>)
+                            : null
+                        }
                     </View>
                 )}
             </View>
@@ -347,6 +356,16 @@ const styles = StyleSheet.create({
         borderTopWidth: 2,
         borderBottomColor: "#ccc",
         borderTopColor: "#ccc",
+        flexDirection: "row"
+    },
+    statusViewParent: {
+        borderBottomWidth: 2,
+        borderTopWidth: 2,
+        borderBottomColor: "#ccc",
+        borderTopColor: "#ccc",
+    },
+    statusView2: {
+        paddingVertical: 10,
         flexDirection: "row"
     },
     status: {
