@@ -22,6 +22,7 @@ function formatDate(inputDate) {
 export default function DemandeCongeDetails({ navigation, route }) {
     const TOKEN = useSelector(state => state.user.token);
     const BASE_URL = useSelector(state => state.baseURL.baseURL);
+    const IDAgence = useSelector(state => state.user.user.IDAgence);
     let { demande } = route.params;
     const [modalVisible, setModalVisible] = useState(false);
     const [comment, setComment] = useState('');
@@ -186,10 +187,17 @@ export default function DemandeCongeDetails({ navigation, route }) {
 
             <View style={styles.box2}>
                 <Text style={styles.title2}>Etat général</Text>
-                <View style={styles.statusView}>
-                    <View style={demande.valide == 0 && demande.Non_accorde == 0 ? styles.waiting : demande.valide == 1 ? styles.accpeted : styles.rejected}></View>
-                    <Text style={styles.status}>{demande.valide == 0 && demande.Non_accorde == 0 ? "En attente" : demande.valide == 1 ? "Acceptée" : "Refusée"}</Text>
-                </View>
+                {IDAgence == 4 ? (
+                    <View style={styles.statusView}>
+                        <View style={demande.valide_siege == 0 && demande.Non_accorde == 0 ? styles.waiting : demande.valide_siege == 1 ? styles.accpeted : styles.rejected}></View>
+                        <Text style={styles.status}>{demande.valide_siege == 0 && demande.Non_accorde == 0 ? "En attente" : demande.valide_siege == 1 ? "Acceptée" : "Refusée"}</Text>
+                    </View>
+                ) : (
+                    <View style={styles.statusView}>
+                        <View style={demande.valide == 0 && demande.Non_accorde == 0 ? styles.waiting : demande.valide == 1 ? styles.accpeted : styles.rejected}></View>
+                        <Text style={styles.status}>{demande.valide == 0 && demande.Non_accorde == 0 ? "En attente" : demande.valide == 1 ? "Acceptée" : "Refusée"}</Text>
+                    </View>
+                )}
             </View>
 
             {demande.Non_accorde == 1 && (
@@ -201,14 +209,18 @@ export default function DemandeCongeDetails({ navigation, route }) {
                 </View>
             )}
 
-            {/* <View style={styles.box2}>
-                <Text style={styles.title2}>Date du demande</Text>
-                <View style={styles.statusView}>
-                    <Text style={styles.status}>{moment(demande.date_demande, "YYYYMMDD").format("DD/MM/YYYY") || 'N/A'}</Text>
+            {IDAgence == 4 ? (
+                <View style={styles.box2}>
+                    <Text style={styles.title2}>Agence</Text>
+                    <View style={styles.statusView}>
+                        <Text style={styles.status}>{demande.libelle}</Text>
+                    </View>
                 </View>
-            </View> */}
+            ) : <></>}
 
-            {demande.valide == 0 && demande.Non_accorde == 0 && (
+            {((IDAgence != 4 && demande.valide == 0 && demande.Non_accorde == 0) ||
+                (IDAgence == 4 && demande.valide_siege == 0 && demande.Non_accorde == 0)
+            ) ? (
                 <View style={styles.btns}>
                     <TouchableOpacity style={[styles.btn, styles.btn_accept]} onPress={() => { acceptDemande() }}>
                         <Text style={styles.btnText1}>Accepter</Text>
@@ -217,7 +229,7 @@ export default function DemandeCongeDetails({ navigation, route }) {
                         <Text style={styles.btnText2}>Refuser</Text>
                     </TouchableOpacity>
                 </View>
-            )}
+            ) : (<></>)}
 
             {/* Modal for refuse */}
             <Modal
@@ -305,6 +317,7 @@ const styles = StyleSheet.create({
         borderRadius: 5,
         borderColor: "#4b6aff",
         borderWidth: 2,
+        marginLeft: 5
     },
     labelle: {
         color: "#4b6aff",

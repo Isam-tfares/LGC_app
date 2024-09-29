@@ -53,11 +53,6 @@ let apiIP = null;
 
 export const initializeAPI = async () => {
     apiIP = await readApiFromFile();
-    if (apiIP) {
-        console.log(`API IP address loaded: ${apiIP}`);
-    } else {
-        console.log('No API IP found. Please set it.');
-    }
 };
 
 // Use this function to retrieve BASE_URL and BASE_PVS_URL after initializing

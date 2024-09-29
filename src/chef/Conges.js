@@ -24,9 +24,9 @@ function formatDate(inputDate) {
     // Return the formatted string
     return { "day": day, "month": month, "year": year };
 }
-console.log(formatDate("10/08/2024").day, formatDate("10/08/2024").month, formatDate("10/08/2024").year);
 function Conges({ navigation, route }) {
     const TOKEN = useSelector(state => state.user.token);
+    const IDAgence = useSelector(state => state.user.user.IDAgence);
     const BASE_URL = useSelector(state => state.baseURL.baseURL);
 
     const [refreshing, setRefreshing] = useState(false);
@@ -141,12 +141,22 @@ function Conges({ navigation, route }) {
         hideDatePicker();
     };
     const filterConges = (conges) => {
-        if (clicked == 1) {
-            return conges.filter(conge => conge.valide == 0 && conge.Non_accorde == 0);
-        } else if (clicked == 2) {
-            return conges.filter(conge => conge.valide == 1);
+        if (IDAgence == 4) {
+            if (clicked == 1) {
+                return conges.filter(conge => conge.valide_siege == 0 && conge.Non_accorde == 0);
+            } else if (clicked == 2) {
+                return conges.filter(conge => conge.valide_siege == 1);
+            } else {
+                return conges.filter(conge => conge.Non_accorde == 1);
+            }
         } else {
-            return conges.filter(conge => conge.Non_accorde == 1);
+            if (clicked == 1) {
+                return conges.filter(conge => conge.valide == 0 && conge.Non_accorde == 0);
+            } else if (clicked == 2) {
+                return conges.filter(conge => conge.valide == 1 && conge.Non_accorde == 0);
+            } else {
+                return conges.filter(conge => conge.Non_accorde == 1);
+            }
         }
     }
     return (
@@ -200,7 +210,7 @@ function Conges({ navigation, route }) {
                     {filterConges(congesData)?.map((conge, index) => (
                         <TouchableOpacity key={index} onPress={() => { DemandeCongeClick(conge) }}>
                             <View style={styles.conge}>
-                                <View style={[styles.box, { width: "60%", }]}>
+                                <View style={[styles.box, { width: "65%", }]}>
                                     {conge.imageUrl ?
                                         (<Image source={{ uri: conge.imageUrl }} style={{ width: 50, height: 50, borderRadius: 25 }} />) :
                                         (<Image source={require('../../assets/profile.jpeg')} style={{ width: 50, height: 50, borderRadius: 25 }} />)
@@ -210,15 +220,15 @@ function Conges({ navigation, route }) {
                                         <Text style={styles.labelle}>{conge.Nat_conge}</Text>
                                     </View>
                                 </View>
-                                <View style={[styles.box, { width: "40%" }]}>
-                                    <View style={styles.dateView}>
+                                <View style={[styles.box, { width: "35%", }]}>
+                                    <View style={styles.dayView}>
                                         <Text style={styles.day}>{formatDate(conge.date_debut).day}</Text>
                                         <Text style={styles.monthyear}>{formatDate(conge.date_debut).month} {formatDate(conge.date_debut).year}</Text>
                                     </View>
-                                    <View style={{ padding: 5 }}>
+                                    <View style={{ width: "20%" }}>
                                         <Ionicons name="arrow-forward" size={24} color="#888" />
                                     </View>
-                                    <View style={styles.dateView}>
+                                    <View style={styles.dayView}>
                                         <Text style={styles.day}>{formatDate(conge.date_fin).day}</Text>
                                         <Text style={styles.monthyear}>{formatDate(conge.date_fin).month} {formatDate(conge.date_fin).year}</Text>
                                     </View>
@@ -311,12 +321,13 @@ const styles = StyleSheet.create({
         flexDirection: "row",
         alignItems: "center",
     },
-    dateView: {
+    dayView: {
         flexDirection: "column",
         alignItems: "center",
         borderWidth: 1,
         borderColor: '#ccc',
-        padding: 5,
+        padding: 3,
+        width: "40%",
     },
     textInfo: {
         fontSize: 16,

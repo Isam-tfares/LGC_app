@@ -1,16 +1,27 @@
 import React, { useEffect, useState, useCallback } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, TextInput, Alert, ScrollView, RefreshControl } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, TextInput, Alert, ScrollView, RefreshControl, Modal } from 'react-native';
 import DateTimePickerModal from "react-native-modal-datetime-picker";
 import AntDesign from '@expo/vector-icons/AntDesign';
 import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
-import Entypo from '@expo/vector-icons/Entypo';
+import Ionicons from '@expo/vector-icons/Ionicons';
 import { Picker } from '@react-native-picker/picker';
 import moment from 'moment';
 import 'moment/locale/fr'; // Import French locale for month names
 import { useSelector } from 'react-redux';
 import { ConfirmAction } from '../components/utils';
 
+function formatDate(inputDate) {
+    // Parse the date using moment
+    const date = moment(inputDate, "YYYYMMDD")
 
+    // Format the date to the desired format
+    const day = date.format('D');
+    const month = date.format('MMM');
+    const year = date.format('YY');
+
+    // Return the formatted string
+    return { "day": day, "month": month, "year": year };
+}
 export default function Conge({ navigation }) {
     const TOKEN = useSelector(state => state.user.token);
     const BASE_URL = useSelector(state => state.baseURL.baseURL);
@@ -33,8 +44,11 @@ export default function Conge({ navigation }) {
     const [dateType, setDateType] = useState('');
     const [conges, setConges] = useState([]);
     const [demandesConges, setDemandesConges] = useState([]);
+    const [demandesRefus, setDemandesRefus] = useState([]);
     const [motifs_conges, setMotifsConges] = useState([]);
     const [reload, setReload] = useState(false);
+    const [clicked, setClicked] = useState(1);
+    const [modalVisible, setModalVisible] = useState(false);
 
     useEffect(() => {
         fetchData();
@@ -90,6 +104,7 @@ export default function Conge({ navigation }) {
                 setMotifsConges(data.motifs);
                 setAvailableDays(data.days);
                 setDemandesConges(data.demandesConges);
+                setDemandesRefus(data.demandesRefus);
                 if (data.years.length == 0) {
                     setYears([{ "annee": moment().year() }]);
                 } else {
@@ -202,11 +217,16 @@ export default function Conge({ navigation }) {
             return Alert.alert('Erreur', 'La date de début doit être avant la date de fin');
         }
 
+        // Convertir nbr_days en entier avant de faire la validation
+        const days = parseInt(nbr_days, 10);  // Convertir en entier
+
         // Vérification si nbr_days est un entier
-        setNbr_days(parseInt(nbr_days, 10));
-        if (!Number.isInteger(nbr_days)) {
-            return Alert.alert('Erreur', 'Le nombre de jours doit être un entier');
+        if (!Number.isInteger(days) || days <= 0) {
+            return Alert.alert('Erreur', 'Le nombre de jours doit être un entier positif');
         }
+
+        // Définir nbr_days comme un entier dans l'état
+        setNbr_days(days);
 
         // Confirmation de l'action avant d'ajouter la demande
         ConfirmAction(
@@ -219,11 +239,29 @@ export default function Conge({ navigation }) {
                 setToDate('');
                 setNbr_days(0);
                 setSelectedMotif('');
+                setModalVisible(false);
                 setReload(!reload);
             }
         );
     };
 
+    const closeModal = () => {
+        setFromDate('');
+        setToDate('');
+        setNbr_days(0);
+        setSelectedMotif('');
+        setObs('');
+        setModalVisible(false);
+    }
+    const filterConges = () => {
+        if (clicked == 1) {
+            return demandesConges;
+        } else if (clicked == 2) {
+            return conges;
+        } else {
+            return demandesRefus;
+        }
+    }
 
 
 
@@ -266,102 +304,129 @@ export default function Conge({ navigation }) {
                 </View>
             </View>
 
-
-            <View style={styles.historiqueContainer}>
-                <View style={styles.flexConatiner}>
-                    <Text style={styles.title}>Historique Congés</Text>
-                    <TouchableOpacity onPress={() => { setShowenSection(!showenSection) }}>
-                        {showenSection ? <Entypo name="chevron-thin-up" size={20} color="black" /> : <Entypo name="chevron-thin-down" size={24} color="black" />}
-                    </TouchableOpacity>
-                </View>
-                {showenSection ?
-                    (<>
-                        {conges?.map((item, index) => {
-                            return (
-                                <View style={styles.conge} key={item.IDConge_personnel}>
-                                    <Text style={styles.year}>{moment(item.date_debut, "YYYYMMDD").format("DD/MM/YYYY") || 'N/A'} -> {moment(item.date_fin, "YYYYMMDD").format("DD/MM/YYYY") || 'N/A'}</Text>
-                                    <Text style={styles.days}>{item.Nbj_ouvrable} Jours</Text>
-                                </View>
-                            );
-                        })}
-                    </>) : null}
+            <View style={styles.btnView}>
+                <TouchableOpacity style={styles.btn} onPress={() => { setModalVisible(true) }}>
+                    <Text style={styles.btnText}>Demander Congé</Text>
+                </TouchableOpacity>
             </View>
+
             <View style={styles.historiqueContainer}>
                 <View style={styles.flexConatiner}>
                     <Text style={styles.title}>Vos Demandes</Text>
-                    <TouchableOpacity onPress={() => { setShowenSection2(!showenSection2) }}>
-                        {showenSection2 ? <Entypo name="chevron-thin-up" size={20} color="black" /> : <Entypo name="chevron-thin-down" size={24} color="black" />}
+                </View>
+                <View style={styles.headerContainer}>
+                    <TouchableOpacity onPress={() => { setClicked(1) }} style={styles.liView}>
+                        <Text style={[styles.liText, clicked == 1 ? styles.clicked : {}]}>En attente</Text>
+                    </TouchableOpacity>
+                    <TouchableOpacity onPress={() => { setClicked(2) }} style={styles.liView}>
+                        <Text style={[styles.liText, clicked == 2 ? styles.clicked : {}]}>Acceptés</Text>
+                    </TouchableOpacity>
+                    <TouchableOpacity onPress={() => { setClicked(3) }} style={styles.liView}>
+                        <Text style={[styles.liText, clicked == 3 ? styles.clicked : {}]}>Refusés</Text>
                     </TouchableOpacity>
                 </View>
-                {showenSection2 ?
-                    (<>
-                        {demandesConges?.map((item, index) => {
-                            return (
-                                <View style={styles.conge} key={item.IDConge_personnel}>
-                                    <View style={styles.flexS}>
-                                        <Text style={styles.year}>{moment(item.date_debut, "YYYYMMDD").format("DD/MM/YYYY") || 'N/A'} -> {moment(item.date_fin, "YYYYMMDD").format("DD/MM/YYYY") || 'N/A'}</Text>
-                                        <Text style={styles.labelle}>{item.Nat_conge}</Text>
-                                    </View>
-                                    <Text style={styles.days}>{item.Nbj_ouvrable} Jours</Text>
+                <View style={styles.demandesView}>
+                    {filterConges()?.map((conge, index) => (
+                        <View style={styles.conge} key={conge.IDConge_personnel}>
+                            <View style={[styles.box, { width: "60%", }]}>
+                                <View style={{ width: "90%" }}>
+                                    <Text style={styles.textInfo}>{conge.Nat_conge}</Text>
+                                    <Text style={styles.labelle}>{conge.Nbj_ouvrable} jour(s)</Text>
                                 </View>
-                            );
-                        })}
-                    </>) : null}
-            </View>
-            <Text style={styles.title}>Demande Congé</Text>
-            <View style={styles.formContainer}>
-                <Text style={styles.label}>Motif de congé</Text>
-                <Picker
-                    selectedValue={selectedMotif}
-                    onValueChange={(itemValue, itemIndex) => setSelectedMotif(itemValue)}
-                    style={styles.input}
-                >
-                    <Picker.Item label="Motif de congé" value="" />
-                    {motifs_conges?.map((motif, index) => (
-                        <Picker.Item key={index} label={motif.Nat_conge} value={motif.IDNature_conge} />
+                            </View>
+                            <View style={[styles.box, { width: "40%" }]}>
+                                <View style={styles.dateView}>
+                                    <Text style={styles.day}>{formatDate(conge.date_debut).day}</Text>
+                                    <Text style={styles.monthyear}>{formatDate(conge.date_debut).month} {formatDate(conge.date_debut).year}</Text>
+                                </View>
+                                <View style={{ width: "20%" }}>
+                                    <Ionicons name="arrow-forward" size={24} color="#888" />
+                                </View>
+                                <View style={styles.dateView}>
+                                    <Text style={styles.day}>{formatDate(conge.date_fin).day}</Text>
+                                    <Text style={styles.monthyear}>{formatDate(conge.date_fin).month} {formatDate(conge.date_fin).year}</Text>
+                                </View>
+                            </View>
+
+                        </View>
                     ))}
-                </Picker>
+                </View>
 
-                <Text style={styles.label}>Date de début</Text>
-                <TouchableOpacity onPress={() => showDatePicker('from')}>
-                    <TextInput
-                        style={styles.input}
-                        placeholder="Date de début"
-                        value={fromDate}
-                        editable={false}
-                    />
-                </TouchableOpacity>
-
-                <Text style={styles.label}>Date de fin</Text>
-                <TouchableOpacity onPress={() => showDatePicker('to')}>
-                    <TextInput
-                        style={styles.input}
-                        placeholder="Date de fin"
-                        value={toDate}
-                        editable={false}
-                    />
-                </TouchableOpacity>
-
-                <Text style={styles.label}>Nombre des jours</Text>
-                <TextInput
-                    style={styles.input}
-                    placeholder="Nombre des jours"
-                    value={nbr_days.toString()}
-                    onChangeText={(text) => { setNbr_days(text) }}
-                    keyboardType="numeric"
-                />
-                <Text style={styles.label}>Observation</Text>
-                <TextInput
-                    style={styles.input}
-                    placeholder="Observation"
-                    value={obs}
-                    onChangeText={setObs}
-                />
-
-                <TouchableOpacity style={styles.button} onPress={handleRequest}>
-                    <Text style={styles.buttonText}>Demander</Text>
-                </TouchableOpacity>
             </View>
+
+            <Modal
+                animationType="slide"
+                transparent={true}
+                visible={modalVisible}
+                onRequestClose={() => {
+                    setModalVisible(!modalVisible);
+                }}
+            >
+                <View style={styles.modalOverlay}>
+                    <View style={styles.modalView}>
+                        <TouchableOpacity style={styles.close}
+                            onPress={() => closeModal()}
+                        >
+                            <Ionicons name="close-circle-sharp" size={40} color="red" />
+                        </TouchableOpacity>
+
+                        <Text style={styles.label2}>Motif de congé</Text>
+                        <Picker
+                            selectedValue={selectedMotif}
+                            onValueChange={(itemValue, itemIndex) => setSelectedMotif(itemValue)}
+                            style={styles.picker}
+                        >
+                            <Picker.Item label="Motif de congé" value="" />
+                            {motifs_conges?.map((motif, index) => (
+                                <Picker.Item key={index} label={motif.Nat_conge} value={motif.IDNature_conge} />
+                            ))}
+                        </Picker>
+
+                        <Text style={styles.label2}>Date de début</Text>
+                        <TouchableOpacity style={styles.dateButton} onPress={() => showDatePicker('from')}>
+                            <TextInput
+                                style={styles.dateButtonText}
+                                placeholder="Date de début"
+                                value={fromDate}
+                                editable={false}
+                            />
+                        </TouchableOpacity>
+
+                        <Text style={styles.label2}>Date de fin</Text>
+                        <TouchableOpacity style={styles.dateButton} onPress={() => showDatePicker('to')}>
+                            <TextInput
+                                style={styles.dateButtonText}
+                                placeholder="Date de fin"
+                                value={toDate}
+                                editable={false}
+                            />
+                        </TouchableOpacity>
+
+                        <Text style={styles.label2}>Nombre des jours</Text>
+                        <TextInput
+                            style={styles.prelevement}
+                            placeholder="Nombre des jours"
+                            value={nbr_days.toString()}
+                            onChangeText={(text) => { setNbr_days(text) }}
+                            keyboardType="numeric"
+                        />
+                        <Text style={styles.label2}>Observation</Text>
+                        <TextInput
+                            style={styles.prelevement}
+                            placeholder="Observation"
+                            value={obs}
+                            onChangeText={setObs}
+                        />
+
+                        <TouchableOpacity style={styles.modalButton} onPress={handleRequest}>
+                            <Text style={styles.modalButtonText}>Demander</Text>
+                        </TouchableOpacity>
+
+                    </View>
+                </View>
+            </Modal>
+
+
             <DateTimePickerModal
                 isVisible={isDatePickerVisible}
                 mode="date"
@@ -444,69 +509,171 @@ const styles = StyleSheet.create({
         paddingTop: 7,
         fontSize: 16,
     },
-    label: {
+    picker: {
+        width: '100%',
+        height: 50,
+        marginBottom: 20,
+    },
+    title: {
+        fontWeight: "bold",
+        fontSize: 25,
+        paddingBottom: 10,
+        textAlign: "center"
+    },
+    labelle: {
+        fontSize: 14
+    },
+    headerContainer: {
+        marginBottom: 20,
+        flexDirection: "row",
+        justifyContent: "space-between",
+    },
+    liView: {
+        width: "33.3%",
+        alignItems: "center",
+    },
+    liText: {
+        fontSize: 18,
+        fontWeight: "bold",
+        padding: 5,
+        paddingBottom: 10,
+    },
+    clicked: {
+        borderBottomColor: "#4b6aff",
+        borderBottomWidth: 2,
+    },
+
+    conge: {
+        flexDirection: "row",
+        justifyContent: "space-between",
+        alignItems: "center",
+        borderWidth: 1,
+        borderColor: '#ccc',
+        padding: 10,
+    },
+    box: {
+        flexDirection: "row",
+        alignItems: "center",
+    },
+    dateView: {
+        flexDirection: "column",
+        alignItems: "center",
+        borderWidth: 1,
+        borderColor: '#ccc',
+        padding: 3,
+        width: "40%"
+    },
+    textInfo: {
+        fontSize: 16,
+        fontWeight: "bold",
+        marginLeft: 10,
+    },
+    labelle: {
+        fontSize: 14,
+        marginLeft: 10,
+        color: "#7a7a7a",
+    },
+    demandesView: {
+        marginBottom: 30,
+        paddingBottom: 30,
+    },
+    day: {
+        fontSize: 16,
+        fontWeight: "bold",
+    },
+    monthyear: {
+        fontSize: 12,
+        color: "#7a7a7a",
+    },
+    btnView: {
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        marginBottom: 10
+    },
+    btn: {
+        width: 160,
+        padding: 10,
+        backgroundColor: "#4b6aff"
+    },
+    btnText: {
+        color: "white",
+        fontWeight: "bold",
+        fontSize: 16
+    },
+    modalOverlay: {
+        flex: 1,
+        justifyContent: 'center',
+        alignItems: 'center',
+        backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    },
+    close: {
+        position: "absolute",
+        top: -15,
+        right: -15,
+    },
+    modalView: {
+        position: "relative",
+        width: '80%',
+        backgroundColor: 'white',
+        borderRadius: 10,
+        padding: 20,
+        alignItems: 'center',
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.25,
+        shadowRadius: 4,
+        elevation: 5,
+    },
+    modalTitle: {
+        fontSize: 18,
+        fontWeight: 'bold',
+        marginBottom: 15,
+    },
+    label2: {
         width: '100%',
         fontSize: 16,
         fontWeight: 'bold',
         marginBottom: 5,
-        color: "#333",
     },
     picker: {
         width: '100%',
         height: 50,
         marginBottom: 20,
     },
-    labelText: {
-        fontSize: 18,
-        marginBottom: 10,
-        fontWeight: "bold",
-        color: "#d7dff9",
+    prelevement: {
+        width: '100%',
+        height: 40,
+        marginBottom: 20,
+        backgroundColor: "#f0f0f0",
+        paddingLeft: 10,
+        borderRadius: 5,
     },
-    formContainer: {
-        borderWidth: 1,
-        borderColor: '#ccc',
-        padding: 10,
-        paddingBottom: 20,
+    dateButton: {
+        width: '100%',
+        height: 40,
+        justifyContent: 'center',
+        alignItems: 'center',
+        backgroundColor: '#f0f0f0',
+        borderRadius: 5,
         marginBottom: 20,
     },
-    input: {
-        height: 40,
-        borderColor: '#ccc',
-        borderWidth: 1,
-        borderRadius: 5,
-        paddingLeft: 10,
-        marginBottom: 10,
-        backgroundColor: '#f2f2f2',
-    },
-    button: {
-        backgroundColor: '#4b6aff',
-        padding: 10,
-        borderRadius: 5,
-        alignItems: 'center',
-    },
-    buttonText: {
-        color: '#fff',
+    dateButtonText: {
         fontSize: 16,
+        color: '#333',
+    },
+    modalButton: {
+        backgroundColor: '#4bacc0',
+        borderRadius: 5,
+        padding: 10,
+        alignItems: 'center',
+        width: '100%',
+        marginBottom: 10,
+    },
+    modalButtonText: {
+        color: '#fff',
         fontWeight: 'bold',
+        fontSize: 16,
     },
-    title: {
-        fontWeight: "bold",
-        fontSize: 25,
-        paddingBottom: 10
-    },
-    loading: {
-        position: "absolute",
-        top: "50%",
-        left: "50%",
-        zIndex: 111
-    },
-    flexS: {
-        flexDirection: "row",
-        justifyContent: "space-between",
-        alignItems: "center"
-    },
-    labelle: {
-        fontSize: 14
-    }
 });
 
