@@ -23,7 +23,6 @@ export default function DemandeCongeDetails({ navigation, route }) {
     const TOKEN = useSelector(state => state.user.token);
     const BASE_URL = useSelector(state => state.baseURL.baseURL);
     let { demande } = route.params;
-    console.log("demande", demande);
     const [modalVisible, setModalVisible] = useState(false);
     const [comment, setComment] = useState('');
 

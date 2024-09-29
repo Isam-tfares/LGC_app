@@ -6,12 +6,11 @@ import { Ionicons } from '@expo/vector-icons';
 import MaterialIcons from '@expo/vector-icons/MaterialIcons';
 import { useSelector } from 'react-redux';
 import moment from 'moment';
-import { BASE_URL, BASE_PVS_URL } from '../components/utils';
 
 export default function ReceptionDetails({ route, navigation }) {
     const TOKEN = useSelector(state => state.user.token);
     const BASE_URL = useSelector(state => state.baseURL.baseURL);
-    const IMAGES_URL = BASE_PVS_URL;
+    const IMAGES_URL = BASE_URL + "/pvs/";
     const ETATS_RECUPERATION = ["Réccupéré", "Non réccupéré"];
     const PRELVES_PAR = ["LGC", "Client"];
     const RECEPETION_TYPES = ["interne", "externe"];
@@ -103,7 +102,6 @@ export default function ReceptionDetails({ route, navigation }) {
     const closeImageModal = () => {
         setImageModalVisible(null);
     };
-    console.log("RECEPT", receptionState);
 
     return (
         <ScrollView

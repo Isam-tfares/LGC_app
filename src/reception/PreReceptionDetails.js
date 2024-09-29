@@ -7,12 +7,11 @@ import MaterialIcons from '@expo/vector-icons/MaterialIcons';
 import { useSelector } from 'react-redux';
 import moment from 'moment';
 import { ConfirmAction } from '../components/utils';
-import { BASE_URL, BASE_PVS_URL } from '../components/utils';
 
 export default function PreReceptionDetails({ route, navigation }) {
     const TOKEN = useSelector(state => state.user.token);
     const BASE_URL = useSelector(state => state.baseURL.baseURL);
-    const IMAGES_URL = BASE_PVS_URL;
+    const IMAGES_URL = BASE_URL + "/pvs/";
     const ETATS_RECUPERATION = ["Réccupéré", "Non réccupéré"];
     const PRELVES_PAR = ["LGC", "Client"];
     const RECEPETION_TYPES = ["interne", "externe"];
@@ -60,7 +59,6 @@ export default function PreReceptionDetails({ route, navigation }) {
                 data = await response.json();
             } else {
                 const text = await response.text();
-                console.log("TEXT", text);
                 try {
                     if (text[0] == "[" || text[0] == "{") {
                         data = JSON.parse(text);

@@ -92,7 +92,6 @@ export default function DemandesInterventions({ navigation }) {
                 return;
             }
             if (data) {
-                // console.log(data);
                 setInterventions(data);
             }
         } catch (error) {

@@ -135,7 +135,6 @@ export default function Intervention({ route, navigation }) {
                         data = await response.json();
                     } else {
                         const text = await response.text();
-                        console.log("TEXt", text);
                         data = JSON.parse(text);
                     }
                     if (data.error && data.error === "Expired token") {

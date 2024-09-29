@@ -24,6 +24,7 @@ import DemandesInterventions from './src/chef/demandesIntreventions';
 import AddedInterventions from './src/technicien/AddedInterventions';
 import { IsAPIExist } from './src/components/utils';
 import EnterAPI from './src/screens/EnterAPI';
+import ChangeAPIURL from './src/screens/ChangeAPIURL';
 
 const Drawer = createDrawerNavigator();
 

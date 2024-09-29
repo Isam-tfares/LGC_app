@@ -3,9 +3,11 @@ import React, { useState, useEffect } from 'react';
 import { View, TextInput, Alert, StyleSheet, TouchableOpacity, Text, Image, KeyboardAvoidingView, ScrollView, Platform, SafeAreaView, ActivityIndicator } from 'react-native';
 import { useDispatch, useSelector } from 'react-redux';
 import Ionicons from '@expo/vector-icons/Ionicons';
+import Feather from '@expo/vector-icons/Feather';
 import { setUser } from '../actions/userActions'; // Update path as needed
 import { setBaseURL } from '../actions/baseURLActions';
 import { initializeAPI, getBaseUrl } from '../components/utils';
+import ChangeAPIURL from './ChangeAPIURL';
 
 const Login = ({ isLogined, setLogined }) => {
     const dispatch = useDispatch();
@@ -14,6 +16,8 @@ const Login = ({ isLogined, setLogined }) => {
     const [errorMatricule, setErrorMatricule] = useState('');
     const [errorPassword, setErrorPassword] = useState('');
     const [isVisible, setVisible] = useState(false);
+    const [isNavVisible, setNavVisible] = useState(false);
+    const [isModalVisible, setModalVisible] = useState(false);
     const [loading, setLoading] = useState(false);
     const [apiUrl, setApiUrl] = useState(useSelector((state) => state.baseURL.baseURL));
     const user = useSelector(state => state.user);
@@ -40,10 +44,10 @@ const Login = ({ isLogined, setLogined }) => {
         if (user.user) {
             switch (user.user.user_type) {
                 case '3':
-                    if (user.user.user_tache == 2) {
-                        setLogined(1); // technicien interventions
-                    } else {
+                    if (user.user.user_tache == 1) {
                         setLogined(3); // receptions
+                    } else {
+                        setLogined(1);  // technicien interventions
                     }
                     break;
                 case '1':
@@ -119,6 +123,20 @@ const Login = ({ isLogined, setLogined }) => {
                 style={styles.container}
             >
                 <ScrollView contentContainerStyle={styles.scrollView}>
+
+                    <TouchableOpacity style={styles.threeDots} onPress={() => { setNavVisible(!isNavVisible) }}>
+                        <Feather name="more-vertical" size={25} color="white" />
+                    </TouchableOpacity>
+                    <View style={styles.nav}>
+                        {isNavVisible ?
+                            (<View style={styles.navView}>
+                                <TouchableOpacity style={styles.navItem} onPress={() => { setModalVisible(true) }}>
+                                    <Text style={styles.navText}>Modifier API URL</Text>
+                                </TouchableOpacity>
+                            </View>)
+                            : (<></>)}
+                    </View>
+                    <ChangeAPIURL modalVisible={isModalVisible} setModalVisible={setModalVisible} dispatch={dispatch} setBaseURL={setBaseURL} setApiUrl={setApiUrl} />
                     <View style={styles.imgC}>
                         <Image style={styles.img} source={require('../../assets/login.jpg')} />
                     </View>
@@ -266,6 +284,30 @@ const styles = StyleSheet.create({
         width: 300,
         backgroundColor: 'white',
         padding: 10,
+    },
+    threeDots: {
+        position: 'absolute',
+        top: "5%",
+        right: "2%",
+    },
+    nav: {
+        backgroundColor: 'white',
+        position: 'absolute',
+        top: "9%",
+        right: "2%",
+        marginRight: "2%",
+    },
+    navView: {
+        backgroundColor: 'white',
+        padding: 10,
+        borderRadius: 5,
+        marginRight: "2%"
+    },
+    navItem: {
+        padding: 5,
+    },
+    navText: {
+        color: '#1c488c',
     }
 });
 

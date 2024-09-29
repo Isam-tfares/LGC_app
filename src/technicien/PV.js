@@ -123,7 +123,6 @@ export default function PV({ navigation, route }) {
                 data = await response.json();
             } else {
                 const text = await response.text();
-                console.log("TEXT", text)
                 data = JSON.parse(text);
             }
             if (data.error && data.error == "Expired token") {

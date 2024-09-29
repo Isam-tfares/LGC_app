@@ -196,7 +196,6 @@ export default function NewReception({ route, navigation }) {
                 data = await response.json();
             } else {
                 const text = await response.text();
-                console.log(text);
                 data = JSON.parse(text);
             }
             if (data.error && data.error == "Expired token") {
