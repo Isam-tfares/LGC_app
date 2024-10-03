@@ -33,7 +33,9 @@ export default function App() {
 
   // Check if the file exists when the app loads
   if (!IsAPIExist()) {
-    console.log('API NOT exist');
+    return (
+      <EnterAPI />
+    )
   }
 
   if (!isLogined) {

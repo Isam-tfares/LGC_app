@@ -103,7 +103,7 @@ const Login = ({ isLogined, setLogined }) => {
                 Alert.alert(data.message);
             }
         } catch (error) {
-            console.error(error);
+            console.error(error.message);
             Alert.alert('Erreur de connexion');
         } finally {
             setErrorMatricule('');
@@ -127,6 +127,7 @@ const Login = ({ isLogined, setLogined }) => {
                     <TouchableOpacity style={styles.threeDots} onPress={() => { setNavVisible(!isNavVisible) }}>
                         <Feather name="more-vertical" size={25} color="white" />
                     </TouchableOpacity>
+
                     <View style={styles.nav}>
                         {isNavVisible ?
                             (<View style={styles.navView}>

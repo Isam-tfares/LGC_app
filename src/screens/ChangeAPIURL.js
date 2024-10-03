@@ -25,6 +25,11 @@ const ChangeAPIURL = ({ modalVisible, setModalVisible, dispatch, setBaseURL, set
     }, []);
 
     const handleUpdateAPIUrl = async () => {
+        // check if url is not empty
+        if (!newAPIUrl) {
+            Alert.alert('Veuillez saisir une nouvelle URL d\'API');
+            return;
+        }
         try {
             await FileSystem.writeAsStringAsync(fileUri, newAPIUrl);
             Alert.alert('API URL est mise à jour avec succès');

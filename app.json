@@ -7,7 +7,7 @@
     "icon": "./assets/LGC_icon.png",
     "userInterfaceStyle": "automatic",
     "splash": {
-      "image": "./assets/splash.png",
+      "image": "./assets/LGC_splash.png",
       "resizeMode": "contain",
       "backgroundColor": "#ffffff"
     },
@@ -16,10 +16,15 @@
     },
     "android": {
       "adaptiveIcon": {
-        "foregroundImage": "./assets/adaptive-icon.png",
-        "backgroundColor": "#ffffff"
+        "foregroundImage": "./assets/LGC_icon.png",
+        "backgroundColor": "#ffffff",
+        "resizeMode": "cover"
       },
-      "package": "com.isam_tf.LGC"
+      "package": "com.isam_tf.LGC",
+      "permissions": [
+        "INTERNET",
+        "ACCESS_NETWORK_STATE"
+      ]
     },
     "web": {
       "favicon": "./assets/favicon.png"
@@ -28,34 +33,50 @@
       "eas": {
         "projectId": "ac445273-4428-4c20-8adb-ad91412d98ee"
       }
-    }
-  },
-  "plugins": [
-    [
-      "expo-camera",
-      {
-        "cameraPermission": "Allow $(PRODUCT_NAME) to access your camera",
-        "microphonePermission": "Allow $(PRODUCT_NAME) to access your microphone",
-        "recordAudioAndroid": true
-      },
-      "expo-media-library",
-      {
-        "photosPermission": "Allow $(PRODUCT_NAME) to access your photos.",
-        "savePhotosPermission": "Allow $(PRODUCT_NAME) to save photos.",
-        "isAccessMediaLocationEnabled": "true"
-      },
-      "expo-calendar",
-      {
-        "calendarPermission": "The app needs to access your calendar."
-      },
-      "expo-image-picker",
-      {
-        "photosPermission": "The app accesses your photos to let you share them with your friends."
-      },
-      "expo-location",
-      {
-        "locationAlwaysAndWhenInUsePermission": "Allow $(PRODUCT_NAME) to use your location."
-      }
+    },
+    "plugins": [
+      [
+        "expo-camera",
+        {
+          "cameraPermission": "Allow $(PRODUCT_NAME) to access your camera",
+          "microphonePermission": "Allow $(PRODUCT_NAME) to access your microphone",
+          "recordAudioAndroid": true
+        }
+      ],
+      [
+        "expo-media-library",
+        {
+          "photosPermission": "Allow $(PRODUCT_NAME) to access your photos.",
+          "savePhotosPermission": "Allow $(PRODUCT_NAME) to save photos.",
+          "isAccessMediaLocationEnabled": true
+        }
+      ],
+      [
+        "expo-calendar",
+        {
+          "calendarPermission": "The app needs to access your calendar."
+        }
+      ],
+      [
+        "expo-image-picker",
+        {
+          "photosPermission": "The app accesses your photos to let you share them with your friends."
+        }
+      ],
+      [
+        "expo-location",
+        {
+          "locationAlwaysAndWhenInUsePermission": "Allow $(PRODUCT_NAME) to use your location."
+        }
+      ],
+      [
+        "expo-build-properties",
+        {
+          "android": {
+            "usesCleartextTraffic": true
+          }
+        }
+      ]
     ]
-  ]
+  }
 }

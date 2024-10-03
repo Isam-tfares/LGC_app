@@ -9,6 +9,7 @@ import { ConfirmAction } from '../components/utils';
 
 export default function Intervention({ route, navigation }) {
     const TOKEN = useSelector(state => state.user.token)
+    const BASE_URL = useSelector(state => state.baseURL.baseURL);
     const { intervention } = route.params;
     const [refreshing, setRefreshing] = useState(false);
     const [modalVisible, setModalVisible] = useState(false);
