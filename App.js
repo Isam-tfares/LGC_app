@@ -2,9 +2,8 @@ import * as React from 'react';
 import { Provider } from 'react-redux';
 import { createDrawerNavigator } from '@react-navigation/drawer';
 import { NavigationContainer } from '@react-navigation/native';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { View, Text } from 'react-native';
-import * as FileSystem from 'expo-file-system';
 
 import store from './src/store';
 import PV from './src/technicien/PV';
@@ -24,18 +23,37 @@ import DemandesInterventions from './src/chef/demandesIntreventions';
 import AddedInterventions from './src/technicien/AddedInterventions';
 import { IsAPIExist } from './src/components/utils';
 import EnterAPI from './src/screens/EnterAPI';
-import ChangeAPIURL from './src/screens/ChangeAPIURL';
 
 const Drawer = createDrawerNavigator();
 
 export default function App() {
   const [isLogined, setLogined] = useState(false);
+  const [apiExists, setApiExists] = useState(false);  // State to track if API exists
+  const [loading, setLoading] = useState(true);  // State to track if check is in progress
+
+  // Use useEffect to handle the async API check
+  useEffect(() => {
+    const checkAPI = async () => {
+      const exists = await IsAPIExist();  // Await the result of the async check
+      setApiExists(exists);  // Set the result
+      setLoading(false);  // We're done loading
+    };
+
+    checkAPI();  // Call the async function to check if the API exists
+  }, []);
+
+  // Show a loading indicator while checking
+  if (loading) {
+    return (
+      <View>
+        <Text>Loading...</Text>
+      </View>
+    );
+  }
 
   // Check if the file exists when the app loads
-  if (!IsAPIExist()) {
-    return (
-      <EnterAPI />
-    )
+  if (!apiExists) {
+    return <EnterAPI setApiExists={setApiExists} />;
   }
 
   if (!isLogined) {

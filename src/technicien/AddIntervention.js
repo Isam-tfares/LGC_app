@@ -28,7 +28,6 @@ export default function AddIntervention({ modalVisible, setModalVisible }) {
     useEffect(() => {
         if (!clients || !projects || !prestations) {
             const API_URL = `${BASE_URL}/?page=addInterventionInterface`;
-            console.log(API_URL, TOKEN);
             fetchData(API_URL, TOKEN);
         }
     }, []);

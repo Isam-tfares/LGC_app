@@ -1,4 +1,0 @@
->> matriaux,natures,tableau
->> some inputs in new reception are not inserted ( beton datas ( cymlidre,jrs,...))
->> cylindres
->> downlaod PV in phone

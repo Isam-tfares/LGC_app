@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { View, Text, Modal, TextInput, Button, StyleSheet, TouchableOpacity, Alert } from 'react-native';
 import * as FileSystem from 'expo-file-system';
 import { Ionicons } from '@expo/vector-icons';
+import { IsAPIExist } from '../components/utils';
 
 
 const ChangeAPIURL = ({ modalVisible, setModalVisible, dispatch, setBaseURL, setApiUrl }) => {
@@ -13,6 +14,9 @@ const ChangeAPIURL = ({ modalVisible, setModalVisible, dispatch, setBaseURL, set
 
     useEffect(() => {
         const loadCurrentAPIUrl = async () => {
+            if (!IsAPIExist()) {
+                return;
+            }
             try {
                 const content = await FileSystem.readAsStringAsync(fileUri);
                 setCurrentAPIUrl(content);
@@ -33,7 +37,7 @@ const ChangeAPIURL = ({ modalVisible, setModalVisible, dispatch, setBaseURL, set
         try {
             await FileSystem.writeAsStringAsync(fileUri, newAPIUrl);
             Alert.alert('API URL est mise à jour avec succès');
-            let new_base_url = `http://${newAPIUrl}/LGC_backend`;
+            let new_base_url = `${newAPIUrl}`;
             dispatch(setBaseURL(new_base_url));
             setApiUrl(new_base_url);
             setCurrentAPIUrl(newAPIUrl);
@@ -58,17 +62,17 @@ const ChangeAPIURL = ({ modalVisible, setModalVisible, dispatch, setBaseURL, set
                     >
                         <Ionicons name="close-circle-sharp" size={40} color="red" />
                     </TouchableOpacity>
-                    <Text style={styles.modalText}>URL de l'API actuelle :</Text>
+                    <Text style={styles.modalText}>l'URL Actuelle du répertoire racine des API:</Text>
                     <TextInput
                         style={styles.input}
                         value={currentAPIUrl}
-                        editable={false}
                     />
-                    <Text style={styles.modalText}>Nouvelle URL d'API :</Text>
+                    <Text style={styles.modalText}>Nouvelle l'URL du répertoire racine des API :</Text>
                     <TextInput
                         style={styles.input}
                         value={newAPIUrl}
                         onChangeText={setNewAPIUrl}
+                        placeholder='Ex: http://192.168.43.88/LGC_backend/'
                     />
                     <Button title="Enregistrer" onPress={handleUpdateAPIUrl} />
                 </View>
@@ -115,7 +119,7 @@ const styles = StyleSheet.create({
         fontSize: 18,
     },
     input: {
-        width: 200,
+        width: 280,
         borderWidth: 1,
         borderColor: 'gray',
         borderRadius: 5,

@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { View, Text, Button, TextInput, Alert, StyleSheet } from 'react-native';
 import * as FileSystem from 'expo-file-system';
 
-export default function EnterAPI() {
+export default function EnterAPI({ setApiExists }) {
     const [apiIP, setApiIP] = useState(null);
     const [inputIP, setInputIP] = useState('');
     const directoryPath = `${FileSystem.documentDirectory}LGC/`;
@@ -58,6 +58,7 @@ export default function EnterAPI() {
             // Write the input IP address to the file
             await FileSystem.writeAsStringAsync(filePath, inputIP);
             setApiIP(inputIP); // Update the state with the new IP address
+            setApiExists(true);
             Alert.alert('Succès', "L'adresse IP de l'API a été enregistrée.");
         } catch (error) {
             console.log("Erreur lors de l'écriture dans le fichier :", error);
@@ -84,12 +85,16 @@ export default function EnterAPI() {
 const styles = StyleSheet.create({
     container: {
         flex: 1,
+        resizeMode: 'cover',
         justifyContent: 'center',
-        alignItems: 'center',
     },
     inputContainer: {
-        width: '80%',
+        backgroundColor: 'rgba(255, 255, 255, 0.8)', // Semi-transparent background
+        padding: 20,
+        borderRadius: 10,
         alignItems: 'center',
+        width: '80%',
+        alignSelf: 'center',
     },
     input: {
         width: '100%',

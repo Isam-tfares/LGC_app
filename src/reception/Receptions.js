@@ -90,7 +90,6 @@ function Receptions({ route, navigation }) {
             // check if data is Object
             if (typeof data === 'object' && data !== null) {
                 setReceptions(data);
-                console.log('Data: ', data);
             }
         } catch (error) {
             console.error('Error fetching data:', error);

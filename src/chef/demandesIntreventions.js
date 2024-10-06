@@ -254,7 +254,6 @@ export default function DemandesInterventions({ navigation }) {
 
     const handleConfirm2 = (date) => {
         const formattedDate = `${date.getDate()}/${date.getMonth() + 1}/${date.getFullYear()}`;
-        console.log(formattedDate)
         setSelectedDate(moment(formattedDate, "DD/MM/YYYY"));
         hideDatePicker2();
     };

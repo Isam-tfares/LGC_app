@@ -256,7 +256,7 @@ export default function NewReception({ route, navigation }) {
 
     const handleAddIntervention = () => {
         // check intervention_id,IDPhase, IDProjet, nombre, IDType_beton, IDMateriaux, observation, date_prevus, prelevement_par, Compression, Traction, Lieux_ouvrage, Traction_fend
-        if (!selectedIntervention || !selectedPrestation || !selectedProject || !selectedMatiere || !nbr_echatillon || !selectedDate || !preleve || !lieu_prelevement || !obs) {
+        if (!selectedIntervention || !selectedPrestation || !selectedProject || !selectedMatiere || !nbr_echatillon || !preleve || !lieu_prelevement || !obs) {
             Alert.alert('Veuillez remplir tous les champs');
             return;
         }

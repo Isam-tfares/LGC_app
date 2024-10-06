@@ -1,15 +1,61 @@
-import React from 'react';
-import { Alert } from "react-native";
 import * as FileSystem from 'expo-file-system';
-
+import { Alert } from 'react-native';
 const directoryPath = `${FileSystem.documentDirectory}LGC/`;
 const filePath = `${directoryPath}api.txt`;
 
+// Ensure that the directory exists before accessing or creating files
+const ensureDirectoryExists = async () => {
+    const dirInfo = await FileSystem.getInfoAsync(directoryPath);
+    if (!dirInfo.exists) {
+        // Create the directory if it doesn't exist
+        await FileSystem.makeDirectoryAsync(directoryPath, { intermediates: true });
+        console.log('Directory created:', directoryPath);
+    }
+};
+
+// Ensure the file exists and create it with default content if missing
+const ensureApiFileExists = async () => {
+    await ensureDirectoryExists(); // Ensure the directory exists
+
+    const fileInfo = await FileSystem.getInfoAsync(filePath);
+
+    if (!fileInfo.exists) {
+        // File does not exist
+        console.log('File does not exist.');
+        return false;  // Return false as the file does not exist
+    }
+
+    // If file exists, read its content
+    const fileContent = await FileSystem.readAsStringAsync(filePath);
+
+    // Check if the file is empty or contains only whitespace
+    if (!fileContent || fileContent.trim() === '') {
+        console.log('API file is empty.');
+        return false;  // Return false as the file exists but is empty
+    }
+
+    // If the file contains valid content, return true
+    console.log('API file exists and contains valid content.');
+    return true;
+};
+
+
+// Check if the API file exists
+export const IsAPIExist = async () => {
+    try {
+        const fileExists = await ensureApiFileExists();  // Ensure file exists
+        return fileExists;
+    } catch (error) {
+        console.log('Error checking file:', error);
+        return false;
+    }
+};
+
+// Function to read the API from the file
 export const readApiFromFile = async () => {
     try {
         const fileInfo = await FileSystem.getInfoAsync(filePath);
         if (fileInfo.exists) {
-            // Read the content of the file
             const apiIP = await FileSystem.readAsStringAsync(filePath);
             return apiIP;
         } else {
@@ -22,50 +68,25 @@ export const readApiFromFile = async () => {
     }
 };
 
-const ensureDirectoryExists = async (directory) => {
-    const dirInfo = await FileSystem.getInfoAsync(directory);
-    if (!dirInfo.exists) {
-        await FileSystem.makeDirectoryAsync(directory, { intermediates: true });
-    }
-};
-
-export const IsAPIExist = async () => {
-    try {
-        // Ensure the directory exists
-        await ensureDirectoryExists(directoryPath);
-        const fileInfo = await FileSystem.getInfoAsync(filePath);
-        if (fileInfo.exists) {
-            // If file exists, read its content
-            const ip = await FileSystem.readAsStringAsync(filePath);
-            if (ip) {
-                return true;
-            }
-        }
-        return false;
-    } catch (error) {
-        console.log('Error checking file:', error);
-        return false;
-    }
-};
-
-// New function to set the BASE_URL asynchronously
+// Function to initialize the API by reading the file
 let apiIP = null;
 
 export const initializeAPI = async () => {
     apiIP = await readApiFromFile();
 };
 
-// Use this function to retrieve BASE_URL and BASE_PVS_URL after initializing
+// Function to get the base URL using the IP from the file
 export const getBaseUrl = () => {
     if (apiIP) {
-        return `http://${apiIP}/LGC_backend`;
+        return `${apiIP}`;
     }
     return null;
 };
 
+// Function to get the PVS URL
 export const getBasePvsUrl = () => {
     if (apiIP) {
-        return `http://${apiIP}/LGC_backend/pvs/`;
+        return `${apiIP}/pvs/`;
     }
     return null;
 };
